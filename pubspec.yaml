@@ -1,5 +1,5 @@
 name: fe_food_go_driver
-description: "Driver app for Food Go - food delivery application."
+description: "Driver Go - Food delivery driver app."
 publish_to: 'none'
 version: 1.0.0+1
 

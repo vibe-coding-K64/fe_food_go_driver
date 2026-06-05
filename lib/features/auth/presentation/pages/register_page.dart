@@ -296,14 +296,12 @@ class _RegisterPageState extends State<RegisterPage> {
         isDark ? AppColors.primaryDark : AppColors.primaryLight;
     return Column(
       children: [
-        Container(
+        Image.asset(
+          'assets/img/logo.png',
           width: 80,
           height: 80,
-          decoration: BoxDecoration(
-            color: primaryColor.withValues(alpha: 0.15),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => Icon(
             Icons.delivery_dining,
             size: 44,
             color: primaryColor,

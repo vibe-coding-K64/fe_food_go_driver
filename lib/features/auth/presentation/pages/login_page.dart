@@ -98,22 +98,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildLogo(bool isDark) {
-    final primaryColor = isDark ? AppColors.primaryDark : AppColors.primaryLight;
-    return Container(
+    return Image.asset(
+      'assets/img/logo.png',
       width: 100,
       height: 100,
-      decoration: BoxDecoration(
-        color: primaryColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withValues(alpha: 0.4),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: const Icon(
+      fit: BoxFit.contain,
+      errorBuilder: (_, __, ___) => const Icon(
         Icons.delivery_dining,
         size: 56,
         color: Colors.white,

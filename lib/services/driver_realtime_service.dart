@@ -15,6 +15,8 @@ class DriverRealtimeService {
   final FlutterSecureStorage _secureStorage;
 
   StompClient? _client;
+  StreamSubscription<dynamic>? _orderRequestSubscription;
+  StreamSubscription<dynamic>? _orderStatusSubscription;
   StreamController<DriverRealtimeOrderRequest>? _orderRequestController;
   StreamController<DriverRealtimeOrderStatus>? _orderStatusController;
   StreamController<String>? _connectionStateController;

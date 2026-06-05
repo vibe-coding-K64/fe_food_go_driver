@@ -1,11 +1,11 @@
 {
-    "name": "Food Go Driver",
-    "short_name": "Food Go",
+    "name": "Driver Go",
+    "short_name": "Driver Go",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFFFFF",
     "theme_color": "#FFFFFF",
-    "description": "Food Go Driver - Food delivery driver app.",
+    "description": "Driver Go - Food delivery driver app.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

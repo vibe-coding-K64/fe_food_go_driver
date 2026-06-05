@@ -35,7 +35,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
     final session = await _authRepository.getStoredSession();
     if (session == null) {
-      emit(const SessionInvalid('Khong co phien dang nhap. Vui long dang nhap.'));
+      emit(const SessionInvalid('Không có phiên đăng nhập. Vui lòng đăng nhập.'));
       return;
     }
 

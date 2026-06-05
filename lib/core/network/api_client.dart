@@ -48,21 +48,21 @@ class ApiClient {
 
   Failure _mapException(Object error, String endpoint) {
     if (error is SocketException) {
-      return ServerFailure('Khong the ket noi server. Kiem tra ket noi mang.');
+      return ServerFailure('Không thể kết nối server. Kiểm tra kết nối mạng.');
     }
     if (error is HandshakeException) {
-      return const ServerFailure('Loi bao mat ket noi. Vui long cap nhat ung dung.');
+      return const ServerFailure('Lỗi bảo mật kết nối. Vui lòng cập nhật ứng dụng.');
     }
     if (error is http.ClientException) {
-      return ServerFailure('Loi ket noi: ${error.message}');
+      return ServerFailure('Lỗi kết nối: ${error.message}');
     }
     if (error is FormatException) {
-      return const ServerFailure('Du lieu phan hoi tu server khong hop le.');
+      return const ServerFailure('Dữ liệu phản hồi từ server không hợp lệ.');
     }
     if (error is Failure) {
       return error;
     }
-    return const ServerFailure('Da xay ra loi. Vui long thu lai.');
+    return const ServerFailure('Đã xảy ra lỗi. Vui lòng thử lại.');
   }
 
   Map<String, dynamic> _parseBody(String body) {

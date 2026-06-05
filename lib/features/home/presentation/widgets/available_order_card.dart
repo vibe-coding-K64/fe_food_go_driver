@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../orders/data/models/order_model.dart';
 
 class AvailableOrderCard extends StatelessWidget {
@@ -7,6 +8,7 @@ class AvailableOrderCard extends StatelessWidget {
   final String Function(double) formatCurrency;
   final VoidCallback onAccept;
   final VoidCallback onDecline;
+  final AppLocalizations l10n;
 
   const AvailableOrderCard({
     super.key,
@@ -14,6 +16,7 @@ class AvailableOrderCard extends StatelessWidget {
     required this.formatCurrency,
     required this.onAccept,
     required this.onDecline,
+    required this.l10n,
   });
 
   @override
@@ -32,9 +35,9 @@ class AvailableOrderCard extends StatelessWidget {
             const Divider(height: 24),
             _buildDeliveryInfo(isDark),
             const SizedBox(height: 12),
-            _buildItemsPreview(isDark),
+            _buildItemsPreview(isDark, l10n),
             const SizedBox(height: 12),
-            _buildPriceSection(isDark),
+            _buildPriceSection(isDark, l10n),
             const SizedBox(height: 16),
             _buildActionButtons(context),
           ],
@@ -119,7 +122,7 @@ class AvailableOrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildItemsPreview(bool isDark) {
+  Widget _buildItemsPreview(bool isDark, AppLocalizations l10n) {
     final displayItems = order.items.take(2).toList();
     final extraCount = order.items.length - 2;
 
@@ -176,7 +179,7 @@ class AvailableOrderCard extends StatelessWidget {
             )),
         if (extraCount > 0)
           Text(
-            '+ $extraCount more items',
+            l10n.moreItems(extraCount),
             style: const TextStyle(
               fontSize: 12,
               color: AppColors.primaryLight,
@@ -187,7 +190,7 @@ class AvailableOrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPriceSection(bool isDark) {
+  Widget _buildPriceSection(bool isDark, AppLocalizations l10n) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -195,7 +198,7 @@ class AvailableOrderCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Tổng đơn',
+              l10n.totalOrder,
               style: TextStyle(
                 fontSize: 11,
                 color: isDark
@@ -218,7 +221,7 @@ class AvailableOrderCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              'Tiền cước',
+              l10n.deliveryFee,
               style: TextStyle(
                 fontSize: 11,
                 color: isDark
@@ -250,7 +253,7 @@ class AvailableOrderCard extends StatelessWidget {
               foregroundColor: AppColors.errorLight,
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
-            child: const Text('Từ chối'),
+            child: Text(l10n.decline),
           ),
         ),
         const SizedBox(width: 12),
@@ -266,9 +269,9 @@ class AvailableOrderCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              'Nhận đơn',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            child: Text(
+              l10n.homeAccept,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ),

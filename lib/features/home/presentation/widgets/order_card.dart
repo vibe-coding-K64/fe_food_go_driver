@@ -19,7 +19,7 @@ class OrderCard extends StatelessWidget {
       case 'PENDING_STORE_CONFIRMATION':
         return Colors.orange;
       case 'WAITING_DRIVER':
-        return AppColors.info;
+        return AppColors.warning;
       case 'DELIVERING':
         return AppColors.busy;
       case 'COMPLETED':
@@ -36,7 +36,7 @@ class OrderCard extends StatelessWidget {
       case 'PENDING_STORE_CONFIRMATION':
         return l10n.waitingForOrder;
       case 'WAITING_DRIVER':
-        return l10n.pickup;
+        return l10n.pickingUp;
       case 'DELIVERING':
         return l10n.delivering;
       case 'COMPLETED':
@@ -90,48 +90,50 @@ class OrderCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      if (order.orderCode.isNotEmpty) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: primaryColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            order.orderCode,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: primaryColor,
+                  Expanded(
+                    child: Row(
+                      children: [
+                        if (order.orderCode.isNotEmpty) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: primaryColor.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              order.orderCode,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: primaryColor,
+                              ),
                             ),
                           ),
+                          const SizedBox(width: 8),
+                        ],
+                        Icon(
+                          Icons.store,
+                          size: 14,
+                          color: isDark
+                              ? AppColors.onBackgroundDark
+                              : AppColors.onBackgroundLight,
                         ),
-                        const SizedBox(width: 8),
-                      ],
-                      Icon(
-                        Icons.store,
-                        size: 14,
-                        color: isDark
-                            ? AppColors.onBackgroundDark
-                            : AppColors.onBackgroundLight,
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          order.storeName,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? AppColors.onSurfaceDark
-                                : AppColors.onSurfaceLight,
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            order.storeName,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: isDark
+                                  ? AppColors.onSurfaceDark
+                                  : AppColors.onSurfaceLight,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

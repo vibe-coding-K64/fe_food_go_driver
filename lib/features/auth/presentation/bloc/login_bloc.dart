@@ -1,0 +1,120 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../services/fcm_service.dart';
+import '../../domain/entities/auth_user.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../../domain/usecases/login_usecase.dart';
+import 'login_event.dart';
+import 'login_state.dart';
+
+class LoginBloc extends Bloc<LoginEvent, LoginState> {
+  final AuthRepository _authRepository;
+  final LoginUseCase _loginUseCase;
+  final FCMService _fcmService;
+
+  LoginBloc({
+    required AuthRepository authRepository,
+    required LoginUseCase loginUseCase,
+    required FCMService fcmService,
+  })  : _authRepository = authRepository,
+        _loginUseCase = loginUseCase,
+        _fcmService = fcmService,
+        super(const LoginInitial()) {
+    on<LoginRequested>(_onLoginRequested);
+    on<LoginReset>(_onLoginReset);
+    on<CheckSessionRequested>(_onCheckSessionRequested);
+    on<LogoutRequested>(_onLogoutRequested);
+
+    add(const CheckSessionRequested());
+  }
+
+  Future<void> _onCheckSessionRequested(
+    CheckSessionRequested event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(const SessionValidating());
+
+    final session = await _authRepository.getStoredSession();
+    if (session == null) {
+      emit(const SessionInvalid('Khong co phien dang nhap. Vui long dang nhap.'));
+      return;
+    }
+
+    if (session.refreshToken.isEmpty) {
+      emit(const SessionInvalid('Phien het han. Vui long dang nhap lai.'));
+      return;
+    }
+
+    final refreshResult = await _authRepository.refreshToken(session.refreshToken);
+    await refreshResult.fold(
+      (failure) async {
+        emit(SessionInvalid(failure.message));
+      },
+      (authResponse) async {
+        final newToken = authResponse.token;
+        if (newToken == null || newToken.isEmpty) {
+          emit(const SessionInvalid('Token khong hop le. Vui long dang nhap lai.'));
+          return;
+        }
+
+        final userResult = await _authRepository.getCurrentUser(newToken);
+        userResult.fold(
+          (failure) {
+            emit(SessionInvalid(failure.message));
+          },
+          (AuthUser user) {
+            emit(SessionValid(user));
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _onLoginRequested(
+    LoginRequested event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(const LoginLoading());
+
+    final result = await _loginUseCase(event.email, event.password);
+
+    await result.fold(
+      (failure) async => emit(LoginFailure(failure.message)),
+      (authResponse) async {
+        final user = authResponse.user;
+        if (user == null || (user.id?.isEmpty ?? true)) {
+          emit(const LoginFailure('Invalid response: missing user data'));
+          return;
+        }
+
+        emit(LoginSuccess(user));
+        await _registerFcmToken(authResponse.token ?? '');
+      },
+    );
+  }
+
+  Future<void> _registerFcmToken(String token) async {
+    try {
+      await _fcmService.requestPermission();
+      final fcmToken = await _fcmService.getToken();
+      if (fcmToken == null || fcmToken.isEmpty) {
+        return;
+      }
+      await _authRepository.registerFcmToken(token, fcmToken);
+      _fcmService.onTokenRefresh((newToken) {
+        _authRepository.registerFcmToken(token, newToken);
+      });
+    } catch (_) {}
+  }
+
+  void _onLoginReset(LoginReset event, Emitter<LoginState> emit) {
+    emit(const LoginInitial());
+  }
+
+  Future<void> _onLogoutRequested(
+    LogoutRequested event,
+    Emitter<LoginState> emit,
+  ) async {
+    await _authRepository.logout();
+    emit(const LoginInitial());
+  }
+}

@@ -32,6 +32,7 @@ class Order extends Equatable {
   final String? vehiclePlate;
   final double? storeLat;
   final double? storeLng;
+  final String? storePhone;
   final double? deliveryLat;
   final double? deliveryLng;
   final double? distance;
@@ -83,6 +84,7 @@ class Order extends Equatable {
     this.vehiclePlate,
     this.storeLat,
     this.storeLng,
+    this.storePhone,
     this.deliveryLat,
     this.deliveryLng,
     this.distance,
@@ -108,11 +110,8 @@ class Order extends Equatable {
   bool get isDelivering => statusCode == 'DELIVERING';
   bool get isCompleted => statusCode == 'COMPLETED';
   bool get isCancelled => statusCode == 'CANCELLED';
-
-  bool get isWaitingPickup => deliveryStep == 'WAITING_PICKUP';
-  bool get isArrivedStore => deliveryStep == 'ARRIVED_STORE';
-  bool get isOnTheWay => deliveryStep == 'ON_THE_WAY';
-  bool get isDeliveredStep => deliveryStep == 'DELIVERED';
+  bool get isPickingUp => status == 1;
+  bool get isOnTheWay => status == 2;
 
   String get displayRecipientName =>
       recipientName?.trim().isNotEmpty == true
@@ -161,6 +160,8 @@ class Order extends Equatable {
     vehiclePlate,
     storeLat,
     storeLng,
+    storePhone,
+    storePhone,
     deliveryLat,
     deliveryLng,
     distance,

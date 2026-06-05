@@ -323,6 +323,7 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
               formatCurrency: _formatCurrency,
               onAccept: () => _acceptOrder(order),
               onDecline: () => _declineOrder(order),
+              l10n: l10n,
             ),
           );
         },

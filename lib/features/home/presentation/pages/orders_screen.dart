@@ -7,7 +7,6 @@ import '../bloc/home_state.dart';
 import '../bloc/home_event.dart';
 import '../widgets/order_card.dart';
 import 'order_detail_screen.dart';
-import 'available_orders_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -29,11 +28,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
   List<dynamic> _filteredOrders(List<dynamic> orders) {
     switch (_selectedFilter) {
       case 1:
-        return orders.where((o) => o.statusCode == 'DELIVERING').toList();
+        return orders.where((o) => o.isPickingUp).toList();
       case 2:
-        return orders.where((o) => o.statusCode == 'COMPLETED').toList();
+        return orders.where((o) => o.isOnTheWay).toList();
       case 3:
-        return orders.where((o) => o.statusCode == 'CANCELLED').toList();
+        return orders.where((o) => o.isCompleted).toList();
+      case 4:
+        return orders.where((o) => o.isCancelled).toList();
       default:
         return orders;
     }
@@ -56,33 +57,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
         final stats = state.todayStats;
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.orders),
-            automaticallyImplyLeading: false,
-            actions: [
-              IconButton(
-                icon: Stack(
-                  children: [
-                    const Icon(Icons.notifications_outlined),
-                    if (state.orderRequests.isNotEmpty)
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppColors.errorLight,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                onPressed: () {},
-              ),
-            ],
-          ),
           body: RefreshIndicator(
             onRefresh: () async {
               context.read<HomeBloc>().add(const HomeLoadRequested());
@@ -140,26 +114,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ],
             ),
           ),
-          floatingActionButton: state.isOnline
-              ? FloatingActionButton.extended(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<HomeBloc>(),
-                          child: const AvailableOrdersScreen(),
-                        ),
-                      ),
-                    );
-                  },
-                  backgroundColor: primaryColor,
-                  icon: const Icon(Icons.add_circle, color: Colors.white),
-                  label: Text(
-                    l10n.availableOrders,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                )
-              : null,
         );
       },
     );
@@ -307,6 +261,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget _buildFilterChips(bool isDark, Color primaryColor, AppLocalizations l10n) {
     final filters = [
       l10n.allOrders,
+      l10n.pickingUp,
       l10n.delivering,
       l10n.completed,
       l10n.cancelled,

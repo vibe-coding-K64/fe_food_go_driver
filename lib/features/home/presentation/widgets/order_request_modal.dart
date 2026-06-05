@@ -335,15 +335,15 @@ class _OrderRequestModalState extends State<OrderRequestModal>
   String _paymentMethodLabel(int paymentMethod) {
     switch (paymentMethod) {
       case 1:
-        return 'Tien mat';
-      case 2:
         return 'MoMo';
+      case 2:
+        return 'Tiền mặt';
       case 3:
         return 'ZaloPay';
       case 4:
-        return 'VNPay';
+        return 'Thẻ ngân hàng';
       default:
-        return 'Khong xac dinh';
+        return 'Không xác định';
     }
   }
 

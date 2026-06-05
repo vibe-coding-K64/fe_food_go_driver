@@ -12,7 +12,12 @@ class LoadWallet extends WalletEvent {
 }
 
 class LoadWalletTransactionsOnly extends WalletEvent {
-  const LoadWalletTransactionsOnly();
+  final String filter;
+
+  const LoadWalletTransactionsOnly({this.filter = 'all'});
+
+  @override
+  List<Object?> get props => [filter];
 }
 
 class LoadTransactions extends WalletEvent {

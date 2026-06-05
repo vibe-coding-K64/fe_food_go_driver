@@ -14,37 +14,37 @@ class OrderCard extends StatelessWidget {
     this.onTap,
   });
 
-  Color _statusColor(int status, bool isDark) {
-    switch (status) {
-      case 0:
+  Color _statusColor(bool isDark) {
+    switch (order.statusCode) {
+      case 'PENDING_STORE_CONFIRMATION':
         return Colors.orange;
-      case 1:
+      case 'WAITING_DRIVER':
         return AppColors.info;
-      case 2:
+      case 'DELIVERING':
         return AppColors.busy;
-      case 3:
+      case 'COMPLETED':
         return AppColors.success;
-      case 4:
+      case 'CANCELLED':
         return AppColors.errorLight;
       default:
         return isDark ? AppColors.primaryDark : AppColors.primaryLight;
     }
   }
 
-  String _statusText(int status, AppLocalizations l10n) {
-    switch (status) {
-      case 0:
-        return l10n.status;
-      case 1:
+  String _statusText(AppLocalizations l10n) {
+    switch (order.statusCode) {
+      case 'PENDING_STORE_CONFIRMATION':
+        return l10n.waitingForOrder;
+      case 'WAITING_DRIVER':
         return l10n.pickup;
-      case 2:
+      case 'DELIVERING':
         return l10n.delivering;
-      case 3:
+      case 'COMPLETED':
         return l10n.delivered;
-      case 4:
+      case 'CANCELLED':
         return l10n.cancelled;
       default:
-        return l10n.status;
+        return order.statusDescription ?? l10n.status;
     }
   }
 
@@ -73,7 +73,7 @@ class OrderCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
     final primaryColor = isDark ? AppColors.primaryDark : AppColors.primaryLight;
-    final statusColor = _statusColor(order.status, isDark);
+    final statusColor = _statusColor(isDark);
 
     return Card(
       elevation: 1,
@@ -92,7 +92,7 @@ class OrderCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      if (order.code != null && order.code!.isNotEmpty) ...[
+                      if (order.orderCode.isNotEmpty) ...[
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
@@ -100,7 +100,7 @@ class OrderCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            order.code!,
+                            order.orderCode,
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -110,7 +110,13 @@ class OrderCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                       ],
-                      Icon(Icons.store, size: 14, color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight),
+                      Icon(
+                        Icons.store,
+                        size: 14,
+                        color: isDark
+                            ? AppColors.onBackgroundDark
+                            : AppColors.onBackgroundLight,
+                      ),
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
@@ -118,7 +124,9 @@ class OrderCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: isDark ? AppColors.onSurfaceDark : AppColors.onSurfaceLight,
+                            color: isDark
+                                ? AppColors.onSurfaceDark
+                                : AppColors.onSurfaceLight,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -132,7 +140,7 @@ class OrderCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      _statusText(order.status, l10n),
+                      _statusText(l10n),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -145,14 +153,22 @@ class OrderCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.location_on, size: 14, color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight),
+                  Icon(
+                    Icons.location_on,
+                    size: 14,
+                    color: isDark
+                        ? AppColors.onBackgroundDark
+                        : AppColors.onBackgroundLight,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       order.deliveryAddress,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight,
+                        color: isDark
+                            ? AppColors.onBackgroundDark
+                            : AppColors.onBackgroundLight,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -166,13 +182,21 @@ class OrderCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.access_time, size: 14, color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight),
+                      Icon(
+                        Icons.access_time,
+                        size: 14,
+                        color: isDark
+                            ? AppColors.onBackgroundDark
+                            : AppColors.onBackgroundLight,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         _formatTime(order.createdAt),
                         style: TextStyle(
                           fontSize: 11,
-                          color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight,
+                          color: isDark
+                              ? AppColors.onBackgroundDark
+                              : AppColors.onBackgroundLight,
                         ),
                       ),
                     ],

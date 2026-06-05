@@ -13,55 +13,34 @@ class OrderRequestFirebaseDataSource {
   }
 
   Stream<List<OrderRequestModel>> watchOrderRequests(String driverId) {
-    log('watchOrderRequests - driverId: $driverId');
-
-    return _firestore
+    final query = _firestore
         .collection('order_requests')
         .doc(driverId)
         .collection('requests')
-        .where('status', isEqualTo: 0)
-        .orderBy('createdAt', descending: false)
-        .snapshots()
-        .map((snap) {
-      log('watchOrderRequests - received ${snap.docChanges.length} changes, docs: ${snap.docs.length}');
-      return snap.docs.map((doc) {
-        return OrderRequestModel.fromFirestore(doc.id, _fromFirestore(doc));
+        .orderBy('createdAt', descending: true);
+
+    log(
+      'watchOrderRequests subscribe - path=order_requests/$driverId/requests orderBy=createdAt desc',
+    );
+
+    return query.snapshots().map((snapshot) {
+      log(
+        'watchOrderRequests snapshot - driverId=$driverId docs=${snapshot.docs.length}',
+      );
+
+      final requests = snapshot.docs.map((doc) {
+        final data = doc.data();
+        log(
+          'watchOrderRequests doc - requestId=${doc.id}, orderId=${data['orderId']}, driverId=${data['driverId']}, status=${data['status']}, createdAt=${data['createdAt']}',
+        );
+        return OrderRequestModel.fromFirestore(doc.id, data);
       }).toList();
+
+      log(
+        'watchOrderRequests mapped - requestIds=${requests.map((request) => request.id).toList()}',
+      );
+
+      return requests;
     });
-  }
-
-  Future<void> deleteOrderRequest(String driverId, String requestId) async {
-    log('deleteOrderRequest - driverId: $driverId, requestId: $requestId');
-    try {
-      await _firestore
-          .collection('order_requests')
-          .doc(driverId)
-          .collection('requests')
-          .doc(requestId)
-          .delete();
-      log('deleteOrderRequest - success');
-    } catch (e) {
-      log('deleteOrderRequest - error: $e');
-      rethrow;
-    }
-  }
-
-  Map<String, dynamic> _fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>?;
-    if (data == null) return {'id': doc.id};
-    return {
-      ...data,
-      'id': doc.id,
-      'createdAt': _convertTimestamp(data['createdAt']),
-      'updatedAt': _convertTimestamp(data['updatedAt']),
-    };
-  }
-
-  dynamic _convertTimestamp(dynamic value) {
-    if (value == null) return null;
-    if (value is Timestamp) {
-      return value.toDate().toIso8601String();
-    }
-    return value;
   }
 }

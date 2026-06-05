@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../orders/data/models/order_request_model.dart';
@@ -22,35 +24,80 @@ class OrderRequestModal extends StatefulWidget {
 
 class _OrderRequestModalState extends State<OrderRequestModal>
     with SingleTickerProviderStateMixin {
-  static const int _totalSeconds = 10;
-  int _remainingSeconds = _totalSeconds;
   Timer? _timer;
   late AnimationController _progressController;
   late Animation<double> _progressAnimation;
+  int _remainingSeconds = 0;
+  int _totalSeconds = 1;
+  bool _didAutoDecline = false;
 
   @override
   void initState() {
     super.initState();
+    _configureCountdown();
+  }
+
+  @override
+  void didUpdateWidget(covariant OrderRequestModal oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.request.id != widget.request.id ||
+        oldWidget.request.expiresAt != widget.request.expiresAt) {
+      _timer?.cancel();
+      _progressController.dispose();
+      _configureCountdown();
+    }
+  }
+
+  void _configureCountdown() {
+    final now = DateTime.now().toUtc();
+    final expiresAt = widget.request.expiresAt?.toUtc();
+    final fallbackSeconds = widget.request.expiresInSeconds ?? 10;
+    final secondsLeft = expiresAt != null
+        ? expiresAt.difference(now).inSeconds.clamp(0, 86400)
+        : fallbackSeconds.clamp(0, 86400);
+
+    _totalSeconds = secondsLeft <= 0 ? 1 : secondsLeft;
+    _remainingSeconds = secondsLeft;
+
     _progressController = AnimationController(
-      duration: const Duration(seconds: _totalSeconds),
+      duration: Duration(seconds: _totalSeconds),
       vsync: this,
+      value: _totalSeconds == 0 ? 0 : _remainingSeconds / _totalSeconds,
     );
     _progressAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(parent: _progressController, curve: Curves.linear),
     );
-    _progressController.forward();
+
+    if (_remainingSeconds <= 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _onDecline(autoTriggered: true);
+        }
+      });
+      return;
+    }
+
+    _progressController.reverse(from: _remainingSeconds / _totalSeconds);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
       }
+
+      final now = DateTime.now().toUtc();
+      final expiresAt = widget.request.expiresAt?.toUtc();
+      final latestRemaining = expiresAt != null
+          ? expiresAt.difference(now).inSeconds.clamp(0, 86400)
+          : (_remainingSeconds - 1).clamp(0, _totalSeconds);
+
       setState(() {
-        _remainingSeconds--;
+        _remainingSeconds = latestRemaining;
       });
+
       if (_remainingSeconds <= 0) {
         timer.cancel();
-        _onDecline();
+        _onDecline(autoTriggered: true);
       }
     });
   }
@@ -62,26 +109,40 @@ class _OrderRequestModalState extends State<OrderRequestModal>
     super.dispose();
   }
 
+  bool get _isExpired => _remainingSeconds <= 0;
+
   void _onAccept() {
+    if (_isExpired) return;
     _timer?.cancel();
     _progressController.stop();
-    widget.homeBloc.add(RespondToOrderRequest(
-          requestId: widget.request.id,
-          orderId: widget.request.orderId,
-          action: 'accept',
-        ));
+    widget.homeBloc.add(
+      RespondToOrderRequest(
+        requestId: widget.request.id,
+        orderId: widget.request.orderId,
+        action: 'accept',
+      ),
+    );
     Navigator.of(context).pop();
   }
 
-  void _onDecline() {
+  void _onDecline({bool autoTriggered = false}) {
+    if (_didAutoDecline && autoTriggered) return;
+    if (autoTriggered) {
+      _didAutoDecline = true;
+    }
+
     _timer?.cancel();
     _progressController.stop();
-    widget.homeBloc.add(RespondToOrderRequest(
-          requestId: widget.request.id,
-          orderId: widget.request.orderId,
-          action: 'decline',
-        ));
-    Navigator.of(context).pop();
+    widget.homeBloc.add(
+      RespondToOrderRequest(
+        requestId: widget.request.id,
+        orderId: widget.request.orderId,
+        action: 'decline',
+      ),
+    );
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -137,7 +198,9 @@ class _OrderRequestModalState extends State<OrderRequestModal>
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
-                      value: _progressAnimation.value,
+                      value: _totalSeconds == 0
+                          ? 0
+                          : (_remainingSeconds / _totalSeconds).clamp(0.0, 1.0),
                       backgroundColor: Colors.grey[300],
                       valueColor: AlwaysStoppedAnimation<Color>(
                         _remainingSeconds <= 3
@@ -149,7 +212,9 @@ class _OrderRequestModalState extends State<OrderRequestModal>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Tu dong tu choi sau ${_remainingSeconds}s',
+                    _isExpired
+                        ? 'Yeu cau da het han'
+                        : 'Tu dong tu choi sau ${_remainingSeconds}s',
                     style: TextStyle(
                       fontSize: 13,
                       color: _remainingSeconds <= 3
@@ -188,14 +253,15 @@ class _OrderRequestModalState extends State<OrderRequestModal>
                   _buildInfoRow(
                     Icons.payments,
                     'Thanh toan',
-                    order.paymentMethod,
+                    _paymentMethodLabel(order.paymentMethod),
                     isDark,
                   ),
-                  if (order.receiverName != null)
+                  if (order.displayRecipientPhone != null ||
+                      order.displayRecipientName != 'N/A')
                     _buildInfoRow(
                       Icons.person,
                       'Nguoi nhan',
-                      '${order.receiverName}${order.receiverPhone != null ? ' - ${order.receiverPhone}' : ''}',
+                      '${order.displayRecipientName}${order.displayRecipientPhone != null ? ' - ${order.displayRecipientPhone}' : ''}',
                       isDark,
                     ),
                   if (order.note != null && order.note!.isNotEmpty)
@@ -227,7 +293,7 @@ class _OrderRequestModalState extends State<OrderRequestModal>
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: _onDecline,
+                    onPressed: _isExpired ? null : _onDecline,
                     icon: const Icon(Icons.close),
                     label: Text(l10n.decline),
                     style: OutlinedButton.styleFrom(
@@ -244,7 +310,7 @@ class _OrderRequestModalState extends State<OrderRequestModal>
                 Expanded(
                   flex: 2,
                   child: ElevatedButton.icon(
-                    onPressed: _onAccept,
+                    onPressed: _isExpired ? null : _onAccept,
                     icon: const Icon(Icons.check),
                     label: Text(l10n.accept),
                     style: ElevatedButton.styleFrom(
@@ -264,6 +330,21 @@ class _OrderRequestModalState extends State<OrderRequestModal>
         ],
       ),
     );
+  }
+
+  String _paymentMethodLabel(int paymentMethod) {
+    switch (paymentMethod) {
+      case 1:
+        return 'Tien mat';
+      case 2:
+        return 'MoMo';
+      case 3:
+        return 'ZaloPay';
+      case 4:
+        return 'VNPay';
+      default:
+        return 'Khong xac dinh';
+    }
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value, bool isDark) {

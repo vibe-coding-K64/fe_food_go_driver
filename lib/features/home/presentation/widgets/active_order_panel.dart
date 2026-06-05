@@ -24,12 +24,12 @@ class ActiveOrderPanel extends StatelessWidget {
   });
 
   Color _statusColor(bool isDark) {
-    switch (order.status) {
-      case 2:
+    switch (order.statusCode) {
+      case 'DELIVERING':
         return AppColors.busy;
-      case 3:
+      case 'COMPLETED':
         return AppColors.success;
-      case 4:
+      case 'CANCELLED':
         return AppColors.errorLight;
       default:
         return isDark ? AppColors.primaryDark : AppColors.primaryLight;
@@ -37,15 +37,19 @@ class ActiveOrderPanel extends StatelessWidget {
   }
 
   String _statusLabel(AppLocalizations l10n) {
-    switch (order.status) {
-      case 2:
+    switch (order.statusCode) {
+      case 'PENDING_STORE_CONFIRMATION':
+        return l10n.waitingForOrder;
+      case 'WAITING_DRIVER':
+        return l10n.pickup;
+      case 'DELIVERING':
         return l10n.delivering;
-      case 3:
+      case 'COMPLETED':
         return l10n.delivered;
-      case 4:
+      case 'CANCELLED':
         return l10n.cancelled;
       default:
-        return l10n.status;
+        return order.statusDescription ?? l10n.status;
     }
   }
 
@@ -86,8 +90,9 @@ class ActiveOrderPanel extends StatelessWidget {
   }
 
   Future<void> _callReceiver() async {
-    if (order.receiverPhone == null || order.receiverPhone!.isEmpty) return;
-    final uri = Uri.parse('tel:${order.receiverPhone}');
+    final phone = order.displayRecipientPhone;
+    if (phone == null || phone.isEmpty) return;
+    final uri = Uri.parse('tel:$phone');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     }
@@ -153,7 +158,7 @@ class ActiveOrderPanel extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (order.code != null && order.code!.isNotEmpty) ...[
+                  if (order.orderCode.isNotEmpty) ...[
                     Row(
                       children: [
                         Text(
@@ -170,7 +175,7 @@ class ActiveOrderPanel extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            order.code!,
+                            order.orderCode,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -189,12 +194,29 @@ class ActiveOrderPanel extends StatelessWidget {
                   const SizedBox(height: 8),
                   const Divider(height: 1),
                   const SizedBox(height: 8),
-                  _buildInfoRow(Icons.person, order.receiverName ?? 'N/A', isDark),
-                  _buildInfoRow(Icons.phone, order.receiverPhone ?? 'N/A', isDark, isBold: true),
+                  _buildInfoRow(Icons.person, order.displayRecipientName, isDark),
+                  if (order.displayRecipientPhone != null)
+                    _buildInfoRow(Icons.phone, order.displayRecipientPhone!, isDark, isBold: true),
                   _buildInfoRow(Icons.home, order.deliveryAddress, isDark, maxLines: 2),
                   if (order.note != null && order.note!.isNotEmpty)
                     _buildInfoRow(Icons.note, order.note!, isDark, iconColor: AppColors.warning),
                   const SizedBox(height: 12),
+                  if (order.estimatedDurationMinutes != null) ...[
+                    Row(
+                      children: [
+                        Icon(Icons.timer_outlined, size: 16, color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Du kien: ${order.estimatedDurationMinutes!} phut',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                   Row(
                     children: [
                       Text(
@@ -205,7 +227,7 @@ class ActiveOrderPanel extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${_formatCurrency(order.deliveryFee)} VND',
+                        '${_formatCurrency(order.driverCollectAmount)} VND',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -263,7 +285,7 @@ class ActiveOrderPanel extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (order.status == 2) ...[
+                  if (order.statusCode == 'DELIVERING') ...[
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -329,9 +351,17 @@ class ActiveOrderPanel extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
-        crossAxisAlignment: maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment:
+            maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
-          Icon(icon, size: 16, color: iconColor ?? (isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight)),
+          Icon(
+            icon,
+            size: 16,
+            color: iconColor ??
+                (isDark
+                    ? AppColors.onBackgroundDark
+                    : AppColors.onBackgroundLight),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -341,7 +371,8 @@ class ActiveOrderPanel extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
-                color: isDark ? AppColors.onSurfaceDark : AppColors.onSurfaceLight,
+                color:
+                    isDark ? AppColors.onSurfaceDark : AppColors.onSurfaceLight,
               ),
             ),
           ),

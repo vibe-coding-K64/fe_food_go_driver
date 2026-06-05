@@ -5,6 +5,26 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/network/base_remote_datasource.dart';
 import '../models/order_model.dart';
 
+class OrderActionResultModel {
+  final String orderId;
+  final String? requestId;
+  final String status;
+
+  const OrderActionResultModel({
+    required this.orderId,
+    required this.requestId,
+    required this.status,
+  });
+
+  factory OrderActionResultModel.fromJson(Map<String, dynamic> json) {
+    return OrderActionResultModel(
+      orderId: json['orderId']?.toString() ?? '',
+      requestId: json['requestId']?.toString(),
+      status: json['status']?.toString() ?? '',
+    );
+  }
+}
+
 class OrderRemoteDataSource extends BaseRemoteDataSource {
   OrderRemoteDataSource({
     http.Client? httpClient,
@@ -28,7 +48,7 @@ class OrderRemoteDataSource extends BaseRemoteDataSource {
         final list = decoded is List
             ? decoded
             : (decoded['data'] ?? decoded['content'] ?? []);
-        return list
+        return (list as List)
             .map((e) => OrderModel.fromJson(e as Map<String, dynamic>))
             .toList();
       }
@@ -78,7 +98,29 @@ class OrderRemoteDataSource extends BaseRemoteDataSource {
     return _getOrders('/drivers/orders/history?limit=$limit');
   }
 
-  Future<void> acceptOrderApi(String driverId, String orderId) async {
+  Future<OrderModel?> getOrderById(String orderId) async {
+    log('GET /drivers/orders/$orderId');
+    try {
+      final response = await requestGet('/drivers/orders/$orderId');
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final orderData = decoded is Map<String, dynamic>
+            ? (decoded['data'] ?? decoded)
+            : decoded;
+        if (orderData == null || orderData == '') return null;
+        return OrderModel.fromJson(orderData as Map<String, dynamic>);
+      }
+      if (response.statusCode == 404) return null;
+      throw mapFailure(response, '/drivers/orders/$orderId');
+    } catch (e) {
+      if (e is Failure) rethrow;
+      log('Exception: $e');
+      throw const ServerFailure('Failed to fetch order detail');
+    }
+  }
+
+  Future<OrderModel?> acceptOrderApi(String driverId, String orderId) async {
     log('POST /drivers/orders/$orderId/accept');
     try {
       final response = await requestPost(
@@ -86,9 +128,13 @@ class OrderRemoteDataSource extends BaseRemoteDataSource {
         body: {'driverId': driverId},
       );
 
-      if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
-        throw mapFailure(response, '/drivers/orders/$orderId/accept');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final decoded = jsonDecode(response.body);
+        final data = decoded is Map<String, dynamic> ? decoded['data'] ?? decoded : decoded;
+        return data is Map<String, dynamic> ? OrderModel.fromJson(data) : null;
       }
+      if (response.statusCode == 204) return null;
+      throw mapFailure(response, '/drivers/orders/$orderId/accept');
     } catch (e) {
       if (e is Failure) rethrow;
       log('Exception: $e');
@@ -96,7 +142,7 @@ class OrderRemoteDataSource extends BaseRemoteDataSource {
     }
   }
 
-  Future<void> updateOrderStatusApi(
+  Future<OrderModel?> updateOrderStatusApi(
     String driverId,
     String orderId,
     int status,
@@ -108,9 +154,13 @@ class OrderRemoteDataSource extends BaseRemoteDataSource {
         body: {'status': status},
       );
 
-      if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
-        throw mapFailure(response, '/drivers/orders/$orderId/status');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final decoded = jsonDecode(response.body);
+        final data = decoded is Map<String, dynamic> ? decoded['data'] ?? decoded : decoded;
+        return data is Map<String, dynamic> ? OrderModel.fromJson(data) : null;
       }
+      if (response.statusCode == 204) return null;
+      throw mapFailure(response, '/drivers/orders/$orderId/status');
     } catch (e) {
       if (e is Failure) rethrow;
       log('Exception: $e');
@@ -118,19 +168,33 @@ class OrderRemoteDataSource extends BaseRemoteDataSource {
     }
   }
 
-  Future<void> respondOrderApi(String orderId, String action) async {
-    log('POST /drivers/orders/$orderId/respond - action=$action');
+  Future<dynamic> respondOrderApi(
+    String orderId,
+    String action,
+    String requestId,
+  ) async {
+    log(
+      'POST /drivers/orders/$orderId/respond - action=$action, requestId=$requestId',
+    );
     try {
       final response = await requestPost(
         '/drivers/orders/$orderId/respond',
-        body: {'action': action},
+        body: {'action': action, 'requestId': requestId},
       );
 
-      if (response.statusCode != 200 &&
-          response.statusCode != 201 &&
-          response.statusCode != 204) {
-        throw mapFailure(response, '/drivers/orders/$orderId/respond');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final decoded = jsonDecode(response.body);
+        final data = decoded is Map<String, dynamic> ? decoded['data'] ?? decoded : decoded;
+        if (data is Map<String, dynamic>) {
+          if (action.toLowerCase() == 'accept') {
+            return OrderModel.fromJson(data);
+          }
+          return OrderActionResultModel.fromJson(data);
+        }
+        return null;
       }
+      if (response.statusCode == 204) return null;
+      throw mapFailure(response, '/drivers/orders/$orderId/respond');
     } catch (e) {
       if (e is Failure) rethrow;
       log('Exception: $e');

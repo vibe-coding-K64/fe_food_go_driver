@@ -32,7 +32,7 @@
   "acceptOrder": "Nhận đơn",
   "status": "Trạng thái",
   "wallet": "Ví",
-  "settings": "Settings",
+  "settings": "Cài đặt",
   "home": "Trang chủ",
   "orders": "Đơn hàng",
   "profile": "Hồ sơ",
@@ -53,7 +53,7 @@
   "emailLabel": "Email",
   "passwordLabel": "Mật khẩu",
   "emailRequired": "Email không được để trống",
-  "invalidEmail": "�ịa chỉ email không hợp lệ",
+  "invalidEmail": "Địa chỉ email không hợp lệ",
   "passwordRequired": "Mật khẩu không được để trống",
   "passwordTooShort": "Mật khẩu phải có ít nhất 6 ký tự",
   "forgotPassword": "Quên mật khẩu?",
@@ -389,6 +389,8 @@
   "noAvailableOrders": "Không có đơn hàng nào khả dụng",
   "orderTaken": "Đơn đã được nhận",
   "orderDeclined": "Đã từ chối đơn",
+  "callStore": "Gọi quán",
+  "items": "Món ăn",
   "viewDetail": "Xem chi tiết",
   "tapToViewDetail": "Nhấn để xem chi tiết",
   "withdraw": "Rút tiền",
@@ -466,6 +468,7 @@
   "pendingBalance": "Đang chờ",
   "today": "Hôm nay",
   "recentOrders": "Đơn gần đây",
+  "pickingUp": "Đang lấy",
   "viewAll": "Xem tất cả",
   "noRecentOrders": "Chưa có đơn nào",
   "todayStats": "Thống kê hôm nay",
@@ -479,5 +482,25 @@
   "offlinePrompt": "Bật trạng thái Online để bắt đầu nhận đơn giao hàng",
   "searchingForOrders": "Đang tìm kiếm đơn hàng quanh bạn...",
   "cancelOrderWarning": "Cảnh báo: Hủy đơn",
-  "map": "Bản đồ"
+  "map": "Bản đồ",
+  "moreItems": "+ {count} món khác",
+  "@moreItems": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "totalOrder": "Tổng đơn",
+  "deliveryFee": "Tiền cước",
+  "foodItems": "Tiền món",
+  "toppingItems": "Tiền topping",
+  "discount": "Giảm giá",
+  "deliveryCharge": "Phí giao hàng",
+  "orderRequestError": "Không thể xử lý yêu cầu đơn hàng.",
+  "orderRequestNoIdError": "Không thể xử lý yêu cầu đơn hàng này vì thiếu requestId hợp lệ.",
+  "orderRequestGenericError": "Không thể xử lý yêu cầu: {error}",
+  "noLoginSession": "Không có phiên đăng nhập. Vui lòng đăng nhập.",
+  "cannotConnectServer": "Không thể kết nối server. Kiểm tra kết nối mạng.",
+  "paid": "Đã thanh toán",
+  "unpaid": "Chưa thanh toán",
+  "dismiss": "Đóng"
 }

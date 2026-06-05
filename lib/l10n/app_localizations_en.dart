@@ -501,6 +501,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderDeclined => 'Order declined';
 
   @override
+  String get callStore => 'Call store';
+
+  @override
+  String get items => 'Items';
+
+  @override
   String get viewDetail => 'View Details';
 
   @override
@@ -692,6 +698,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recentOrders => 'Recent Orders';
 
   @override
+  String get pickingUp => 'Picking Up';
+
+  @override
   String get viewAll => 'View All';
 
   @override
@@ -735,4 +744,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get map => 'Map';
+
+  @override
+  String moreItems(int count) {
+    return '+ $count more items';
+  }
+
+  @override
+  String get totalOrder => 'Total Order';
+
+  @override
+  String get deliveryFee => 'Delivery Fee';
+
+  @override
+  String get foodItems => 'Food Items';
+
+  @override
+  String get toppingItems => 'Topping Items';
+
+  @override
+  String get discount => 'Discount';
+
+  @override
+  String get deliveryCharge => 'Delivery Charge';
+
+  @override
+  String get orderRequestError => 'Unable to process order request.';
+
+  @override
+  String get orderRequestNoIdError =>
+      'Unable to process this order request due to missing valid requestId.';
+
+  @override
+  String orderRequestGenericError(Object error) {
+    return 'Unable to process request: $error';
+  }
+
+  @override
+  String get noLoginSession => 'No login session. Please log in.';
+
+  @override
+  String get cannotConnectServer =>
+      'Cannot connect to server. Check your internet connection.';
+
+  @override
+  String get paid => 'Paid';
+
+  @override
+  String get unpaid => 'Unpaid';
+
+  @override
+  String get dismiss => 'Dismiss';
 }

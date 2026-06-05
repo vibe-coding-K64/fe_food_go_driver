@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../injection_container.dart';
+import '../../../../services/background_location_service_manager.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
+import '../../../driver/domain/repositories/driver_repository.dart';
 import '../../../auth/presentation/bloc/login_bloc.dart';
 import '../../../auth/presentation/pages/login_page.dart';
 import '../../../../services/fcm_service.dart';
@@ -28,14 +31,69 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool _isModalShowing = false;
+  final _bgService = BackgroundLocationServiceManager();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     context.read<HomeBloc>().add(const HomeLoadRequested());
     _ensureFcmTokenRegistered();
+    _initBackgroundService();
+  }
+
+  Future<void> _initBackgroundService() async {
+    _bgService.initialize(driverRepository: getIt<DriverRepository>());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final homeState = context.read<HomeBloc>().state;
+    final hasActiveOrder = homeState.activeOrder != null;
+    final isOnline = homeState.isOnline;
+
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      // App going to background
+      if (hasActiveOrder && isOnline) {
+        _startBackgroundLocation();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      // App back to foreground
+      _stopBackgroundLocation();
+    }
+  }
+
+  Future<void> _startBackgroundLocation() async {
+    try {
+      // Request background location permission if needed
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        debugPrint('[HomePage] Background location permission not granted');
+        return;
+      }
+
+      // Android 10+ requires ACCESS_BACKGROUND_LOCATION
+      if (await Geolocator.isLocationServiceEnabled()) {
+        await _bgService.startService();
+        debugPrint('[HomePage] Background location service started');
+      }
+    } catch (e) {
+      debugPrint('[HomePage] Failed to start background location: $e');
+    }
+  }
+
+  void _stopBackgroundLocation() {
+    if (_bgService.isRunning) {
+      _bgService.stopService();
+      debugPrint('[HomePage] Background location service stopped');
+    }
   }
 
   Future<void> _ensureFcmTokenRegistered() async {
@@ -60,6 +118,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _onRefresh() async {
     context.read<HomeBloc>().add(const HomeLoadRequested());
+    context.read<HomeBloc>().add(const LoadWalletRequested());
+    context.read<HomeBloc>().add(const LoadStatsRequested());
   }
 
   @override
@@ -68,8 +128,30 @@ class _HomePageState extends State<HomePage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = isDark ? AppColors.primaryDark : AppColors.primaryLight;
 
-    return BlocConsumer<HomeBloc, HomeState>(
+    return BlocListener<HomeBloc, HomeState>(
+      listenWhen: (previous, current) =>
+          previous.activeOrder != current.activeOrder,
       listener: (context, state) {
+        if (state.activeOrder != null && state.isOnline) {
+          // Order started - if app is already in background, start service immediately
+          final lifecycleState = WidgetsBinding.instance.lifecycleState;
+          if (lifecycleState == AppLifecycleState.paused ||
+              lifecycleState == AppLifecycleState.inactive ||
+              lifecycleState == AppLifecycleState.hidden) {
+            _startBackgroundLocation();
+          }
+        } else {
+          // Order completed/cancelled
+          _stopBackgroundLocation();
+        }
+      },
+      child: BlocConsumer<HomeBloc, HomeState>(
+        listenWhen: (previous, current) =>
+            previous.pendingRequest != current.pendingRequest ||
+            previous.successMessage != current.successMessage ||
+            previous.errorMessage != current.errorMessage ||
+            previous.needsReLogin != current.needsReLogin,
+        listener: (context, state) {
         if (state.needsReLogin) {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
@@ -88,7 +170,9 @@ class _HomePageState extends State<HomePage> {
         }
 
         if (state.successMessage != null && state.successMessage!.isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          final messenger = ScaffoldMessenger.of(context);
+          messenger.hideCurrentSnackBar();
+          messenger.showSnackBar(
             SnackBar(
               content: Text(state.successMessage!),
               backgroundColor: AppColors.success,
@@ -98,21 +182,24 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(12),
               ),
               action: SnackBarAction(
-                label: 'Dismiss',
+                label: l10n.dismiss,
                 textColor: Colors.white,
                 onPressed: () {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  messenger.hideCurrentSnackBar();
                   context.read<HomeBloc>().add(const ClearSuccessMessage());
                 },
               ),
             ),
           );
+          context.read<HomeBloc>().add(const ClearSuccessMessage());
         }
 
         if (state.errorMessage != null &&
             state.errorMessage!.isNotEmpty &&
             !state.needsLocationPermission) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          final messenger = ScaffoldMessenger.of(context);
+          messenger.hideCurrentSnackBar();
+          messenger.showSnackBar(
             SnackBar(
               content: Text(state.errorMessage!),
               backgroundColor:
@@ -123,19 +210,20 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(12),
               ),
               action: SnackBarAction(
-                label: 'Dismiss',
+                label: l10n.dismiss,
                 textColor: Colors.white,
                 onPressed: () {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  messenger.hideCurrentSnackBar();
                   context.read<HomeBloc>().add(const ClearErrorMessage());
                 },
               ),
             ),
           );
+          context.read<HomeBloc>().add(const ClearErrorMessage());
         }
       },
       builder: (context, state) {
-        if (state.status == HomeStatus.loading && state.driverProfile == null) {
+        if (state.status == HomeStatus.loading || state.driverProfile == null) {
           return Center(
             child: CircularProgressIndicator(color: primaryColor),
           );
@@ -158,7 +246,7 @@ class _HomePageState extends State<HomePage> {
                     onPickedUp: () {
                       if (state.activeOrder != null) {
                         context.read<HomeBloc>().add(
-                              CompleteOrderPressed(state.activeOrder!.id),
+                              ConfirmPickupPressed(state.activeOrder!.id),
                             );
                       }
                     },
@@ -195,7 +283,15 @@ class _HomePageState extends State<HomePage> {
           ),
         );
       },
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _bgService.dispose();
+    super.dispose();
   }
 
   Widget _buildOfflinePrompt(

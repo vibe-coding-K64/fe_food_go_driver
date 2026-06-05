@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -59,32 +60,46 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   String _paymentMethodLabel(int paymentMethod) {
     switch (paymentMethod) {
       case 1:
-        return 'Tien mat (COD)';
-      case 2:
         return 'MoMo';
+      case 2:
+        return 'Tiền mặt (COD)';
       case 3:
         return 'ZaloPay';
       case 4:
-        return 'VNPay';
+        return 'Thẻ ngân hàng';
       default:
-        return 'Khong xac dinh';
+        return 'Không xác định';
     }
   }
 
-  void _openMap(double? lat, double? lng) {
+  void _openMap(double? lat, double? lng) async {
     if (lat == null || lng == null) return;
+
+    Position? position;
+    try {
+      position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      );
+    } catch (_) {}
+
+    const defaultLat = 10.7769;
+    const defaultLng = 106.7009;
+    final oriLat = position != null ? position.latitude.toStringAsFixed(6) : defaultLat.toString();
+    final oriLng = position != null ? position.longitude.toStringAsFixed(6) : defaultLng.toString();
+
     final uri = Uri.parse(
-      'https://www.openstreetmap.org/directions'
-      '?engine=osrm_car'
-      '&route=$lat,$lng#map=16/$lat/$lng',
+      'https://www.google.com/maps/dir/?api=1'
+      '&origin=${oriLat},${oriLng}'
+      '&destination=${lat.toStringAsFixed(6)},${lng.toStringAsFixed(6)}'
+      '&travelmode=driving',
     );
-    launchUrl(uri, mode: LaunchMode.externalApplication);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   void _makeCall(String? phone) {
     if (phone == null || phone.isEmpty) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Call: $phone')),
+      SnackBar(content: Text('Call: $phone'), duration: const Duration(seconds: 1)),
     );
   }
 
@@ -113,26 +128,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.orderDetail),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Center(
-              child: Text(
-                _statusLabel(l10n),
-                style: TextStyle(
-                  color: statusColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -213,29 +208,25 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             ),
             const SizedBox(height: 12),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _openMap(widget.order.storeLat, widget.order.storeLng),
-                    icon: const Icon(Icons.navigation, size: 18),
-                    label: Text(l10n.openMaps),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: primaryColor,
-                      side: BorderSide(color: primaryColor),
-                    ),
+                IconButton(
+                  onPressed: () => _openMap(widget.order.storeLat, widget.order.storeLng),
+                  icon: const Icon(Icons.navigation, size: 22),
+                  style: IconButton.styleFrom(
+                    foregroundColor: primaryColor,
+                    side: BorderSide(color: primaryColor),
                   ),
+                  tooltip: l10n.openMaps,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _makeCall(widget.order.displayRecipientPhone),
-                    icon: const Icon(Icons.phone, size: 18),
-                    label: Text(l10n.callReceiver),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: primaryColor,
-                      side: BorderSide(color: primaryColor),
-                    ),
+                IconButton(
+                  onPressed: () => _makeCall(widget.order.displayRecipientPhone),
+                  icon: const Icon(Icons.phone, size: 22),
+                  style: IconButton.styleFrom(
+                    foregroundColor: primaryColor,
+                    side: BorderSide(color: primaryColor),
                   ),
+                  tooltip: l10n.callReceiver,
                 ),
               ],
             ),
@@ -299,10 +290,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.phone, color: AppColors.success),
-                  onPressed: () => _makeCall(widget.order.displayRecipientPhone),
-                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -348,29 +335,25 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             ),
             const SizedBox(height: 12),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _openMap(widget.order.deliveryLat, widget.order.deliveryLng),
-                    icon: const Icon(Icons.navigation, size: 18),
-                    label: Text(l10n.openMaps),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.info,
-                      side: const BorderSide(color: AppColors.info),
-                    ),
+                IconButton(
+                  onPressed: () => _openMap(widget.order.deliveryLat, widget.order.deliveryLng),
+                  icon: const Icon(Icons.navigation, size: 22),
+                  style: IconButton.styleFrom(
+                    foregroundColor: AppColors.info,
+                    side: const BorderSide(color: AppColors.info),
                   ),
+                  tooltip: l10n.openMaps,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _makeCall(widget.order.displayRecipientPhone),
-                    icon: const Icon(Icons.phone, size: 18),
-                    label: Text(l10n.callReceiver),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.info,
-                      side: const BorderSide(color: AppColors.info),
-                    ),
+                IconButton(
+                  onPressed: () => _makeCall(widget.order.displayRecipientPhone),
+                  icon: const Icon(Icons.phone, size: 22),
+                  style: IconButton.styleFrom(
+                    foregroundColor: AppColors.info,
+                    side: const BorderSide(color: AppColors.info),
                   ),
+                  tooltip: l10n.callReceiver,
                 ),
               ],
             ),
@@ -533,12 +516,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             ),
             const SizedBox(height: 12),
             if (widget.order.itemsSubtotal > 0 || widget.order.optionsSubtotal > 0) ...[
-              _paymentRow('Tien mon', widget.order.itemsSubtotal, isDark),
+              _paymentRow(l10n.foodItems, widget.order.itemsSubtotal, isDark),
               if (widget.order.optionsSubtotal > 0)
-                _paymentRow('Tien topping', widget.order.optionsSubtotal, isDark),
+                _paymentRow(l10n.toppingItems, widget.order.optionsSubtotal, isDark),
               if (widget.order.discountAmount > 0)
-                _paymentRow('Giam gia', -widget.order.discountAmount, isDark, isDiscount: true),
-              _paymentRow('Phi giao hang', widget.order.deliveryFee, isDark),
+                _paymentRow(l10n.discount, -widget.order.discountAmount, isDark, isDiscount: true),
+              _paymentRow(l10n.deliveryCharge, widget.order.deliveryFee, isDark),
               const Divider(),
             ],
             Row(

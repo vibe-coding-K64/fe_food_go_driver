@@ -14,12 +14,14 @@ class TransactionItem extends StatelessWidget {
 
   IconData _iconForType(String type) {
     switch (type) {
-      case 'EARNING':
+      case 'DELIVERY_INCOME':
         return Icons.arrow_upward;
       case 'WITHDRAWAL':
         return Icons.arrow_downward;
       case 'REFUND':
         return Icons.replay;
+      case 'COD_DEBIT':
+        return Icons.local_shipping;
       default:
         return Icons.swap_vert;
     }
@@ -27,12 +29,14 @@ class TransactionItem extends StatelessWidget {
 
   Color _colorForType(String type) {
     switch (type) {
-      case 'EARNING':
+      case 'DELIVERY_INCOME':
         return AppColors.success;
       case 'WITHDRAWAL':
         return AppColors.errorLight;
       case 'REFUND':
         return AppColors.warning;
+      case 'COD_DEBIT':
+        return Colors.orange;
       default:
         return AppColors.info;
     }
@@ -40,12 +44,14 @@ class TransactionItem extends StatelessWidget {
 
   String _labelForType(String type) {
     switch (type) {
-      case 'EARNING':
-        return 'Thu nhập';
+      case 'DELIVERY_INCOME':
+        return 'Thu nhập giao hàng';
       case 'WITHDRAWAL':
         return 'Rút tiền';
       case 'REFUND':
         return 'Hoàn tiền';
+      case 'COD_DEBIT':
+        return 'Thu COD';
       default:
         return 'Giao dịch';
     }
@@ -137,7 +143,7 @@ class TransactionItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '${transaction.type == 'WITHDRAWAL' ? '-' : '+'}${_formatCurrency(transaction.amount)}',
+                    '${(transaction.type == 'WITHDRAWAL' || transaction.type == 'COD_DEBIT') ? '-' : '+'}${_formatCurrency(transaction.amount)}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,

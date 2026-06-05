@@ -23,6 +23,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final FlutterSecureStorage _secureStorage;
   final LocationService _locationService;
   final DriverRealtimeService _driverRealtimeService;
+  final WalletRepository _walletRepository;
 
   StreamSubscription? _profileSub;
   StreamSubscription? _activeOrderSub;
@@ -38,7 +39,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   String? _currentDriverId;
   final Set<String> _activeRequestIds = <String>{};
   final Set<String> _dismissedRequestIds = <String>{};
-  Timer? _availableOrdersPollingTimer;
 
   HomeBloc({
     required HomeRepository homeRepository,
@@ -54,6 +54,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
        _secureStorage = secureStorage,
        _driverRealtimeService = driverRealtimeService,
        _locationService = locationService ?? LocationService(),
+       _walletRepository = walletRepository,
        super(const HomeState()) {
     on<HomeLoadRequested>(_onHomeLoadRequested);
     on<HomeStopListening>(_onHomeStopListening);
@@ -78,6 +79,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<RespondToOrderRequest>(_onRespondToOrderRequest);
     on<RealtimeOrderStatusReceived>(_onRealtimeOrderStatusReceived);
     on<RealtimeOrderRequestReceived>(_onRealtimeOrderRequestReceived);
+    on<LoadWalletRequested>(_onLoadWalletRequested);
+    on<LoadStatsRequested>(_onLoadStatsRequested);
   }
 
   Future<String> _getDriverId() async {
@@ -93,7 +96,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     _orderRequestSub?.cancel();
     _orderStatusSub?.cancel();
     _realtimeConnectionSub?.cancel();
-    _stopAvailableOrdersPolling();
     _profileSub = null;
     _activeOrderSub = null;
     _recentOrdersSub = null;
@@ -115,6 +117,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     _locationSub =
         Geolocator.getPositionStream(locationSettings: locationSettings).listen(
           (position) async {
+            if (!isClosed && !state.isOnline) return;
             try {
               await _driverRepository.updateDriverLocation(
                 position.latitude,
@@ -124,17 +127,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
               );
             } catch (e) {
               debugPrint('[HomeBloc] Location stream update error: $e');
-              // Retry once after a short delay
-              try {
-                await Future.delayed(const Duration(seconds: 3));
-                await _driverRepository.updateDriverLocation(
-                  position.latitude,
-                  position.longitude,
-                  heading: position.heading,
-                  speed: position.speed,
-                );
-              } catch (e2) {
-                debugPrint('[HomeBloc] Location stream retry failed: $e2');
+              if (!isClosed && state.isOnline) {
+                try {
+                  await Future.delayed(const Duration(seconds: 3));
+                  await _driverRepository.updateDriverLocation(
+                    position.latitude,
+                    position.longitude,
+                    heading: position.heading,
+                    speed: position.speed,
+                  );
+                } catch (e2) {
+                  debugPrint('[HomeBloc] Location stream retry failed: $e2');
+                }
               }
             }
           },
@@ -143,7 +147,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           },
         );
 
-    _locationTimer = Timer.periodic(const Duration(seconds: 25), (_) async {
+    _locationTimer = Timer.periodic(const Duration(seconds: 15), (_) async {
       if (!isClosed && state.isOnline) {
         try {
           final (position, _) = await _locationService.getCurrentPosition();
@@ -187,7 +191,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeLoadRequested event,
     Emitter<HomeState> emit,
   ) async {
-    emit(state.copyWith(status: HomeStatus.loading));
+    if (event.resetStreams) {
+      emit(state.copyWith(status: HomeStatus.loading));
+    }
 
     final driverId = await _getDriverId();
     if (driverId.isEmpty) {
@@ -230,6 +236,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // });
 
       await _connectRealtime();
+      add(const LoadWalletRequested());
+      add(const LoadStatsRequested());
     } else {
       debugPrint(
         '[HomeBloc] Skipping stream reset for HomeLoadRequested(resetStreams: false)',
@@ -478,8 +486,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(isAcceptingOrder: true));
 
     try {
-      await _orderRepository.acceptOrder(driverId, event.orderId);
-      emit(state.copyWith(isAcceptingOrder: false));
+      final order = await _orderRepository.acceptOrder(driverId, event.orderId);
+      emit(state.copyWith(
+        isAcceptingOrder: false,
+        activeOrder: order,
+      ));
     } on AuthFailure catch (_) {
       _handleAuthFailure(emit);
     } catch (e) {
@@ -507,7 +518,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         event.orderId,
         AppConstants.orderStatusDelivered,
       );
-      emit(state.copyWith(isUpdatingStatus: false));
+      emit(state.copyWith(
+        isUpdatingStatus: false,
+        clearActiveOrder: true,
+      ));
+      add(const LoadWalletRequested());
+      add(const LoadStatsRequested());
     } on AuthFailure catch (_) {
       _handleAuthFailure(emit);
     } catch (e) {
@@ -530,12 +546,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(isUpdatingStatus: true));
 
     try {
-      await _orderRepository.updateOrderStatus(
+      final order = await _orderRepository.updateOrderStatus(
         driverId,
         event.orderId,
         AppConstants.orderStatusDelivering,
       );
-      emit(state.copyWith(isUpdatingStatus: false));
+      emit(state.copyWith(
+        isUpdatingStatus: false,
+        activeOrder: order,
+      ));
     } on AuthFailure catch (_) {
       _handleAuthFailure(emit);
     } catch (e) {
@@ -563,7 +582,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         event.orderId,
         AppConstants.orderStatusCancelled,
       );
-      emit(state.copyWith(isUpdatingStatus: false));
+      emit(state.copyWith(
+        isUpdatingStatus: false,
+        clearActiveOrder: true,
+      ));
     } on AuthFailure catch (_) {
       _handleAuthFailure(emit);
     } catch (e) {
@@ -578,6 +600,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   void _onProfileUpdated(ProfileUpdated event, Emitter<HomeState> emit) {
     final isDriverOnline = event.profile?.isActive ?? false;
+
+    if (isDriverOnline == state.isOnline &&
+        event.profile == state.driverProfile) {
+      return;
+    }
 
     if (isDriverOnline) {
       _startLocationUpdates();
@@ -614,11 +641,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(
       state.copyWith(
         todayStats: TodayStats(
-          ordersToday: data['ordersToday'] ?? 0,
-          earningsToday: (data['earningsToday'] ?? 0.0).toDouble(),
+          ordersToday: data['ordersToday'] ?? data['todayTrips'] ?? 0,
+          earningsToday: (data['earningsToday'] ?? data['todayEarnings'] ?? 0.0).toDouble(),
           balance: (data['balance'] ?? 0.0).toDouble(),
-          totalOrders: data['totalOrders'] ?? 0,
-          rating: (data['rating'] ?? 0.0).toDouble(),
+          totalOrders: data['totalOrders'] ?? data['totalTrips'] ?? 0,
+          rating: (data['rating'] ?? data['averageRating'] ?? 0.0).toDouble(),
         ),
       ),
     );
@@ -626,6 +653,30 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   void _onWalletUpdated(WalletUpdated event, Emitter<HomeState> emit) {
     emit(state.copyWith(wallet: event.wallet));
+  }
+
+  Future<void> _onLoadWalletRequested(
+    LoadWalletRequested event,
+    Emitter<HomeState> emit,
+  ) async {
+    try {
+      final wallet = await _walletRepository.getWallet();
+      emit(state.copyWith(wallet: wallet));
+    } catch (e) {
+      debugPrint('[HomeBloc] Failed to load wallet: $e');
+    }
+  }
+
+  Future<void> _onLoadStatsRequested(
+    LoadStatsRequested event,
+    Emitter<HomeState> emit,
+  ) async {
+    try {
+      final data = await _homeRepository.getDriverStats();
+      add(StatsUpdated(data));
+    } catch (e) {
+      debugPrint('[HomeBloc] Failed to load stats: $e');
+    }
   }
 
   Future<void> _onForegroundFcmOrderSignalReceived(
@@ -745,7 +796,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           pendingRequest:
               remainingRequests.isEmpty ? null : remainingRequests.first,
           clearPendingRequest: remainingRequests.isEmpty,
-          errorMessage: payload.message ?? 'Khong the xu ly yeu cau don hang.',
+          errorMessage: payload.message ?? 'Không thể xử lý yêu cầu đơn hàng.',
           clearSuccessMessage: true,
           isAcceptingOrder: false,
         ),
@@ -830,7 +881,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(
         state.copyWith(
           errorMessage:
-              'Khong the xu ly yeu cau don hang nay vi thieu requestId hop le.',
+              'Không thể xử lý yêu cầu đơn hàng này vì thiếu requestId hợp lệ.',
         ),
       );
       return;
@@ -849,12 +900,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         pendingRequest:
             updatedRequests.isEmpty ? null : updatedRequests.first,
         clearPendingRequest: updatedRequests.isEmpty,
-        clearErrorMessage: true,
-      ),
-    );
-
-    emit(
-      state.copyWith(
         isAcceptingOrder: event.action == 'accept',
         clearErrorMessage: true,
         clearSuccessMessage: true,
@@ -899,14 +944,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           ),
         );
         if (event.action == 'accept') {
-          add(const HomeLoadRequested());
+          add(const HomeLoadRequested(resetStreams: false));
         }
       } catch (e) {
         emit(
           state.copyWith(
             isAcceptingOrder: false,
             clearSuccessMessage: true,
-            errorMessage: 'Khong the xu ly yeu cau: $e',
+            errorMessage: 'Không thể xử lý yêu cầu: $e',
           ),
         );
       }
@@ -926,7 +971,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     if (_orderRequestSub != null && _orderStatusSub != null) {
       if (_driverRealtimeService.isConnected) {
         debugPrint('[HomeBloc] Realtime already connected, keeping existing subscriptions');
-        _startAvailableOrdersPolling();
         return;
       }
     } else {
@@ -944,28 +988,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     await _driverRealtimeService.connect();
     debugPrint('[HomeBloc] Realtime connect() completed');
-    _startAvailableOrdersPolling();
   }
 
   void _disconnectRealtime() {
     unawaited(_driverRealtimeService.disconnect());
-    _stopAvailableOrdersPolling();
     debugPrint('[HomeBloc] Realtime disconnected');
-  }
-
-
-  void _startAvailableOrdersPolling() {
-    if (_availableOrdersPollingTimer != null) return;
-
-    _availableOrdersPollingTimer = Timer.periodic(
-      const Duration(seconds: 10),
-      (_) => add(const HomeLoadRequested()),
-    );
-  }
-
-  void _stopAvailableOrdersPolling() {
-    _availableOrdersPollingTimer?.cancel();
-    _availableOrdersPollingTimer = null;
   }
 
   @override

@@ -1,11 +1,11 @@
 {
-    "name": "fe_food_go_driver",
-    "short_name": "fe_food_go_driver",
+    "name": "Food Go Driver",
+    "short_name": "Food Go",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FFFFFF",
+    "description": "Food Go Driver - Food delivery driver app.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -39,11 +39,11 @@ class _RecentOrdersListState extends State<RecentOrdersList> {
   List<Order> _filteredOrders() {
     switch (_selectedFilter) {
       case 1:
-        return widget.orders.where((o) => o.status == 2).toList();
+        return widget.orders.where((o) => o.statusCode == 'DELIVERING').toList();
       case 2:
-        return widget.orders.where((o) => o.status == 3).toList();
+        return widget.orders.where((o) => o.statusCode == 'COMPLETED').toList();
       case 3:
-        return widget.orders.where((o) => o.status == 4).toList();
+        return widget.orders.where((o) => o.statusCode == 'CANCELLED').toList();
       default:
         return widget.orders;
     }

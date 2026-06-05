@@ -22,37 +22,52 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.');
   }
 
-  String _statusLabel(int status, AppLocalizations l10n) {
-    switch (status) {
-      case 0:
+  String _statusLabel(AppLocalizations l10n) {
+    switch (widget.order.statusCode) {
+      case 'PENDING_STORE_CONFIRMATION':
         return l10n.waitingForOrder;
-      case 1:
-        return l10n.pickedUp;
-      case 2:
+      case 'WAITING_DRIVER':
+        return l10n.pickup;
+      case 'DELIVERING':
         return l10n.deliveringNow;
-      case 3:
+      case 'COMPLETED':
         return l10n.completed;
-      case 4:
+      case 'CANCELLED':
         return l10n.cancelled;
       default:
-        return '';
+        return widget.order.statusDescription ?? '';
     }
   }
 
-  Color _statusColor(int status) {
-    switch (status) {
-      case 0:
+  Color _statusColor() {
+    switch (widget.order.statusCode) {
+      case 'PENDING_STORE_CONFIRMATION':
         return AppColors.warning;
-      case 1:
+      case 'WAITING_DRIVER':
         return AppColors.info;
-      case 2:
+      case 'DELIVERING':
         return AppColors.primaryLight;
-      case 3:
+      case 'COMPLETED':
         return AppColors.success;
-      case 4:
+      case 'CANCELLED':
         return AppColors.errorLight;
       default:
         return AppColors.outlineLight;
+    }
+  }
+
+  String _paymentMethodLabel(int paymentMethod) {
+    switch (paymentMethod) {
+      case 1:
+        return 'Tien mat (COD)';
+      case 2:
+        return 'MoMo';
+      case 3:
+        return 'ZaloPay';
+      case 4:
+        return 'VNPay';
+      default:
+        return 'Khong xac dinh';
     }
   }
 
@@ -79,11 +94,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
+  String _hideName(String name) {
+    if (name.length <= 2) return name;
+    return '${name[0]}${'*' * (name.length - 2)}${name[name.length - 1]}';
+  }
+
+  String _formatDateTime(DateTime dt) {
+    return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
     final primaryColor = isDark ? AppColors.primaryDark : AppColors.primaryLight;
+    final statusColor = _statusColor();
 
     return Scaffold(
       appBar: AppBar(
@@ -93,14 +118,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: _statusColor(widget.order.status).withValues(alpha: 0.2),
+              color: statusColor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Center(
               child: Text(
-                _statusLabel(widget.order.status, l10n),
+                _statusLabel(l10n),
                 style: TextStyle(
-                  color: _statusColor(widget.order.status),
+                  color: statusColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -203,7 +228,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () => _makeCall(widget.order.displayRecipientPhone),
                     icon: const Icon(Icons.phone, size: 18),
                     label: Text(l10n.callReceiver),
                     style: OutlinedButton.styleFrom(
@@ -225,7 +250,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     Color primaryColor,
     AppLocalizations l10n,
   ) {
-    final hiddenName = _hideName(widget.order.receiverName ?? 'Khach hang');
+    final displayName = widget.order.displayRecipientName;
+    final hiddenName = _hideName(displayName);
 
     return Card(
       elevation: 2,
@@ -258,14 +284,62 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           color: isDark ? AppColors.onSurfaceDark : AppColors.onSurfaceLight,
                         ),
                       ),
+                      if (widget.order.displayRecipientPhone != null)
+                        GestureDetector(
+                          onTap: () => _copyToClipboard(widget.order.displayRecipientPhone!),
+                          child: Text(
+                            widget.order.displayRecipientPhone!,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.info,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.phone, color: AppColors.success),
+                  onPressed: () => _makeCall(widget.order.displayRecipientPhone),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.home, color: AppColors.warning),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        widget.order.deliveryAddress,
+                        'Dia chi giao hang',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                      ),
+                      GestureDetector(
+                        onTap: () => _copyToClipboard(widget.order.deliveryAddress),
+                        child: Text(
+                          widget.order.deliveryAddress,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? AppColors.onSurfaceDark : AppColors.onSurfaceLight,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -289,7 +363,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _makeCall(widget.order.receiverPhone),
+                    onPressed: () => _makeCall(widget.order.displayRecipientPhone),
                     icon: const Icon(Icons.phone, size: 18),
                     label: Text(l10n.callReceiver),
                     style: OutlinedButton.styleFrom(
@@ -401,28 +475,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ],
               );
             }),
-            const Divider(thickness: 2),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.totalAmount,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: isDark ? AppColors.onSurfaceDark : AppColors.onSurfaceLight,
-                  ),
-                ),
-                Text(
-                  '${_formatCurrency(widget.order.totalAmount)} VND',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: primaryColor,
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
@@ -460,21 +512,35 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(widget.order.paymentMethod),
+                Text(
+                  _paymentMethodLabel(widget.order.paymentMethod),
+                  style: TextStyle(
+                    color: isDark ? AppColors.onSurfaceDark : AppColors.onSurfaceLight,
+                  ),
+                ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: AppColors.success.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text(
-                    'Da thanh toan',
-                    style: TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.bold),
+                  child: Text(
+                    widget.order.paymentStatus == 2 ? 'Da thanh toan' : 'Chua thanh toan',
+                    style: const TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
+            if (widget.order.itemsSubtotal > 0 || widget.order.optionsSubtotal > 0) ...[
+              _paymentRow('Tien mon', widget.order.itemsSubtotal, isDark),
+              if (widget.order.optionsSubtotal > 0)
+                _paymentRow('Tien topping', widget.order.optionsSubtotal, isDark),
+              if (widget.order.discountAmount > 0)
+                _paymentRow('Giam gia', -widget.order.discountAmount, isDark, isDiscount: true),
+              _paymentRow('Phi giao hang', widget.order.deliveryFee, isDark),
+              const Divider(),
+            ],
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -482,11 +548,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   l10n.homeDeliveryFee,
                   style: TextStyle(
                     fontSize: 14,
-                    color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? AppColors.onSurfaceDark : AppColors.onSurfaceLight,
                   ),
                 ),
                 Text(
-                  '${_formatCurrency(widget.order.deliveryFee)} VND',
+                  '${_formatCurrency(widget.order.driverCollectAmount)} VND',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -518,13 +585,38 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
+  Widget _paymentRow(String label, double amount, bool isDark, {bool isDiscount = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight,
+            ),
+          ),
+          Text(
+            '${isDiscount ? '-' : ''}${_formatCurrency(amount.abs())} VND',
+            style: TextStyle(
+              fontSize: 13,
+              color: isDiscount
+                  ? AppColors.success
+                  : (isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSection5OrderInfo(
     bool isDark,
     Color primaryColor,
     AppLocalizations l10n,
   ) {
-    final orderCode = widget.order.code ?? widget.order.id.substring(0, 6).toUpperCase();
-
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -536,7 +628,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  orderCode,
+                  widget.order.orderCode.isNotEmpty
+                      ? widget.order.orderCode
+                      : widget.order.id.substring(0, 6.clamp(0, widget.order.id.length)).toUpperCase(),
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -554,6 +648,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight,
               ),
             ),
+            if (widget.order.distance != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                '${widget.order.distance!.toStringAsFixed(1)} km',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -567,17 +671,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   ) {
     final bloc = context.read<HomeBloc>();
 
-    switch (widget.order.status) {
-      case 0:
+    switch (widget.order.statusCode) {
+      case 'PENDING_STORE_CONFIRMATION':
         return _buildStatus0Buttons(l10n);
-      case 1:
+      case 'WAITING_DRIVER':
         return _buildStatus1Buttons(bloc, l10n);
-      case 2:
+      case 'DELIVERING':
         return _buildStatus2Buttons(bloc, isDark, primaryColor, l10n);
-      case 3:
-      case 4:
+      case 'COMPLETED':
+      case 'CANCELLED':
+        return _buildDisabledButton(_statusLabel(l10n));
       default:
-        return _buildDisabledButton(_statusLabel(widget.order.status, l10n));
+        return _buildDisabledButton(widget.order.statusDescription ?? l10n.status);
     }
   }
 
@@ -748,26 +853,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   title: Text(issue),
                   onTap: () {
                     Navigator.of(ctx).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${l10n.reportIssue}: $issue'),
-                        backgroundColor: AppColors.warning,
-                      ),
-                    );
                   },
                 )),
           ],
         ),
       ),
     );
-  }
-
-  String _hideName(String name) {
-    if (name.length <= 2) return '${name[0]}***';
-    return '${name[0]}${'*' * (name.length > 6 ? 4 : name.length - 2)}${name[name.length - 1]}';
-  }
-
-  String _formatDateTime(DateTime dt) {
-    return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 }

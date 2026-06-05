@@ -12,6 +12,8 @@ class AppConstants {
 
   // API Base URL
   static const String baseApiUrl = 'https://be-foodgo.canluaz.io.vn/api';
+  // static const String baseApiUrl = 'http://localhost:8086/api';
+
 
   // API Endpoints
   static const String driverStatusEndpoint = '/drivers/status';
@@ -24,13 +26,15 @@ class AppConstants {
   static const int offlineCheckIntervalSeconds = 30;
 
   // Order status
-  static const int orderStatusPending = 0;      // Chờ xác nhận
-  static const int orderStatusPreparing = 1;    // Đã lấy hàng / Đang chuẩn bị
-  static const int orderStatusDelivering = 2;   // Đang giao
-  static const int orderStatusDelivered = 3;     // Hoàn thành
-  static const int orderStatusCancelled = 4;     // Đã hủy
+  static const int orderStatusPending = 0; // Chờ xác nhận
+  static const int orderStatusPreparing = 1; // Đã lấy hàng / Đang chuẩn bị
+  static const int orderStatusDelivering = 2; // Đang giao
+  static const int orderStatusDelivered = 3; // Hoàn thành
+  static const int orderStatusCancelled = 4; // Đã hủy
 
   // Driver availability status
-  static const int driverAvailableWaiting = 1;   // Online / Chờ đơn (isActive=true, isAvailable=true)
-  static const int driverBusyDelivering = 2;     // Nhận đơn / Đang giao (isActive=true, isAvailable=false)
+  static const int driverAvailableWaiting =
+      1; // Online / Chờ đơn (isActive=true, isAvailable=true)
+  static const int driverBusyDelivering =
+      2; // Nhận đơn / Đang giao (isActive=true, isAvailable=false)
 }

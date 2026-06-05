@@ -29,11 +29,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
   List<dynamic> _filteredOrders(List<dynamic> orders) {
     switch (_selectedFilter) {
       case 1:
-        return orders.where((o) => o.status == 2).toList();
+        return orders.where((o) => o.statusCode == 'DELIVERING').toList();
       case 2:
-        return orders.where((o) => o.status == 3).toList();
+        return orders.where((o) => o.statusCode == 'COMPLETED').toList();
       case 3:
-        return orders.where((o) => o.status == 4).toList();
+        return orders.where((o) => o.statusCode == 'CANCELLED').toList();
       default:
         return orders;
     }

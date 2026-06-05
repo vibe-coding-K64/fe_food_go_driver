@@ -23,6 +23,8 @@ import 'bloc/locale/locale_event.dart';
 import 'bloc/locale/locale_state.dart';
 import '../../../core/theme/app_theme.dart';
 
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -36,12 +38,16 @@ class App extends StatelessWidget {
         BlocProvider<LocaleBloc>(
           create: (_) => getIt<LocaleBloc>()..add(const LoadLocale()),
         ),
+        BlocProvider<HomeBloc>(
+          create: (_) => getIt<HomeBloc>(),
+        ),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
           return BlocBuilder<LocaleBloc, LocaleState>(
             builder: (context, localeState) {
               return MaterialApp(
+                navigatorKey: appNavigatorKey,
                 title: 'Food Go Driver',
                 debugShowCheckedModeBanner: false,
                 theme: AppTheme.light,
@@ -97,10 +103,7 @@ class _AuthGateState extends State<_AuthGate> {
         }
 
         if (state is SessionValid || state is LoginSuccess) {
-          return BlocProvider<HomeBloc>(
-            create: (_) => getIt<HomeBloc>(),
-            child: const _MainShell(),
-          );
+          return const _MainShell();
         }
 
         return const LoginPageWrapper();

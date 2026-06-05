@@ -87,6 +87,28 @@ class _HomePageState extends State<HomePage> {
           _showOrderRequestModal(context, state);
         }
 
+        if (state.successMessage != null && state.successMessage!.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.successMessage!),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              action: SnackBarAction(
+                label: 'Dismiss',
+                textColor: Colors.white,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  context.read<HomeBloc>().add(const ClearSuccessMessage());
+                },
+              ),
+            ),
+          );
+        }
+
         if (state.errorMessage != null &&
             state.errorMessage!.isNotEmpty &&
             !state.needsLocationPermission) {
@@ -260,13 +282,32 @@ class _HomePageState extends State<HomePage> {
 
   void _showOrderRequestModal(BuildContext context, HomeState state) {
     final request = state.pendingRequest;
-    if (request == null || _isModalShowing) return;
+    if (request == null) {
+      debugPrint('[HomePage] Skipping order request modal because pendingRequest is null');
+      return;
+    }
+    if (_isModalShowing) {
+      debugPrint(
+        '[HomePage] Skipping order request modal because another modal is already showing - orderId=${request.orderId}, requestId=${request.id}',
+      );
+      return;
+    }
 
     final homeBloc = context.read<HomeBloc>();
+    debugPrint(
+      '[HomePage] Scheduling order request modal - orderId=${request.orderId}, requestId=${request.id}, source=${request.source}, expiresAt=${request.expiresAt}',
+    );
     setState(() => _isModalShowing = true);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        debugPrint('[HomePage] Context unmounted before showing order request modal');
+        if (mounted) setState(() => _isModalShowing = false);
+        return;
+      }
+      debugPrint(
+        '[HomePage] Showing order request modal - orderId=${request.orderId}, requestId=${request.id}',
+      );
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -278,6 +319,9 @@ class _HomePageState extends State<HomePage> {
           child: OrderRequestModal(request: request, homeBloc: homeBloc),
         ),
       ).then((_) {
+        debugPrint(
+          '[HomePage] Order request modal closed - orderId=${request.orderId}, requestId=${request.id}',
+        );
         if (mounted) setState(() => _isModalShowing = false);
       });
     });

@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../models/driver_realtime_payloads.dart';
+
 sealed class HomeEvent extends Equatable {
   const HomeEvent();
 
@@ -42,6 +44,10 @@ final class SetDriverOfflineRequested extends HomeEvent {
 
 final class ClearErrorMessage extends HomeEvent {
   const ClearErrorMessage();
+}
+
+final class ClearSuccessMessage extends HomeEvent {
+  const ClearSuccessMessage();
 }
 
 final class ClearLocationPermissionRequest extends HomeEvent {
@@ -114,9 +120,23 @@ class WalletUpdated extends HomeEvent {
   const WalletUpdated(this.wallet);
 }
 
-final class OrderRequestsUpdated extends HomeEvent {
-  final List<dynamic> requests;
-  const OrderRequestsUpdated(this.requests);
+final class ForegroundFcmOrderSignalReceived extends HomeEvent {
+  final String orderId;
+  final String? requestId;
+
+  const ForegroundFcmOrderSignalReceived(this.orderId, {this.requestId});
+
+  @override
+  List<Object?> get props => [orderId, requestId];
+}
+
+final class DismissOrderRequestPrompt extends HomeEvent {
+  final String orderId;
+
+  const DismissOrderRequestPrompt(this.orderId);
+
+  @override
+  List<Object?> get props => [orderId];
 }
 
 final class RespondToOrderRequest extends HomeEvent {
@@ -130,94 +150,27 @@ final class RespondToOrderRequest extends HomeEvent {
     required this.action,
   });
 
+  bool get hasValidRequestId => requestId.isNotEmpty;
+
   @override
   List<Object?> get props => [requestId, orderId, action];
 }
 
-final class WsOrderRequestReceived extends HomeEvent {
-  final String orderId;
-  final String? orderCode;
-  final String? message;
-  final String? storeName;
-  final String? storeAddress;
-  final double? storeLat;
-  final double? storeLng;
-  final String? deliveryAddress;
-  final String? receiverName;
-  final String? receiverPhone;
-  final double? deliveryLat;
-  final double? deliveryLng;
-  final double? deliveryHeading;
-  final double? deliveryFee;
-  final double? totalAmount;
-  final double? finalAmount;
-  final String? paymentMethod;
-  final String? note;
-  final double? estimatedEarning;
-  final int? expiresAt;
-  final int? requestType;
+final class RealtimeOrderStatusReceived extends HomeEvent {
+  final DriverRealtimeOrderStatus payload;
 
-  const WsOrderRequestReceived({
-    required this.orderId,
-    this.orderCode,
-    this.message,
-    this.storeName,
-    this.storeAddress,
-    this.storeLat,
-    this.storeLng,
-    this.deliveryAddress,
-    this.receiverName,
-    this.receiverPhone,
-    this.deliveryLat,
-    this.deliveryLng,
-    this.deliveryHeading,
-    this.deliveryFee,
-    this.totalAmount,
-    this.finalAmount,
-    this.paymentMethod,
-    this.note,
-    this.estimatedEarning,
-    this.expiresAt,
-    this.requestType,
-  });
+  const RealtimeOrderStatusReceived(this.payload);
 
   @override
-  List<Object?> get props => [
-        orderId,
-        orderCode,
-        message,
-        storeName,
-        storeAddress,
-        storeLat,
-        storeLng,
-        deliveryAddress,
-        receiverName,
-        receiverPhone,
-        deliveryLat,
-        deliveryLng,
-        deliveryHeading,
-        deliveryFee,
-        totalAmount,
-        finalAmount,
-        paymentMethod,
-        note,
-        estimatedEarning,
-        expiresAt,
-        requestType,
-      ];
+  List<Object?> get props => [payload];
 }
 
-final class WsOrderStatusReceived extends HomeEvent {
-  final String type;
-  final String? orderId;
-  final String? message;
+final class RealtimeOrderRequestReceived extends HomeEvent {
+  final DriverRealtimeOrderRequest payload;
 
-  const WsOrderStatusReceived({
-    required this.type,
-    this.orderId,
-    this.message,
-  });
+  const RealtimeOrderRequestReceived(this.payload);
 
   @override
-  List<Object?> get props => [type, orderId, message];
+  List<Object?> get props => [payload];
 }
+

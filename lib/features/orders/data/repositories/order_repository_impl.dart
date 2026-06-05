@@ -1,18 +1,11 @@
 import '../../domain/entities/order.dart';
 import '../../domain/repositories/order_repository.dart';
-import '../../data/models/order_request_model.dart';
 import '../datasources/order_remote_datasource.dart';
-import '../datasources/order_request_firebase_datasource.dart';
 
 class OrderRepositoryImpl implements OrderRepository {
   final OrderRemoteDataSource _remoteDataSource;
-  final OrderRequestFirebaseDataSource _requestFirebaseDataSource;
 
-  OrderRepositoryImpl(
-    this._remoteDataSource, {
-    OrderRequestFirebaseDataSource? requestFirebaseDataSource,
-  }) : _requestFirebaseDataSource =
-           requestFirebaseDataSource ?? OrderRequestFirebaseDataSource();
+  OrderRepositoryImpl(this._remoteDataSource);
 
   @override
   Stream<List<Order>> getAvailableOrders() async* {
@@ -54,17 +47,22 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Future<void> acceptOrder(String driverId, String orderId) async {
-    await _remoteDataSource.acceptOrderApi(driverId, orderId);
+  Future<Order?> getOrderById(String orderId) async {
+    return _remoteDataSource.getOrderById(orderId);
   }
 
   @override
-  Future<void> updateOrderStatus(
+  Future<Order?> acceptOrder(String driverId, String orderId) async {
+    return _remoteDataSource.acceptOrderApi(driverId, orderId);
+  }
+
+  @override
+  Future<Order?> updateOrderStatus(
     String driverId,
     String orderId,
     int status,
   ) async {
-    await _remoteDataSource.updateOrderStatusApi(driverId, orderId, status);
+    return _remoteDataSource.updateOrderStatusApi(driverId, orderId, status);
   }
 
   @override
@@ -73,17 +71,11 @@ class OrderRepositoryImpl implements OrderRepository {
   }
 
   @override
-  Stream<List<OrderRequestModel>> watchOrderRequests(String driverId) {
-    return _requestFirebaseDataSource.watchOrderRequests(driverId);
-  }
-
-  @override
-  Future<void> respondOrder(String orderId, String action) async {
-    await _remoteDataSource.respondOrderApi(orderId, action);
-  }
-
-  @override
-  Future<void> deleteOrderRequest(String driverId, String requestId) async {
-    await _requestFirebaseDataSource.deleteOrderRequest(driverId, requestId);
+  Future<dynamic> respondOrder(
+    String orderId,
+    String action,
+    String requestId,
+  ) async {
+    return _remoteDataSource.respondOrderApi(orderId, action, requestId);
   }
 }

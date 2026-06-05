@@ -15,6 +15,9 @@ class OrderRequestModel extends Equatable {
   final int status;
   final DateTime createdAt;
   final OrderModel? orderData;
+  final String? source;
+  final DateTime? expiresAt;
+  final int? expiresInSeconds;
 
   const OrderRequestModel({
     required this.id,
@@ -23,6 +26,9 @@ class OrderRequestModel extends Equatable {
     required this.status,
     required this.createdAt,
     this.orderData,
+    this.source,
+    this.expiresAt,
+    this.expiresInSeconds,
   });
 
   factory OrderRequestModel.fromFirestore(String docId, Map<String, dynamic> data) {
@@ -38,6 +44,9 @@ class OrderRequestModel extends Equatable {
       status: data['status'] ?? 0,
       createdAt: _parseDateTime(data['createdAt']),
       orderData: order,
+      source: 'firestore',
+      expiresAt: _parseNullableDateTime(data['expiresAt']),
+      expiresInSeconds: _parseNullableInt(data['expiresInSeconds']),
     );
   }
 
@@ -52,6 +61,27 @@ class OrderRequestModel extends Equatable {
       }
     }
     return DateTime.now();
+  }
+
+  static DateTime? _parseNullableDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  static int? _parseNullableInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   OrderRequestStatus get requestStatus {
@@ -71,6 +101,46 @@ class OrderRequestModel extends Equatable {
 
   bool get isPending => requestStatus == OrderRequestStatus.pending;
 
+  OrderRequestModel copyWith({
+    String? id,
+    String? orderId,
+    String? driverId,
+    int? status,
+    DateTime? createdAt,
+    OrderModel? orderData,
+    bool clearOrderData = false,
+    String? source,
+    bool clearSource = false,
+    DateTime? expiresAt,
+    bool clearExpiresAt = false,
+    int? expiresInSeconds,
+    bool clearExpiresInSeconds = false,
+  }) {
+    return OrderRequestModel(
+      id: id ?? this.id,
+      orderId: orderId ?? this.orderId,
+      driverId: driverId ?? this.driverId,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      orderData: clearOrderData ? null : (orderData ?? this.orderData),
+      source: clearSource ? null : (source ?? this.source),
+      expiresAt: clearExpiresAt ? null : (expiresAt ?? this.expiresAt),
+      expiresInSeconds: clearExpiresInSeconds
+          ? null
+          : (expiresInSeconds ?? this.expiresInSeconds),
+    );
+  }
+
   @override
-  List<Object?> get props => [id, orderId, driverId, status, createdAt];
+  List<Object?> get props => [
+    id,
+    orderId,
+    driverId,
+    status,
+    createdAt,
+    orderData,
+    source,
+    expiresAt,
+    expiresInSeconds,
+  ];
 }

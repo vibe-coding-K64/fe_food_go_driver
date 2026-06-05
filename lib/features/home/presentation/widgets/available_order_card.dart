@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../pages/available_orders_screen.dart';
+import '../../../orders/data/models/order_model.dart';
 
 class AvailableOrderCard extends StatelessWidget {
-  final AvailableOrder order;
+  final OrderModel order;
   final String Function(double) formatCurrency;
   final VoidCallback onAccept;
   final VoidCallback onDecline;

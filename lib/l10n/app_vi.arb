@@ -1,0 +1,483 @@
+{
+  "@@locale": "vi",
+  "login": "Đăng nhập",
+  "homeTitle": "Trang chủ",
+  "driverGreeting": "Xin chào, {name}",
+  "@driverGreeting": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "noOrdersAvailable": "Chưa có đơn hàng nào quanh bạn",
+  "noOrdersAvailableDescription": "Hiện chưa có đơn giao hàng nào trong khu vực của bạn. Hãy trực tuyến để nhận đơn mới!",
+  "loadingOrders": "Đang tải đơn hàng...",
+  "acceptingOrder": "Đang nhận đơn...",
+  "orderAccepted": "Đã nhận đơn!",
+  "acceptOrderFailed": "Không thể nhận đơn. Vui lòng thử lại.",
+  "km": "{value} km",
+  "@km": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "currency": "{amount} VND",
+  "@currency": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "toggleOnline": "Bật/tắt trạng thái trực tuyến",
+  "receivingOrders": "Đang nhận đơn",
+  "switchingStatus": "Đang chuyển...",
+  "acceptOrder": "Nhận đơn",
+  "status": "Trạng thái",
+  "wallet": "Ví",
+  "settings": "Settings",
+  "home": "Trang chủ",
+  "orders": "Đơn hàng",
+  "profile": "Hồ sơ",
+  "logout": "Đăng xuất",
+  "language": "Ngôn ngữ",
+  "darkMode": "Chế độ tối",
+  "lightMode": "Chế độ sáng",
+  "orderDetails": "Chi tiết đơn hàng",
+  "pickup": "Lấy hàng",
+  "delivery": "Giao hàng",
+  "delivered": "Đã giao",
+  "cancelled": "Đã hủy",
+  "available": "Sẵn sàng",
+  "busy": "Bận",
+  "online": "Trực tuyến",
+  "offline": "Ngoại tuyến",
+  "welcomeDriver": "Chào tài xế!",
+  "emailLabel": "Email",
+  "passwordLabel": "Mật khẩu",
+  "emailRequired": "Email không được để trống",
+  "invalidEmail": "�ịa chỉ email không hợp lệ",
+  "passwordRequired": "Mật khẩu không được để trống",
+  "passwordTooShort": "Mật khẩu phải có ít nhất 6 ký tự",
+  "forgotPassword": "Quên mật khẩu?",
+  "loginButton": "Đăng nhập",
+  "registerPrompt": "Đã có tài khoản?",
+  "registerLink": "Đăng ký",
+  "totalOrders": "Tổng đơn hàng",
+  "rating": "Đánh giá",
+  "changeLanguage": "Đổi ngôn ngữ",
+  "english": "Tiếng Anh",
+  "vietnamese": "Tiếng Việt",
+  "accept": "Chấp nhận",
+  "reject": "Từ chối",
+  "customerName": "Tên khách hàng",
+  "pickupAddress": "Địa chỉ lấy hàng",
+  "deliveryAddress": "Địa chỉ giao hàng",
+  "distance": "Khoảng cách",
+  "estimatedTime": "Thời gian ước tính",
+  "orderAmount": "Giá trị đơn hàng",
+  "earning": "Thu nhập",
+  "call": "Gọi",
+  "navigate": "Điều hướng",
+  "complete": "Hoàn thành",
+  "splash": "Food Go Driver",
+  "registerTitle": "Đăng ký Tài xế",
+  "@registerTitle": {
+    "description": "Title of the registration page"
+  },
+  "registerSubtitle": "Trở thành tài xế Food Go",
+  "@registerSubtitle": {
+    "description": "Subtitle on the registration page"
+  },
+  "registerFullNameLabel": "Họ và Tên",
+  "@registerFullNameLabel": {
+    "description": "Label for full name field"
+  },
+  "registerFullNameHint": "Nhập họ và tên của bạn",
+  "@registerFullNameHint": {
+    "description": "Hint for full name field"
+  },
+  "registerFullNameRequired": "Họ và tên không được để trống",
+  "@registerFullNameRequired": {
+    "description": "Validation message for empty full name"
+  },
+  "registerFullNameTooShort": "Họ và tên phải có ít nhất 2 ký tự",
+  "@registerFullNameTooShort": {
+    "description": "Validation message for short full name"
+  },
+  "registerPhoneLabel": "Số Điện Thoại",
+  "@registerPhoneLabel": {
+    "description": "Label for phone number field"
+  },
+  "registerPhoneHint": "0xxx xxx xxx",
+  "@registerPhoneHint": {
+    "description": "Hint for phone number field"
+  },
+  "registerPhoneRequired": "Số điện thoại không được để trống",
+  "@registerPhoneRequired": {
+    "description": "Validation message for empty phone"
+  },
+  "registerInvalidPhone": "Số điện thoại Việt Nam không hợp lệ",
+  "@registerInvalidPhone": {
+    "description": "Validation message for invalid phone format"
+  },
+  "registerVehiclePlateLabel": "Biển Số Xe",
+  "@registerVehiclePlateLabel": {
+    "description": "Label for vehicle plate field"
+  },
+  "registerVehiclePlateHint": "VD: 51A-12345",
+  "@registerVehiclePlateHint": {
+    "description": "Hint for vehicle plate field"
+  },
+  "registerVehiclePlateRequired": "Biển số xe không được để trống",
+  "@registerVehiclePlateRequired": {
+    "description": "Validation message for empty vehicle plate"
+  },
+  "registerInvalidVehiclePlate": "Biển số xe không hợp lệ (VD: 51A-12345)",
+  "@registerInvalidVehiclePlate": {
+    "description": "Validation message for invalid vehicle plate format"
+  },
+  "registerDriverLicenseLabel": "Giấy Phép Lái Xe",
+  "@registerDriverLicenseLabel": {
+    "description": "Label for driver license field"
+  },
+  "registerDriverLicenseHint": "VD: A1-123456789",
+  "@registerDriverLicenseHint": {
+    "description": "Hint for driver license field"
+  },
+  "registerDriverLicenseRequired": "Giấy phép lái xe không được để trống",
+  "@registerDriverLicenseRequired": {
+    "description": "Validation message for empty driver license"
+  },
+  "registerDriverLicenseTooShort": "Giấy phép lái xe quá ngắn",
+  "@registerDriverLicenseTooShort": {
+    "description": "Validation message for short driver license"
+  },
+  "registerPasswordHint": "Tối thiểu 8 ký tự, có chữ in hoa và số",
+  "@registerPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "registerPasswordTooShort": "Mật khẩu phải có ít nhất 8 ký tự",
+  "@registerPasswordTooShort": {
+    "description": "Validation message for short password"
+  },
+  "registerPasswordNeedUppercase": "Mật khẩu phải chứa ít nhất 1 chữ in hoa",
+  "@registerPasswordNeedUppercase": {
+    "description": "Validation message for missing uppercase in password"
+  },
+  "registerPasswordNeedNumber": "Mật khẩu phải chứa ít nhất 1 chữ số",
+  "@registerPasswordNeedNumber": {
+    "description": "Validation message for missing number in password"
+  },
+  "registerPasswordStrength": "Yêu cầu về mật khẩu:",
+  "@registerPasswordStrength": {
+    "description": "Password strength section title"
+  },
+  "registerPasswordMinChars": "Ít nhất 8 ký tự",
+  "@registerPasswordMinChars": {
+    "description": "Password requirement: minimum chars"
+  },
+  "registerPasswordUppercase": "Ít nhất 1 chữ in hoa",
+  "@registerPasswordUppercase": {
+    "description": "Password requirement: uppercase"
+  },
+  "registerPasswordNumber": "Ít nhất 1 chữ số",
+  "@registerPasswordNumber": {
+    "description": "Password requirement: number"
+  },
+  "registerConfirmPasswordLabel": "Xác Nhận Mật Khẩu",
+  "@registerConfirmPasswordLabel": {
+    "description": "Label for confirm password field"
+  },
+  "registerConfirmPasswordHint": "Nhập lại mật khẩu",
+  "@registerConfirmPasswordHint": {
+    "description": "Hint for confirm password field"
+  },
+  "registerConfirmPasswordRequired": "Vui lòng xác nhận mật khẩu",
+  "@registerConfirmPasswordRequired": {
+    "description": "Validation message for empty confirm password"
+  },
+  "registerConfirmPasswordMismatch": "Mật khẩu không khớp",
+  "@registerConfirmPasswordMismatch": {
+    "description": "Validation message for password mismatch"
+  },
+  "registerButton": "Đăng ký",
+  "@registerButton": {
+    "description": "Register button text"
+  },
+  "registerSendingOtp": "Đang gửi mã xác minh...",
+  "@registerSendingOotp": {
+    "description": "Loading text when sending OTP"
+  },
+  "registerSuccess": "Đăng ký thành công!",
+  "@registerSuccess": {
+    "description": "Success message after registration"
+  },
+  "registerSuccessSubtitle": "Chào mừng bạn đến Food Go!",
+  "@registerSuccessSubtitle": {
+    "description": "Subtitle after successful registration"
+  },
+  "otpVerificationTitle": "Xác Minh Email",
+  "@otpVerificationTitle": {
+    "description": "Title of OTP verification dialog"
+  },
+  "otpEmailSent": "Chúng tôi đã gửi mã 6 chữ số đến\n{email}",
+  "@otpEmailSent": {
+    "placeholders": {
+      "email": {"type": "String"}
+    },
+    "description": "Message shown after OTP is sent"
+  },
+  "otpVerifyButton": "Xác minh",
+  "@otpVerifyButton": {
+    "description": "OTP verify button text"
+  },
+  "otpNoReceive": "Không nhận được mã? ",
+  "@otpNoReceive": {
+    "description": "Text before resend button"
+  },
+  "otpResendButton": "Gửi lại",
+  "@otpResendButton": {
+    "description": "OTP resend button text"
+  },
+  "otpChangeEmail": "Đổi địa chỉ email",
+  "@otpChangeEmail": {
+    "description": "Link to change email"
+  },
+  "otpEnterFullCode": "Vui lòng nhập đủ 6 chữ số",
+  "@otpEnterFullCode": {
+    "description": "Validation message for incomplete OTP"
+  },
+  "back": "Quay lại",
+  "@back": {
+    "description": "Back button tooltip"
+  },
+  "forgotPasswordTitle": "Quên Mật Khẩu",
+  "@forgotPasswordTitle": {
+    "description": "Title of forgot password page"
+  },
+  "forgotPasswordEmailRequired": "Email/SĐT không được để trống",
+  "@forgotPasswordEmailRequired": {
+    "description": "Validation message for empty email"
+  },
+  "forgotPasswordInvalidEmailOrPhone": "Email hoặc SĐT không hợp lệ",
+  "@forgotPasswordInvalidEmailOrPhone": {
+    "description": "Validation message for invalid email or phone"
+  },
+  "forgotPasswordStep1Title": "Tìm Tài Khoản",
+  "@forgotPasswordStep1Title": {
+    "description": "Title of step 1 - email input"
+  },
+  "forgotPasswordStep1Subtitle": "Nhập email hoặc số điện thoại đã đăng ký để nhận mã xác minh",
+  "@forgotPasswordStep1Subtitle": {
+    "description": "Subtitle of step 1"
+  },
+  "forgotPasswordEmailLabel": "Email hoặc Số Điện Thoại",
+  "@forgotPasswordEmailLabel": {
+    "description": "Label for email/phone field"
+  },
+  "forgotPasswordEmailHint": "driver@example.com hoặc 0xxx xxx xxx",
+  "@forgotPasswordEmailHint": {
+    "description": "Hint for email/phone field"
+  },
+  "forgotPasswordSendOtp": "Gửi mã OTP",
+  "@forgotPasswordSendOtp": {
+    "description": "Button text to send OTP"
+  },
+  "forgotPasswordStep2Title": "Nhập Mã Xác Minh",
+  "@forgotPasswordStep2Title": {
+    "description": "Title of step 2 - OTP input"
+  },
+  "forgotPasswordStep2Subtitle": "Chúng tôi đã gửi mã 6 chữ số đến\n{email}",
+  "@forgotPasswordStep2Subtitle": {
+    "placeholders": {
+      "email": {"type": "String"}
+    },
+    "description": "Subtitle of step 2"
+  },
+  "forgotPasswordCountdown": "Mã có hiệu lực trong",
+  "@forgotPasswordCountdown": {
+    "description": "Countdown label"
+  },
+  "forgotPasswordVerifyOtp": "Xác nhận",
+  "@forgotPasswordVerifyOtp": {
+    "description": "Button text to verify OTP"
+  },
+  "forgotPasswordNoReceive": "Không nhận được mã? ",
+  "@forgotPasswordNoReceive": {
+    "description": "Text before resend button"
+  },
+  "forgotPasswordResend": "Gửi lại",
+  "@forgotPasswordResend": {
+    "description": "Resend OTP button text"
+  },
+  "forgotPasswordStep3Title": "Đặt Mật Khẩu Mới",
+  "@forgotPasswordStep3Title": {
+    "description": "Title of step 3 - new password"
+  },
+  "forgotPasswordStep3Subtitle": "Nhập mật khẩu mới cho tài khoản của bạn",
+  "@forgotPasswordStep3Subtitle": {
+    "description": "Subtitle of step 3"
+  },
+  "forgotPasswordNewPasswordLabel": "Mật Khẩu Mới",
+  "@forgotPasswordNewPasswordLabel": {
+    "description": "Label for new password field"
+  },
+  "forgotPasswordNewPasswordHint": "Tối thiểu 6 ký tự",
+  "@forgotPasswordNewPasswordHint": {
+    "description": "Hint for new password field"
+  },
+  "forgotPasswordPasswordRequired": "Mật khẩu không được để trống",
+  "@forgotPasswordPasswordRequired": {
+    "description": "Validation for empty password"
+  },
+  "forgotPasswordPasswordTooShort": "Mật khẩu phải có ít nhất 6 ký tự",
+  "@forgotPasswordPasswordTooShort": {
+    "description": "Validation for short password"
+  },
+  "forgotPasswordConfirmPasswordLabel": "Xác Nhận Mật Khẩu",
+  "@forgotPasswordConfirmPasswordLabel": {
+    "description": "Label for confirm password field"
+  },
+  "forgotPasswordConfirmPasswordHint": "Nhập lại mật khẩu mới",
+  "@forgotPasswordConfirmPasswordHint": {
+    "description": "Hint for confirm password field"
+  },
+  "forgotPasswordConfirmRequired": "Vui lòng xác nhận mật khẩu",
+  "@forgotPasswordConfirmRequired": {
+    "description": "Validation for empty confirm password"
+  },
+  "forgotPasswordConfirmMismatch": "Mật khẩu không khớp",
+  "@forgotPasswordConfirmMismatch": {
+    "description": "Validation for password mismatch"
+  },
+  "forgotPasswordResetButton": "Đổi Mật Khẩu",
+  "@forgotPasswordResetButton": {
+    "description": "Button text to reset password"
+  },
+  "forgotPasswordSuccessTitle": "Đặt Lại Thành Công!",
+  "@forgotPasswordSuccessTitle": {
+    "description": "Title of success dialog"
+  },
+  "forgotPasswordSuccessMessage": "Mật khẩu của bạn đã được thay đổi thành công. Vui lòng đăng nhập lại.",
+  "@forgotPasswordSuccessMessage": {
+    "description": "Message of success dialog"
+  },
+  "forgotPasswordGoToLogin": "Đăng Nhập Ngay",
+  "newOrderRequest": "Yêu cầu đơn hàng mới",
+  "decline": "Từ chối",
+  "orderDetail": "Chi tiết đơn hàng",
+  "pickupFrom": "Lấy hàng tại",
+  "deliveredTo": "Giao đến",
+  "orderItems": "Danh sách món",
+  "paymentMethod": "Phương thức thanh toán",
+  "orderNote": "Ghi chú",
+  "totalAmount": "Tổng tiền",
+  "itemsCount": "{count} món",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "confirmPickup": "Xác nhận đã lấy hàng",
+  "confirmDelivered": "Xác nhận đã giao hàng",
+  "reportIssue": "Báo sự cố",
+  "issueReason": "Lý do báo sự cố",
+  "orderConfirmed": "Đã xác nhận lấy hàng",
+  "orderDelivered": "Đã giao hàng thành công",
+  "notifications": "Thông báo",
+  "markAllRead": "Đánh dấu đã đọc tất cả",
+  "noNotifications": "Chưa có thông báo nào",
+  "availableOrders": "Đơn khả dụng",
+  "noAvailableOrders": "Không có đơn hàng nào khả dụng",
+  "orderTaken": "Đơn đã được nhận",
+  "orderDeclined": "Đã từ chối đơn",
+  "viewDetail": "Xem chi tiết",
+  "tapToViewDetail": "Nhấn để xem chi tiết",
+  "withdraw": "Rút tiền",
+  "withdrawAmount": "Số tiền rút",
+  "minWithdraw": "Số tiền tối thiểu: 50.000đ",
+  "confirmWithdraw": "Xác nhận rút tiền",
+  "withdrawSuccess": "Yêu cầu rút tiền thành công!",
+  "bankInfo": "Thông tin ngân hàng",
+  "transactionId": "Mã giao dịch",
+  "transactionPending": "Đang chờ",
+  "transactionCompleted": "Hoàn thành",
+  "transactionFailed": "Thất bại",
+  "transactionEarning": "Thu nhập",
+  "transactionWithdrawal": "Rút tiền",
+  "transactionRefund": "Hoàn tiền",
+  "transactionDate": "Thời gian",
+  "transactionAmount": "Số tiền",
+  "totalWithdrawn": "Đã rút",
+  "netAmount": "Thực nhận",
+  "withdrawFee": "Phí rút",
+  "allTransactions": "Tất cả giao dịch",
+  "earnings": "Thu nhập",
+  "refunds": "Hoàn tiền",
+  "withdrawals": "Rút tiền",
+  "noBankLinked": "Bạn chưa liên kết ngân hàng",
+  "linkBankNow": "Liên kết ngay",
+  "bankAccount": "Số tài khoản",
+  "accountHolder": "Tên chủ tài khoản",
+  "reasonCantFindAddress": "Không tìm thấy địa chỉ giao hàng",
+  "reasonCustomerNotAnswer": "Khách hàng không nghe máy",
+  "reasonStoreClosed": "Cửa hàng đóng cửa / hết hàng",
+  "reasonTraffic": "Tắc đường, giao trễ",
+  "reasonOther": "Lý do khác",
+  "pickupOrderConfirm": "Xác nhận đã lấy hàng từ {storeName}?",
+  "@pickupOrderConfirm": {
+    "placeholders": {
+      "storeName": {"type": "String"}
+    }
+  },
+  "deliverOrderConfirm": "Xác nhận đã giao hàng cho {customerName}?",
+  "@deliverOrderConfirm": {
+    "placeholders": {
+      "customerName": {"type": "String"}
+    }
+  },
+  "cancelOrderConfirm": "Bạn có chắc từ chối đơn hàng này?",
+  "autoDeclineIn": "Tự động từ chối sau {seconds}s",
+  "@autoDeclineIn": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "confirm": "Xác nhận",
+  "cancel": "Hủy",
+  "totalEarned": "Tổng thu nhập",
+  "totalTrips": "Tổng chuyến",
+  "completed": "Hoàn thành",
+  "cancelled": "Đã hủy",
+  "delivering": "Đang giao",
+  "waitingForOrder": "Chờ đơn",
+  "deliveringNow": "Đang giao",
+  "pickedUp": "Đã lấy hàng",
+  "cancelOrder": "Hủy đơn",
+  "confirmCancelOrder": "Xác nhận hủy đơn",
+  "confirmCancelOrderMessage": "Bạn có chắc muốn hủy đơn giao hàng này? Hành động này có thể ảnh hưởng đến đánh giá của bạn.",
+  "allOrders": "Tất cả",
+  "transactionHistory": "Lịch sử giao dịch",
+  "openMaps": "Chỉ đường",
+  "callReceiver": "Gọi",
+  "driverInfo": "Thông tin tài xế",
+  "earningsToday": "Thu nhập hôm nay",
+  "homeAccept": "Nhận đơn",
+  "homeDeliveryFee": "Tiền cước",
+  "balanceAvailable": "Số dư khả dụng",
+  "pendingBalance": "Đang chờ",
+  "today": "Hôm nay",
+  "recentOrders": "Đơn gần đây",
+  "viewAll": "Xem tất cả",
+  "noRecentOrders": "Chưa có đơn nào",
+  "todayStats": "Thống kê hôm nay",
+  "walletBalance": "Số dư ví",
+  "activeOrder": "Đơn đang giao",
+  "orderCode": "Mã đơn",
+  "phone": "Điện thoại",
+  "locationService": "Dịch vụ vị trí",
+  "locationServiceDisabled": "Dịch vụ vị trí đang tắt. Vui lòng bật để sử dụng tính năng online.",
+  "locationPermissionDenied": "Ứng dụng cần quyền truy cập vị trí để hoạt động online.",
+  "offlinePrompt": "Bật trạng thái Online để bắt đầu nhận đơn giao hàng",
+  "searchingForOrders": "Đang tìm kiếm đơn hàng quanh bạn...",
+  "cancelOrderWarning": "Cảnh báo: Hủy đơn",
+  "map": "Bản đồ"
+}

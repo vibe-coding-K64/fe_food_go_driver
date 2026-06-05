@@ -1,0 +1,483 @@
+{
+  "@@locale": "en",
+  "login": "Login",
+  "homeTitle": "Home",
+  "driverGreeting": "Hello, {name}",
+  "@driverGreeting": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "noOrdersAvailable": "No orders available nearby",
+  "noOrdersAvailableDescription": "There are no delivery orders in your area right now. Stay online to receive new orders!",
+  "loadingOrders": "Loading orders...",
+  "acceptingOrder": "Accepting order...",
+  "orderAccepted": "Order accepted!",
+  "acceptOrderFailed": "Failed to accept order. Please try again.",
+  "km": "{value} km",
+  "@km": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "currency": "{amount} VND",
+  "@currency": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "toggleOnline": "Toggle online status",
+  "receivingOrders": "Receiving orders",
+  "switchingStatus": "Switching...",
+  "acceptOrder": "Accept Order",
+  "status": "Status",
+  "wallet": "Wallet",
+  "settings": "Settings",
+  "home": "Home",
+  "orders": "Orders",
+  "profile": "Profile",
+  "logout": "Logout",
+  "language": "Language",
+  "darkMode": "Dark Mode",
+  "lightMode": "Light Mode",
+  "orderDetails": "Order Details",
+  "pickup": "Pickup",
+  "delivery": "Delivery",
+  "delivered": "Delivered",
+  "cancelled": "Cancelled",
+  "available": "Available",
+  "busy": "Busy",
+  "online": "Online",
+  "offline": "Offline",
+  "welcomeDriver": "Welcome, Driver",
+  "emailLabel": "Email",
+  "passwordLabel": "Password",
+  "emailRequired": "Email is required",
+  "invalidEmail": "Invalid email address",
+  "passwordRequired": "Password is required",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "forgotPassword": "Forgot Password?",
+  "loginButton": "Login",
+  "registerPrompt": "Don't have an account?",
+  "registerLink": "Register",
+  "totalOrders": "Total Orders",
+  "rating": "Rating",
+  "changeLanguage": "Change Language",
+  "english": "English",
+  "vietnamese": "Vietnamese",
+  "accept": "Accept",
+  "reject": "Reject",
+  "customerName": "Customer Name",
+  "pickupAddress": "Pickup Address",
+  "deliveryAddress": "Delivery Address",
+  "distance": "Distance",
+  "estimatedTime": "Estimated Time",
+  "orderAmount": "Order Amount",
+  "earning": "Earning",
+  "call": "Call",
+  "navigate": "Navigate",
+  "complete": "Complete",
+  "splash": "Food Go Driver",
+  "registerTitle": "Driver Registration",
+  "@registerTitle": {
+    "description": "Title of the registration page"
+  },
+  "registerSubtitle": "Join us as a Food Go driver",
+  "@registerSubtitle": {
+    "description": "Subtitle on the registration page"
+  },
+  "registerFullNameLabel": "Full Name",
+  "@registerFullNameLabel": {
+    "description": "Label for full name field"
+  },
+  "registerFullNameHint": "Enter your full name",
+  "@registerFullNameHint": {
+    "description": "Hint for full name field"
+  },
+  "registerFullNameRequired": "Full name is required",
+  "@registerFullNameRequired": {
+    "description": "Validation message for empty full name"
+  },
+  "registerFullNameTooShort": "Full name must be at least 2 characters",
+  "@registerFullNameTooShort": {
+    "description": "Validation message for short full name"
+  },
+  "registerPhoneLabel": "Phone Number",
+  "@registerPhoneLabel": {
+    "description": "Label for phone number field"
+  },
+  "registerPhoneHint": "0xxx xxx xxx",
+  "@registerPhoneHint": {
+    "description": "Hint for phone number field"
+  },
+  "registerPhoneRequired": "Phone number is required",
+  "@registerPhoneRequired": {
+    "description": "Validation message for empty phone"
+  },
+  "registerInvalidPhone": "Invalid Vietnamese phone number",
+  "@registerInvalidPhone": {
+    "description": "Validation message for invalid phone format"
+  },
+  "registerVehiclePlateLabel": "Vehicle Plate",
+  "@registerVehiclePlateLabel": {
+    "description": "Label for vehicle plate field"
+  },
+  "registerVehiclePlateHint": "e.g. 51A-12345",
+  "@registerVehiclePlateHint": {
+    "description": "Hint for vehicle plate field"
+  },
+  "registerVehiclePlateRequired": "Vehicle plate is required",
+  "@registerVehiclePlateRequired": {
+    "description": "Validation message for empty vehicle plate"
+  },
+  "registerInvalidVehiclePlate": "Invalid vehicle plate (e.g. 51A-12345)",
+  "@registerInvalidVehiclePlate": {
+    "description": "Validation message for invalid vehicle plate format"
+  },
+  "registerDriverLicenseLabel": "Driver License",
+  "@registerDriverLicenseLabel": {
+    "description": "Label for driver license field"
+  },
+  "registerDriverLicenseHint": "e.g. A1-123456789",
+  "@registerDriverLicenseHint": {
+    "description": "Hint for driver license field"
+  },
+  "registerDriverLicenseRequired": "Driver license is required",
+  "@registerDriverLicenseRequired": {
+    "description": "Validation message for empty driver license"
+  },
+  "registerDriverLicenseTooShort": "Driver license is too short",
+  "@registerDriverLicenseTooShort": {
+    "description": "Validation message for short driver license"
+  },
+  "registerPasswordHint": "Min. 8 characters with uppercase and number",
+  "@registerPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "registerPasswordTooShort": "Password must be at least 8 characters",
+  "@registerPasswordTooShort": {
+    "description": "Validation message for short password"
+  },
+  "registerPasswordNeedUppercase": "Password must contain at least 1 uppercase letter",
+  "@registerPasswordNeedUppercase": {
+    "description": "Validation message for missing uppercase in password"
+  },
+  "registerPasswordNeedNumber": "Password must contain at least 1 number",
+  "@registerPasswordNeedNumber": {
+    "description": "Validation message for missing number in password"
+  },
+  "registerPasswordStrength": "Password requirements:",
+  "@registerPasswordStrength": {
+    "description": "Password strength section title"
+  },
+  "registerPasswordMinChars": "At least 8 characters",
+  "@registerPasswordMinChars": {
+    "description": "Password requirement: minimum chars"
+  },
+  "registerPasswordUppercase": "At least 1 uppercase letter",
+  "@registerPasswordUppercase": {
+    "description": "Password requirement: uppercase"
+  },
+  "registerPasswordNumber": "At least 1 number",
+  "@registerPasswordNumber": {
+    "description": "Password requirement: number"
+  },
+  "registerConfirmPasswordLabel": "Confirm Password",
+  "@registerConfirmPasswordLabel": {
+    "description": "Label for confirm password field"
+  },
+  "registerConfirmPasswordHint": "Re-enter your password",
+  "@registerConfirmPasswordHint": {
+    "description": "Hint for confirm password field"
+  },
+  "registerConfirmPasswordRequired": "Please confirm your password",
+  "@registerConfirmPasswordRequired": {
+    "description": "Validation message for empty confirm password"
+  },
+  "registerConfirmPasswordMismatch": "Passwords do not match",
+  "@registerConfirmPasswordMismatch": {
+    "description": "Validation message for password mismatch"
+  },
+  "registerButton": "Register",
+  "@registerButton": {
+    "description": "Register button text"
+  },
+  "registerSendingOtp": "Sending verification code...",
+  "@registerSendingOtp": {
+    "description": "Loading text when sending OTP"
+  },
+  "registerSuccess": "Registration successful!",
+  "@registerSuccess": {
+    "description": "Success message after registration"
+  },
+  "registerSuccessSubtitle": "Welcome to Food Go!",
+  "@registerSuccessSubtitle": {
+    "description": "Subtitle after successful registration"
+  },
+  "otpVerificationTitle": "Verify Your Email",
+  "@otpVerificationTitle": {
+    "description": "Title of OTP verification dialog"
+  },
+  "otpEmailSent": "We sent a 6-digit code to\n{email}",
+  "@otpEmailSent": {
+    "placeholders": {
+      "email": {"type": "String"}
+    },
+    "description": "Message shown after OTP is sent"
+  },
+  "otpVerifyButton": "Verify",
+  "@otpVerifyButton": {
+    "description": "OTP verify button text"
+  },
+  "otpNoReceive": "Didn't receive the code? ",
+  "@otpNoReceive": {
+    "description": "Text before resend button"
+  },
+  "otpResendButton": "Resend",
+  "@otpResendButton": {
+    "description": "OTP resend button text"
+  },
+  "otpChangeEmail": "Change email address",
+  "@otpChangeEmail": {
+    "description": "Link to change email"
+  },
+  "otpEnterFullCode": "Please enter the complete 6-digit code",
+  "@otpEnterFullCode": {
+    "description": "Validation message for incomplete OTP"
+  },
+  "back": "Back",
+  "@back": {
+    "description": "Back button tooltip"
+  },
+  "forgotPasswordTitle": "Forgot Password",
+  "@forgotPasswordTitle": {
+    "description": "Title of forgot password page"
+  },
+  "forgotPasswordEmailRequired": "Email/Phone is required",
+  "@forgotPasswordEmailRequired": {
+    "description": "Validation message for empty email"
+  },
+  "forgotPasswordInvalidEmailOrPhone": "Invalid email or phone number",
+  "@forgotPasswordInvalidEmailOrPhone": {
+    "description": "Validation message for invalid email or phone"
+  },
+  "forgotPasswordStep1Title": "Find Account",
+  "@forgotPasswordStep1Title": {
+    "description": "Title of step 1 - email input"
+  },
+  "forgotPasswordStep1Subtitle": "Enter your registered email or phone number to receive a verification code",
+  "@forgotPasswordStep1Subtitle": {
+    "description": "Subtitle of step 1"
+  },
+  "forgotPasswordEmailLabel": "Email or Phone Number",
+  "@forgotPasswordEmailLabel": {
+    "description": "Label for email/phone field"
+  },
+  "forgotPasswordEmailHint": "driver@example.com or 0xxx xxx xxx",
+  "@forgotPasswordEmailHint": {
+    "description": "Hint for email/phone field"
+  },
+  "forgotPasswordSendOtp": "Send OTP Code",
+  "@forgotPasswordSendOtp": {
+    "description": "Button text to send OTP"
+  },
+  "forgotPasswordStep2Title": "Enter Verification Code",
+  "@forgotPasswordStep2Title": {
+    "description": "Title of step 2 - OTP input"
+  },
+  "forgotPasswordStep2Subtitle": "We sent a 6-digit code to\n{email}",
+  "@forgotPasswordStep2Subtitle": {
+    "placeholders": {
+      "email": {"type": "String"}
+    },
+    "description": "Subtitle of step 2"
+  },
+  "forgotPasswordCountdown": "Code expires in",
+  "@forgotPasswordCountdown": {
+    "description": "Countdown label"
+  },
+  "forgotPasswordVerifyOtp": "Verify",
+  "@forgotPasswordVerifyOtp": {
+    "description": "Button text to verify OTP"
+  },
+  "forgotPasswordNoReceive": "Didn't receive the code? ",
+  "@forgotPasswordNoReceive": {
+    "description": "Text before resend button"
+  },
+  "forgotPasswordResend": "Resend",
+  "@forgotPasswordResend": {
+    "description": "Resend OTP button text"
+  },
+  "forgotPasswordStep3Title": "Set New Password",
+  "@forgotPasswordStep3Title": {
+    "description": "Title of step 3 - new password"
+  },
+  "forgotPasswordStep3Subtitle": "Enter a new password for your account",
+  "@forgotPasswordStep3Subtitle": {
+    "description": "Subtitle of step 3"
+  },
+  "forgotPasswordNewPasswordLabel": "New Password",
+  "@forgotPasswordNewPasswordLabel": {
+    "description": "Label for new password field"
+  },
+  "forgotPasswordNewPasswordHint": "Minimum 6 characters",
+  "@forgotPasswordNewPasswordHint": {
+    "description": "Hint for new password field"
+  },
+  "forgotPasswordPasswordRequired": "Password is required",
+  "@forgotPasswordPasswordRequired": {
+    "description": "Validation for empty password"
+  },
+  "forgotPasswordPasswordTooShort": "Password must be at least 6 characters",
+  "@forgotPasswordPasswordTooShort": {
+    "description": "Validation for short password"
+  },
+  "forgotPasswordConfirmPasswordLabel": "Confirm Password",
+  "@forgotPasswordConfirmPasswordLabel": {
+    "description": "Label for confirm password field"
+  },
+  "forgotPasswordConfirmPasswordHint": "Re-enter your new password",
+  "@forgotPasswordConfirmPasswordHint": {
+    "description": "Hint for confirm password field"
+  },
+  "forgotPasswordConfirmRequired": "Please confirm your password",
+  "@forgotPasswordConfirmRequired": {
+    "description": "Validation for empty confirm password"
+  },
+  "forgotPasswordConfirmMismatch": "Passwords do not match",
+  "@forgotPasswordConfirmMismatch": {
+    "description": "Validation for password mismatch"
+  },
+  "forgotPasswordResetButton": "Change Password",
+  "@forgotPasswordResetButton": {
+    "description": "Button text to reset password"
+  },
+  "forgotPasswordSuccessTitle": "Reset Successful!",
+  "@forgotPasswordSuccessTitle": {
+    "description": "Title of success dialog"
+  },
+  "forgotPasswordSuccessMessage": "Your password has been changed successfully. Please log in again.",
+  "@forgotPasswordSuccessMessage": {
+    "description": "Message of success dialog"
+  },
+  "forgotPasswordGoToLogin": "Login Now",
+  "newOrderRequest": "New Order Request",
+  "decline": "Decline",
+  "orderDetail": "Order Details",
+  "pickupFrom": "Pickup from",
+  "deliveredTo": "Delivered to",
+  "orderItems": "Order Items",
+  "paymentMethod": "Payment Method",
+  "orderNote": "Note",
+  "totalAmount": "Total Amount",
+  "itemsCount": "{count} items",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "confirmPickup": "Confirm Pickup",
+  "confirmDelivered": "Confirm Delivered",
+  "reportIssue": "Report Issue",
+  "issueReason": "Issue Reason",
+  "orderConfirmed": "Order pickup confirmed",
+  "orderDelivered": "Order delivered successfully",
+  "notifications": "Notifications",
+  "markAllRead": "Mark all as read",
+  "noNotifications": "No notifications yet",
+  "availableOrders": "Available Orders",
+  "noAvailableOrders": "No available orders",
+  "orderTaken": "Order taken",
+  "orderDeclined": "Order declined",
+  "viewDetail": "View Details",
+  "tapToViewDetail": "Tap to view details",
+  "withdraw": "Withdraw",
+  "withdrawAmount": "Withdraw Amount",
+  "minWithdraw": "Minimum: 50,000 VND",
+  "confirmWithdraw": "Confirm Withdrawal",
+  "withdrawSuccess": "Withdrawal request successful!",
+  "bankInfo": "Bank Information",
+  "transactionId": "Transaction ID",
+  "transactionPending": "Pending",
+  "transactionCompleted": "Completed",
+  "transactionFailed": "Failed",
+  "transactionEarning": "Earning",
+  "transactionWithdrawal": "Withdrawal",
+  "transactionRefund": "Refund",
+  "transactionDate": "Date",
+  "transactionAmount": "Amount",
+  "totalWithdrawn": "Total Withdrawn",
+  "netAmount": "Net Amount",
+  "withdrawFee": "Fee",
+  "allTransactions": "All Transactions",
+  "earnings": "Earnings",
+  "refunds": "Refunds",
+  "withdrawals": "Withdrawals",
+  "noBankLinked": "No bank account linked",
+  "linkBankNow": "Link Now",
+  "bankAccount": "Account Number",
+  "accountHolder": "Account Holder",
+  "reasonCantFindAddress": "Cannot find delivery address",
+  "reasonCustomerNotAnswer": "Customer not answering",
+  "reasonStoreClosed": "Store closed / out of stock",
+  "reasonTraffic": "Traffic, delivery delayed",
+  "reasonOther": "Other reasons",
+  "pickupOrderConfirm": "Confirm pickup from {storeName}?",
+  "@pickupOrderConfirm": {
+    "placeholders": {
+      "storeName": {"type": "String"}
+    }
+  },
+  "deliverOrderConfirm": "Confirm delivery to {customerName}?",
+  "@deliverOrderConfirm": {
+    "placeholders": {
+      "customerName": {"type": "String"}
+    }
+  },
+  "cancelOrderConfirm": "Are you sure you want to decline this order?",
+  "autoDeclineIn": "Auto decline in {seconds}s",
+  "@autoDeclineIn": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "confirm": "Confirm",
+  "cancel": "Cancel",
+  "totalEarned": "Total Earned",
+  "totalTrips": "Total Trips",
+  "completed": "Completed",
+  "cancelled": "Cancelled",
+  "delivering": "Delivering",
+  "waitingForOrder": "Waiting for order",
+  "deliveringNow": "Delivering",
+  "pickedUp": "Picked Up",
+  "cancelOrder": "Cancel Order",
+  "confirmCancelOrder": "Confirm Cancel Order",
+  "confirmCancelOrderMessage": "Are you sure you want to cancel this delivery? This action may affect your rating.",
+  "allOrders": "All",
+  "transactionHistory": "Transaction History",
+  "openMaps": "Navigate",
+  "callReceiver": "Call",
+  "driverInfo": "Driver Info",
+  "earningsToday": "Today's Earnings",
+  "homeAccept": "Accept Order",
+  "homeDeliveryFee": "Delivery Fee",
+  "balanceAvailable": "Available Balance",
+  "pendingBalance": "Pending",
+  "today": "Today",
+  "recentOrders": "Recent Orders",
+  "viewAll": "View All",
+  "noRecentOrders": "No orders yet",
+  "todayStats": "Today's Stats",
+  "walletBalance": "Wallet Balance",
+  "activeOrder": "Active Order",
+  "orderCode": "Order Code",
+  "phone": "Phone",
+  "locationService": "Location Service",
+  "locationServiceDisabled": "Location service is disabled. Please enable it to use online features.",
+  "locationPermissionDenied": "Location permission is required to go online.",
+  "offlinePrompt": "Turn on Online status to start receiving delivery orders",
+  "searchingForOrders": "Searching for orders around you...",
+  "cancelOrderWarning": "Warning: Cancel Order",
+  "map": "Map"
+}

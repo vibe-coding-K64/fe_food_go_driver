@@ -15,8 +15,8 @@ class DriverRealtimeService {
   final FlutterSecureStorage _secureStorage;
 
   StompClient? _client;
-  StreamSubscription<dynamic>? _orderRequestSubscription;
-  StreamSubscription<dynamic>? _orderStatusSubscription;
+  StompUnsubscribe? _orderRequestSubscription;
+  StompUnsubscribe? _orderStatusSubscription;
   StreamController<DriverRealtimeOrderRequest>? _orderRequestController;
   StreamController<DriverRealtimeOrderStatus>? _orderStatusController;
   StreamController<String>? _connectionStateController;
@@ -46,7 +46,10 @@ class DriverRealtimeService {
 
   Future<void> connect() async {
     if (isConnected) {
-      debugPrint('[DriverRealtimeService] connect() skipped because client is already connected');
+      debugPrint(
+        '[DriverRealtimeService] connect() reusing existing connection and ensuring subscriptions are active',
+      );
+      _ensureRealtimeSubscriptions();
       return;
     }
 
@@ -109,6 +112,11 @@ class DriverRealtimeService {
   }
 
   Future<void> disconnect() async {
+    _orderRequestSubscription?.call();
+    _orderStatusSubscription?.call();
+    _orderRequestSubscription = null;
+    _orderStatusSubscription = null;
+
     final client = _client;
     _client = null;
     if (client != null) {
@@ -187,59 +195,78 @@ class DriverRealtimeService {
     debugPrint(
       '[DriverRealtimeService] Spring user-destination mode active; subscribing with logical destinations /user/queue/order-request and /user/queue/order-status',
     );
-    debugPrint('[DriverRealtimeService] Subscribing to /user/queue/order-request');
     _emitConnectionState('connected');
+    _ensureRealtimeSubscriptions();
+  }
 
-    _client?.subscribe(
-      destination: '/user/queue/order-request',
-      callback: (frame) {
-        final body = frame.body;
-        debugPrint(
-          '[DriverRealtimeService] Received /user/queue/order-request headers=${frame.headers}',
-        );
-        if (body == null || body.isEmpty) {
-          debugPrint('[DriverRealtimeService] Empty order-request frame body');
-          return;
-        }
-        debugPrint('[DriverRealtimeService] Raw order-request body: $body');
-        try {
-          final payload = DriverRealtimeOrderRequest.fromRaw(body);
-          debugPrint(
-            '[DriverRealtimeService] Parsed order-request event=${payload.event}, orderId=${payload.orderId}, requestId=${payload.requestId}, orderModelId=${payload.order.id}, storeLat=${payload.order.storeLat}, storeLng=${payload.order.storeLng}, deliveryLat=${payload.order.deliveryLat}, deliveryLng=${payload.order.deliveryLng}, expiresAt=${payload.expiresAt}, expiresInSeconds=${payload.order.expiresInSeconds}',
-          );
-          _orderRequestController?.add(payload);
-        } catch (e) {
-          debugPrint('[DriverRealtimeService] Failed parsing order request: $e');
-        }
-      },
-    );
-    debugPrint('[DriverRealtimeService] Subscription active for /user/queue/order-request');
+  void _ensureRealtimeSubscriptions() {
+    final client = _client;
+    if (client == null || !client.connected) {
+      debugPrint(
+        '[DriverRealtimeService] Skipping subscription ensure because websocket is not connected',
+      );
+      return;
+    }
 
-    debugPrint('[DriverRealtimeService] Subscribing to /user/queue/order-status');
-    _client?.subscribe(
-      destination: '/user/queue/order-status',
-      callback: (frame) {
-        final body = frame.body;
-        debugPrint(
-          '[DriverRealtimeService] Received /user/queue/order-status headers=${frame.headers}',
-        );
-        if (body == null || body.isEmpty) {
-          debugPrint('[DriverRealtimeService] Empty order-status frame body');
-          return;
-        }
-        debugPrint('[DriverRealtimeService] Raw order-status body: $body');
-        try {
-          final payload = DriverRealtimeOrderStatus.fromRaw(body);
+    if (_orderRequestSubscription == null) {
+      debugPrint('[DriverRealtimeService] Subscribing to /user/queue/order-request');
+      _orderRequestSubscription = client.subscribe(
+        destination: '/user/queue/order-request',
+        callback: (frame) {
+          final body = frame.body;
           debugPrint(
-            '[DriverRealtimeService] Parsed order-status event=${payload.event}, orderId=${payload.orderId}, status=${payload.status}',
+            '[DriverRealtimeService] Received /user/queue/order-request headers=${frame.headers}',
           );
-          _orderStatusController?.add(payload);
-        } catch (e) {
-          debugPrint('[DriverRealtimeService] Failed parsing order status: $e');
-        }
-      },
-    );
-    debugPrint('[DriverRealtimeService] Subscription active for /user/queue/order-status');
+          if (body == null || body.isEmpty) {
+            debugPrint('[DriverRealtimeService] Empty order-request frame body');
+            return;
+          }
+          debugPrint('[DriverRealtimeService] Raw order-request body: $body');
+          try {
+            final payload = DriverRealtimeOrderRequest.fromRaw(body);
+            debugPrint(
+              '[DriverRealtimeService] Parsed order-request event=${payload.event}, orderId=${payload.orderId}, requestId=${payload.requestId}, orderModelId=${payload.order.id}, storeLat=${payload.order.storeLat}, storeLng=${payload.order.storeLng}, deliveryLat=${payload.order.deliveryLat}, deliveryLng=${payload.order.deliveryLng}, expiresAt=${payload.expiresAt}, expiresInSeconds=${payload.order.expiresInSeconds}',
+            );
+            _orderRequestController?.add(payload);
+          } catch (e) {
+            debugPrint('[DriverRealtimeService] Failed parsing order request: $e');
+          }
+        },
+      );
+      debugPrint(
+        '[DriverRealtimeService] Subscription active for /user/queue/order-request',
+      );
+    }
+
+    if (_orderStatusSubscription == null) {
+      debugPrint('[DriverRealtimeService] Subscribing to /user/queue/order-status');
+      _orderStatusSubscription = client.subscribe(
+        destination: '/user/queue/order-status',
+        callback: (frame) {
+          final body = frame.body;
+          debugPrint(
+            '[DriverRealtimeService] Received /user/queue/order-status headers=${frame.headers}',
+          );
+          if (body == null || body.isEmpty) {
+            debugPrint('[DriverRealtimeService] Empty order-status frame body');
+            return;
+          }
+          debugPrint('[DriverRealtimeService] Raw order-status body: $body');
+          try {
+            final payload = DriverRealtimeOrderStatus.fromRaw(body);
+            debugPrint(
+              '[DriverRealtimeService] Parsed order-status event=${payload.event}, orderId=${payload.orderId}, status=${payload.status}',
+            );
+            _orderStatusController?.add(payload);
+          } catch (e) {
+            debugPrint('[DriverRealtimeService] Failed parsing order status: $e');
+          }
+        },
+      );
+      debugPrint(
+        '[DriverRealtimeService] Subscription active for /user/queue/order-status',
+      );
+    }
   }
 
   void _handleUnhandledMessage(StompFrame frame) {

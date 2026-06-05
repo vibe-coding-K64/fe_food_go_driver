@@ -1,0 +1,112 @@
+import 'package:equatable/equatable.dart';
+import '../../../../features/orders/domain/entities/order.dart';
+import '../../../../features/driver/domain/entities/driver_profile.dart';
+import '../../../../features/wallet/domain/entities/wallet.dart';
+import '../../../orders/data/models/order_request_model.dart';
+import '../../../home/data/repositories/home_repository_impl.dart';
+
+enum HomeStatus { initial, loading, loaded, error }
+
+class HomeState extends Equatable {
+  final HomeStatus status;
+  final DriverProfile? driverProfile;
+  final bool isOnline;
+  final bool isLoadingProfile;
+  final Order? activeOrder;
+  final List<Order> availableOrders;
+  final List<Order> recentOrders;
+  final TodayStats todayStats;
+  final Wallet? wallet;
+  final String? errorMessage;
+  final bool isAcceptingOrder;
+  final bool isUpdatingStatus;
+  final bool isTogglingStatus;
+  final bool needsLocationPermission;
+  final bool needsReLogin;
+  final List<OrderRequestModel> orderRequests;
+  final OrderRequestModel? pendingRequest;
+
+  const HomeState({
+    this.status = HomeStatus.initial,
+    this.driverProfile,
+    this.isOnline = false,
+    this.isLoadingProfile = false,
+    this.activeOrder,
+    this.availableOrders = const [],
+    this.recentOrders = const [],
+    this.todayStats = const TodayStats(),
+    this.wallet,
+    this.errorMessage,
+    this.isAcceptingOrder = false,
+    this.isUpdatingStatus = false,
+    this.isTogglingStatus = false,
+    this.needsLocationPermission = false,
+    this.needsReLogin = false,
+    this.orderRequests = const [],
+    this.pendingRequest,
+  });
+
+  HomeState copyWith({
+    HomeStatus? status,
+    DriverProfile? driverProfile,
+    bool? isOnline,
+    bool? isLoadingProfile,
+    Order? activeOrder,
+    bool clearActiveOrder = false,
+    List<Order>? availableOrders,
+    List<Order>? recentOrders,
+    TodayStats? todayStats,
+    Wallet? wallet,
+    String? errorMessage,
+    bool clearErrorMessage = false,
+    bool? isAcceptingOrder,
+    bool? isUpdatingStatus,
+    bool? isTogglingStatus,
+    bool? needsLocationPermission,
+    bool? needsReLogin,
+    List<OrderRequestModel>? orderRequests,
+    OrderRequestModel? pendingRequest,
+    bool clearPendingRequest = false,
+  }) {
+    return HomeState(
+      status: status ?? this.status,
+      driverProfile: driverProfile ?? this.driverProfile,
+      isOnline: isOnline ?? this.isOnline,
+      isLoadingProfile: isLoadingProfile ?? this.isLoadingProfile,
+      activeOrder: clearActiveOrder ? null : (activeOrder ?? this.activeOrder),
+      availableOrders: availableOrders ?? this.availableOrders,
+      recentOrders: recentOrders ?? this.recentOrders,
+      todayStats: todayStats ?? this.todayStats,
+      wallet: wallet ?? this.wallet,
+      errorMessage: clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
+      isAcceptingOrder: isAcceptingOrder ?? this.isAcceptingOrder,
+      isUpdatingStatus: isUpdatingStatus ?? this.isUpdatingStatus,
+      isTogglingStatus: isTogglingStatus ?? this.isTogglingStatus,
+      needsLocationPermission: needsLocationPermission ?? this.needsLocationPermission,
+      needsReLogin: needsReLogin ?? this.needsReLogin,
+      orderRequests: orderRequests ?? this.orderRequests,
+      pendingRequest: clearPendingRequest ? null : (pendingRequest ?? this.pendingRequest),
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        status,
+        driverProfile,
+        isOnline,
+        isLoadingProfile,
+        activeOrder,
+        availableOrders,
+        recentOrders,
+        todayStats,
+        wallet,
+        errorMessage,
+        isAcceptingOrder,
+        isUpdatingStatus,
+        isTogglingStatus,
+        needsLocationPermission,
+        needsReLogin,
+        orderRequests,
+        pendingRequest,
+      ];
+}

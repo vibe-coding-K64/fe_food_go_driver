@@ -10,7 +10,12 @@ sealed class HomeEvent extends Equatable {
 }
 
 final class HomeLoadRequested extends HomeEvent {
-  const HomeLoadRequested();
+  final bool resetStreams;
+
+  const HomeLoadRequested({this.resetStreams = true});
+
+  @override
+  List<Object?> get props => [resetStreams];
 }
 
 final class HomeStopListening extends HomeEvent {

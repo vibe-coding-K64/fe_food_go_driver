@@ -54,9 +54,8 @@ class _WalletScreenContentState extends State<_WalletScreenContent>
 
   void _onTabChanged() {
     if (!_tabController.indexIsChanging) {
-      context
-          .read<WalletBloc>()
-          .add(FilterTransactions(_filters[_tabController.index]));
+      final filter = _filters[_tabController.index];
+      context.read<WalletBloc>().add(FilterTransactions(filter));
     }
   }
 
@@ -82,13 +81,11 @@ class _WalletScreenContentState extends State<_WalletScreenContent>
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.wallet),
-            automaticallyImplyLeading: false,
-          ),
           body: RefreshIndicator(
             onRefresh: () async {
-              context.read<WalletBloc>().add(const LoadWalletTransactionsOnly());
+              context.read<WalletBloc>().add(
+                    LoadWalletTransactionsOnly(filter: state.transactionFilter),
+                  );
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),

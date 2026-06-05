@@ -20,15 +20,19 @@ class WalletRemoteDataSource extends BaseRemoteDataSource {
         );
 
   Future<WalletModel> getWalletApi(String driverId) async {
-    log('GET /wallet/$driverId');
+    log('GET /drivers/wallet');
     try {
-      final response = await requestGet('/wallet/$driverId');
+      final response = await requestGet('/drivers/wallet');
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        return WalletModel.fromJson(decoded as Map<String, dynamic>);
+        if (decoded is Map<String, dynamic>) {
+          final data = decoded['data'] ?? decoded;
+          return WalletModel.fromJson(data as Map<String, dynamic>);
+        }
+        throw const ServerFailure('Invalid wallet response format');
       }
-      throw mapFailure(response, '/wallet/$driverId');
+      throw mapFailure(response, '/drivers/wallet');
     } catch (e) {
       if (e is Failure) rethrow;
       log('Exception: $e');
@@ -37,16 +41,20 @@ class WalletRemoteDataSource extends BaseRemoteDataSource {
   }
 
   Future<List<TransactionModel>> getTransactionsApi(String driverId) async {
-    log('GET /wallet/$driverId/transactions');
+    log('GET /drivers/transactions');
     try {
-      final response = await requestGet('/wallet/$driverId/transactions');
+      final response = await requestGet(
+        '/drivers/transactions',
+        queryParams: {'page': '0', 'size': '50'},
+      );
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        final list = decoded is List ? decoded : (decoded['data'] ?? []);
+        final data = decoded is Map<String, dynamic> ? decoded['data'] ?? decoded : decoded;
+        final list = data is List ? data : [];
         return list.map((e) => TransactionModel.fromJson(e as Map<String, dynamic>)).toList();
       }
-      throw mapFailure(response, '/wallet/$driverId/transactions');
+      throw mapFailure(response, '/drivers/transactions');
     } catch (e) {
       if (e is Failure) rethrow;
       log('Exception: $e');
@@ -55,15 +63,15 @@ class WalletRemoteDataSource extends BaseRemoteDataSource {
   }
 
   Future<void> withdrawApi(String driverId, double amount) async {
-    log('POST /wallet/$driverId/withdraw - amount=$amount');
+    log('POST /drivers/withdraw - amount=$amount');
     try {
       final response = await requestPost(
-        '/wallet/$driverId/withdraw',
+        '/drivers/withdraw',
         body: {'amount': amount},
       );
 
       if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
-        throw mapFailure(response, '/wallet/$driverId/withdraw');
+        throw mapFailure(response, '/drivers/withdraw');
       }
     } catch (e) {
       if (e is Failure) rethrow;

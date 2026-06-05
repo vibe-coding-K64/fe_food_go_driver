@@ -67,7 +67,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get wallet => 'Ví';
 
   @override
-  String get settings => 'Settings';
+  String get settings => 'Cài đặt';
 
   @override
   String get home => 'Trang chủ';
@@ -130,7 +130,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get emailRequired => 'Email không được để trống';
 
   @override
-  String get invalidEmail => '�ịa chỉ email không hợp lệ';
+  String get invalidEmail => 'Địa chỉ email không hợp lệ';
 
   @override
   String get passwordRequired => 'Mật khẩu không được để trống';
@@ -498,6 +498,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get orderDeclined => 'Đã từ chối đơn';
 
   @override
+  String get callStore => 'Gọi quán';
+
+  @override
+  String get items => 'Món ăn';
+
+  @override
   String get viewDetail => 'Xem chi tiết';
 
   @override
@@ -688,6 +694,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get recentOrders => 'Đơn gần đây';
 
   @override
+  String get pickingUp => 'Đang lấy';
+
+  @override
   String get viewAll => 'Xem tất cả';
 
   @override
@@ -731,4 +740,55 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get map => 'Bản đồ';
+
+  @override
+  String moreItems(int count) {
+    return '+ $count món khác';
+  }
+
+  @override
+  String get totalOrder => 'Tổng đơn';
+
+  @override
+  String get deliveryFee => 'Tiền cước';
+
+  @override
+  String get foodItems => 'Tiền món';
+
+  @override
+  String get toppingItems => 'Tiền topping';
+
+  @override
+  String get discount => 'Giảm giá';
+
+  @override
+  String get deliveryCharge => 'Phí giao hàng';
+
+  @override
+  String get orderRequestError => 'Không thể xử lý yêu cầu đơn hàng.';
+
+  @override
+  String get orderRequestNoIdError =>
+      'Không thể xử lý yêu cầu đơn hàng này vì thiếu requestId hợp lệ.';
+
+  @override
+  String orderRequestGenericError(Object error) {
+    return 'Không thể xử lý yêu cầu: $error';
+  }
+
+  @override
+  String get noLoginSession => 'Không có phiên đăng nhập. Vui lòng đăng nhập.';
+
+  @override
+  String get cannotConnectServer =>
+      'Không thể kết nối server. Kiểm tra kết nối mạng.';
+
+  @override
+  String get paid => 'Đã thanh toán';
+
+  @override
+  String get unpaid => 'Chưa thanh toán';
+
+  @override
+  String get dismiss => 'Đóng';
 }

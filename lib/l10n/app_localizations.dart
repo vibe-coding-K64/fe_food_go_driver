@@ -1034,6 +1034,18 @@ abstract class AppLocalizations {
   /// **'Order declined'**
   String get orderDeclined;
 
+  /// No description provided for @callStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Call store'**
+  String get callStore;
+
+  /// No description provided for @items.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get items;
+
   /// No description provided for @viewDetail.
   ///
   /// In en, this message translates to:
@@ -1400,6 +1412,12 @@ abstract class AppLocalizations {
   /// **'Recent Orders'**
   String get recentOrders;
 
+  /// No description provided for @pickingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Picking Up'**
+  String get pickingUp;
+
   /// No description provided for @viewAll.
   ///
   /// In en, this message translates to:
@@ -1483,6 +1501,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Map'**
   String get map;
+
+  /// No description provided for @moreItems.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {count} more items'**
+  String moreItems(int count);
+
+  /// No description provided for @totalOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Order'**
+  String get totalOrder;
+
+  /// No description provided for @deliveryFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Fee'**
+  String get deliveryFee;
+
+  /// No description provided for @foodItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Food Items'**
+  String get foodItems;
+
+  /// No description provided for @toppingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Topping Items'**
+  String get toppingItems;
+
+  /// No description provided for @discount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get discount;
+
+  /// No description provided for @deliveryCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Charge'**
+  String get deliveryCharge;
+
+  /// No description provided for @orderRequestError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to process order request.'**
+  String get orderRequestError;
+
+  /// No description provided for @orderRequestNoIdError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to process this order request due to missing valid requestId.'**
+  String get orderRequestNoIdError;
+
+  /// No description provided for @orderRequestGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to process request: {error}'**
+  String orderRequestGenericError(Object error);
+
+  /// No description provided for @noLoginSession.
+  ///
+  /// In en, this message translates to:
+  /// **'No login session. Please log in.'**
+  String get noLoginSession;
+
+  /// No description provided for @cannotConnectServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot connect to server. Check your internet connection.'**
+  String get cannotConnectServer;
+
+  /// No description provided for @paid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get paid;
+
+  /// No description provided for @unpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get unpaid;
+
+  /// No description provided for @dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
 }
 
 class _AppLocalizationsDelegate

@@ -389,6 +389,8 @@
   "noAvailableOrders": "No available orders",
   "orderTaken": "Order taken",
   "orderDeclined": "Order declined",
+  "callStore": "Call store",
+  "items": "Items",
   "viewDetail": "View Details",
   "tapToViewDetail": "Tap to view details",
   "withdraw": "Withdraw",
@@ -466,6 +468,7 @@
   "pendingBalance": "Pending",
   "today": "Today",
   "recentOrders": "Recent Orders",
+  "pickingUp": "Picking Up",
   "viewAll": "View All",
   "noRecentOrders": "No orders yet",
   "todayStats": "Today's Stats",
@@ -479,5 +482,25 @@
   "offlinePrompt": "Turn on Online status to start receiving delivery orders",
   "searchingForOrders": "Searching for orders around you...",
   "cancelOrderWarning": "Warning: Cancel Order",
-  "map": "Map"
+  "map": "Map",
+  "moreItems": "+ {count} more items",
+  "@moreItems": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "totalOrder": "Total Order",
+  "deliveryFee": "Delivery Fee",
+  "foodItems": "Food Items",
+  "toppingItems": "Topping Items",
+  "discount": "Discount",
+  "deliveryCharge": "Delivery Charge",
+  "orderRequestError": "Unable to process order request.",
+  "orderRequestNoIdError": "Unable to process this order request due to missing valid requestId.",
+  "orderRequestGenericError": "Unable to process request: {error}",
+  "noLoginSession": "No login session. Please log in.",
+  "cannotConnectServer": "Cannot connect to server. Check your internet connection.",
+  "paid": "Paid",
+  "unpaid": "Unpaid",
+  "dismiss": "Dismiss"
 }

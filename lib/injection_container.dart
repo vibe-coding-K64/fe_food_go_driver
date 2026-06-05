@@ -156,11 +156,19 @@ Future<void> init() async {
   );
 
   // Home repository - uses Firebase for real-time QUERY
+  getIt.registerLazySingleton<HomeRemoteDataSource>(
+    () => HomeRemoteDataSource(
+      getToken: () async => await getIt<FlutterSecureStorage>().read(key: AppConstants.driverTokenKey) ?? '',
+      secureStorage: getIt<FlutterSecureStorage>(),
+    ),
+  );
+
   getIt.registerLazySingleton<HomeRepository>(
     () => HomeRepository(
       driverFirebase: getIt<DriverFirebaseDataSource>(),
       orderFirebase: getIt<OrderFirebaseDataSource>(),
       walletFirebase: getIt<WalletFirebaseDataSource>(),
+      homeRemote: getIt<HomeRemoteDataSource>(),
     ),
   );
 

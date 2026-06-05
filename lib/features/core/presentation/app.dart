@@ -177,10 +177,16 @@ class _SessionValidatingScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.delivery_dining,
-              size: 72,
-              color: Theme.of(context).colorScheme.primary,
+            Image.asset(
+              'assets/img/logo.png',
+              width: 72,
+              height: 72,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.delivery_dining,
+                size: 72,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
             const SizedBox(height: 24),
             CircularProgressIndicator(

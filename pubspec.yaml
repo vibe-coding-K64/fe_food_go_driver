@@ -1,0 +1,73 @@
+name: fe_food_go_driver
+description: "Driver app for Food Go - food delivery application."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  # State Management
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+  dartz: ^0.10.1
+  rxdart: ^0.28.0
+
+  # Dependency Injection
+  get_it: ^8.0.3
+
+  # Local Storage
+  shared_preferences: ^2.3.5
+  flutter_secure_storage: ^9.2.4
+
+  # Localization
+  intl: ^0.20.2
+
+  # Network / API
+  http: ^1.2.0
+
+  # WebSocket / STOMP
+  stomp_dart_client: ^3.0.1
+
+  # Location
+  geolocator: ^13.0.2
+  permission_handler: ^11.3.1
+
+  # Maps (OpenStreetMap - free, no API key needed)
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+
+  # UI
+  google_fonts: ^6.2.1
+  shimmer: ^3.0.0
+
+  # OTP Input
+  pinput: ^5.0.0
+
+  # URL Launcher
+  url_launcher: ^6.3.1
+
+  # Firebase
+  firebase_core: ^3.12.1
+  cloud_firestore: ^5.6.6
+  firebase_database: ^11.3.5
+  firebase_auth: ^5.5.3
+  firebase_messaging: ^15.2.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/lang/

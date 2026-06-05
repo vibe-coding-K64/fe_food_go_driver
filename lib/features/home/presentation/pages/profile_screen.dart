@@ -31,10 +31,6 @@ class ProfileScreen extends StatelessWidget {
         final stats = state.todayStats;
 
         return Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.profile),
-            automaticallyImplyLeading: false,
-          ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(

@@ -54,4 +54,13 @@ class WalletRepositoryImpl implements WalletRepository {
       return [];
     }
   }
+
+  @override
+  Future<void> withdraw(double amount) async {
+    final driverId = await _getDriverId();
+    if (driverId.isEmpty) {
+      throw Exception('Missing driverId');
+    }
+    await _remoteDataSource.withdrawApi(driverId, amount);
+  }
 }

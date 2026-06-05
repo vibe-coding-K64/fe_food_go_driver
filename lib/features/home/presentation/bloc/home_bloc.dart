@@ -196,38 +196,45 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     _currentDriverId = driverId;
-    _activeRequestIds.clear();
-    _dismissedRequestIds.clear();
-    _cancelAllSubscriptions();
 
-    _profileSub = _homeRepository.watchDriverProfile(driverId).listen((
-      profile,
-    ) {
-      add(ProfileUpdated(profile));
-    });
+    if (event.resetStreams) {
+      _activeRequestIds.clear();
+      _dismissedRequestIds.clear();
+      _cancelAllSubscriptions();
 
-    _activeOrderSub = _homeRepository.watchCurrentOrder(driverId).listen((
-      order,
-    ) {
-      add(ActiveOrderUpdated(order));
-    });
+      _profileSub = _homeRepository.watchDriverProfile(driverId).listen((
+        profile,
+      ) {
+        add(ProfileUpdated(profile));
+      });
 
-    _recentOrdersSub = _homeRepository.watchRecentOrders(driverId).listen((
-      orders,
-    ) {
-      add(RecentOrdersUpdated(orders));
-    });
+      _activeOrderSub = _homeRepository.watchCurrentOrder(driverId).listen((
+        order,
+      ) {
+        add(ActiveOrderUpdated(order));
+      });
 
-    _statsSub = _homeRepository.watchDriverStats(driverId).listen((data) {
-      add(StatsUpdated(data));
-    });
+      _recentOrdersSub = _homeRepository.watchRecentOrders(driverId).listen((
+        orders,
+      ) {
+        add(RecentOrdersUpdated(orders));
+      });
 
-    // Tam thoi bo wallet stream de tranh loi permission-denied tu Firestore.
-    // _walletSub = _homeRepository.watchWallet(driverId).listen((wallet) {
-    //   add(WalletUpdated(wallet));
-    // });
+      _statsSub = _homeRepository.watchDriverStats(driverId).listen((data) {
+        add(StatsUpdated(data));
+      });
 
-    await _connectRealtime();
+      // Tam thoi bo wallet stream de tranh loi permission-denied tu Firestore.
+      // _walletSub = _homeRepository.watchWallet(driverId).listen((wallet) {
+      //   add(WalletUpdated(wallet));
+      // });
+
+      await _connectRealtime();
+    } else {
+      debugPrint(
+        '[HomeBloc] Skipping stream reset for HomeLoadRequested(resetStreams: false)',
+      );
+    }
 
     emit(state.copyWith(status: HomeStatus.loaded));
   }
@@ -712,7 +719,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           isAcceptingOrder: false,
         ),
       );
-      add(const HomeLoadRequested());
+      add(const HomeLoadRequested(resetStreams: false));
       return;
     }
 

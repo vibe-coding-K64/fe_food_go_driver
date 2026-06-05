@@ -48,17 +48,7 @@ class OrderFirebaseDataSource {
   Stream<OrderModel?> watchSingleActiveOrder(String driverId) {
     _log('watchSingleActiveOrder($driverId)');
 
-    return _firestore
-        .collection('orders')
-        .where('driverId', isEqualTo: driverId)
-        .where('status', isEqualTo: 2)
-        .where('deletedAt', isNull: true)
-        .limit(1)
-        .snapshots()
-        .map((snap) {
-          if (snap.docs.isEmpty) return null;
-          return OrderModel.fromJson(_fromFirestore(snap.docs.first));
-        });
+    return const Stream<OrderModel?>.empty();
   }
 
   Stream<List<OrderModel>> watchDriverRecentOrders(
@@ -67,18 +57,7 @@ class OrderFirebaseDataSource {
   }) {
     _log('watchDriverRecentOrders($driverId, limit=$limit)');
 
-    return _firestore
-        .collection('orders')
-        .where('driverId', isEqualTo: driverId)
-        .where('deletedAt', isNull: true)
-        .orderBy('createdAt', descending: true)
-        .limit(limit)
-        .snapshots()
-        .map(
-          (snap) => snap.docs
-              .map((doc) => OrderModel.fromJson(_fromFirestore(doc)))
-              .toList(),
-        );
+    return const Stream<List<OrderModel>>.empty();
   }
 
   Map<String, dynamic> _fromFirestore(DocumentSnapshot doc) {

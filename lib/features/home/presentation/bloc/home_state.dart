@@ -18,6 +18,7 @@ class HomeState extends Equatable {
   final TodayStats todayStats;
   final Wallet? wallet;
   final String? errorMessage;
+  final String? successMessage;
   final bool isAcceptingOrder;
   final bool isUpdatingStatus;
   final bool isTogglingStatus;
@@ -37,6 +38,7 @@ class HomeState extends Equatable {
     this.todayStats = const TodayStats(),
     this.wallet,
     this.errorMessage,
+    this.successMessage,
     this.isAcceptingOrder = false,
     this.isUpdatingStatus = false,
     this.isTogglingStatus = false,
@@ -59,6 +61,8 @@ class HomeState extends Equatable {
     Wallet? wallet,
     String? errorMessage,
     bool clearErrorMessage = false,
+    String? successMessage,
+    bool clearSuccessMessage = false,
     bool? isAcceptingOrder,
     bool? isUpdatingStatus,
     bool? isTogglingStatus,
@@ -79,6 +83,7 @@ class HomeState extends Equatable {
       todayStats: todayStats ?? this.todayStats,
       wallet: wallet ?? this.wallet,
       errorMessage: clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
+      successMessage: clearSuccessMessage ? null : (successMessage ?? this.successMessage),
       isAcceptingOrder: isAcceptingOrder ?? this.isAcceptingOrder,
       isUpdatingStatus: isUpdatingStatus ?? this.isUpdatingStatus,
       isTogglingStatus: isTogglingStatus ?? this.isTogglingStatus,
@@ -101,6 +106,7 @@ class HomeState extends Equatable {
         todayStats,
         wallet,
         errorMessage,
+        successMessage,
         isAcceptingOrder,
         isUpdatingStatus,
         isTogglingStatus,

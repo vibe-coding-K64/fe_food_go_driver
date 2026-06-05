@@ -3,12 +3,20 @@ class WebSocketResponse<T> {
   final T? data;
   final String? message;
   final int timestamp;
+  final String? event;
+  final String? requestId;
+  final String? orderId;
+  final String? status;
 
   WebSocketResponse({
     required this.type,
     this.data,
     this.message,
     required this.timestamp,
+    this.event,
+    this.requestId,
+    this.orderId,
+    this.status,
   });
 
   factory WebSocketResponse.fromJson(
@@ -16,10 +24,14 @@ class WebSocketResponse<T> {
     T? Function(dynamic rawData) dataParser,
   ) {
     return WebSocketResponse<T>(
-      type: json['type']?.toString() ?? '',
-      data: dataParser(json['data']),
+      type: json['type']?.toString() ?? json['event']?.toString() ?? '',
+      data: dataParser(json['data'] ?? json['orderId']),
       message: json['message']?.toString(),
       timestamp: _toInt(json['timestamp']) ?? 0,
+      event: json['event']?.toString(),
+      requestId: json['requestId']?.toString(),
+      orderId: json['orderId']?.toString(),
+      status: json['status']?.toString(),
     );
   }
 

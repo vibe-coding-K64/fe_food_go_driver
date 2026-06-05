@@ -2,16 +2,30 @@ import 'package:equatable/equatable.dart';
 
 class Order extends Equatable {
   final String id;
+  final String orderCode;
   final String userId;
+  final String? customerName;
+  final String? customerPhone;
+  final String? customerAvatarUrl;
+  final String? recipientName;
+  final String? recipientPhone;
   final String storeId;
   final String storeName;
   final String? storeAddress;
   final List<OrderItem> items;
   final double totalAmount;
+  final double itemsSubtotal;
+  final double optionsSubtotal;
+  final double discountAmount;
   final double deliveryFee;
+  final double finalAmount;
+  final double driverCollectAmount;
   final int status;
+  final String statusCode;
+  final String? statusDescription;
   final String deliveryAddress;
-  final String paymentMethod;
+  final int paymentMethod;
+  final int? paymentStatus;
   final String? driverId;
   final String? driverName;
   final String? driverPhone;
@@ -20,27 +34,49 @@ class Order extends Equatable {
   final double? storeLng;
   final double? deliveryLat;
   final double? deliveryLng;
+  final double? distance;
+  final double? pickupDistanceKm;
+  final double? deliveryDistanceKm;
+  final int? estimatedDurationMinutes;
+  final DateTime? arrivedAtStoreAt;
+  final DateTime? pickedUpAt;
+  final DateTime? deliveredAt;
+  final String? deliveryStep;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
-  final String? receiverName;
-  final String? receiverPhone;
-  final String? code;
   final String? note;
+  final String? requestId;
   final double? estimatedEarning;
+  final DateTime? expiresAt;
+  final int? expiresInSeconds;
 
   const Order({
     required this.id,
+    required this.orderCode,
     required this.userId,
+    this.customerName,
+    this.customerPhone,
+    this.customerAvatarUrl,
+    this.recipientName,
+    this.recipientPhone,
     required this.storeId,
     required this.storeName,
     this.storeAddress,
     required this.items,
     required this.totalAmount,
+    required this.itemsSubtotal,
+    required this.optionsSubtotal,
+    required this.discountAmount,
     required this.deliveryFee,
+    required this.finalAmount,
+    required this.driverCollectAmount,
     required this.status,
+    required this.statusCode,
+    this.statusDescription,
     required this.deliveryAddress,
     required this.paymentMethod,
+    this.paymentStatus,
     this.driverId,
     this.driverName,
     this.driverPhone,
@@ -49,29 +85,76 @@ class Order extends Equatable {
     this.storeLng,
     this.deliveryLat,
     this.deliveryLng,
+    this.distance,
+    this.pickupDistanceKm,
+    this.deliveryDistanceKm,
+    this.estimatedDurationMinutes,
+    this.arrivedAtStoreAt,
+    this.pickedUpAt,
+    this.deliveredAt,
+    this.deliveryStep,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
-    this.receiverName,
-    this.receiverPhone,
-    this.code,
     this.note,
+    this.requestId,
     this.estimatedEarning,
+    this.expiresAt,
+    this.expiresInSeconds,
   });
+
+  bool get isPendingStoreConfirmation => statusCode == 'PENDING_STORE_CONFIRMATION';
+  bool get isWaitingDriver => statusCode == 'WAITING_DRIVER';
+  bool get isDelivering => statusCode == 'DELIVERING';
+  bool get isCompleted => statusCode == 'COMPLETED';
+  bool get isCancelled => statusCode == 'CANCELLED';
+
+  bool get isWaitingPickup => deliveryStep == 'WAITING_PICKUP';
+  bool get isArrivedStore => deliveryStep == 'ARRIVED_STORE';
+  bool get isOnTheWay => deliveryStep == 'ON_THE_WAY';
+  bool get isDeliveredStep => deliveryStep == 'DELIVERED';
+
+  String get displayRecipientName =>
+      recipientName?.trim().isNotEmpty == true
+          ? recipientName!.trim()
+          : customerName?.trim().isNotEmpty == true
+          ? customerName!.trim()
+          : 'N/A';
+
+  String? get displayRecipientPhone =>
+      recipientPhone?.trim().isNotEmpty == true
+          ? recipientPhone!.trim()
+          : customerPhone?.trim().isNotEmpty == true
+          ? customerPhone!.trim()
+          : null;
 
   @override
   List<Object?> get props => [
     id,
+    orderCode,
     userId,
+    customerName,
+    customerPhone,
+    customerAvatarUrl,
+    recipientName,
+    recipientPhone,
     storeId,
     storeName,
     storeAddress,
     items,
     totalAmount,
+    itemsSubtotal,
+    optionsSubtotal,
+    discountAmount,
     deliveryFee,
+    finalAmount,
+    driverCollectAmount,
     status,
+    statusCode,
+    statusDescription,
     deliveryAddress,
     paymentMethod,
+    paymentStatus,
     driverId,
     driverName,
     driverPhone,
@@ -80,14 +163,22 @@ class Order extends Equatable {
     storeLng,
     deliveryLat,
     deliveryLng,
+    distance,
+    pickupDistanceKm,
+    deliveryDistanceKm,
+    estimatedDurationMinutes,
+    arrivedAtStoreAt,
+    pickedUpAt,
+    deliveredAt,
+    deliveryStep,
     createdAt,
     updatedAt,
     deletedAt,
-    receiverName,
-    receiverPhone,
-    code,
     note,
+    requestId,
     estimatedEarning,
+    expiresAt,
+    expiresInSeconds,
   ];
 }
 

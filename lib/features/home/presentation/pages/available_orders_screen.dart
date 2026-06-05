@@ -6,102 +6,10 @@ import 'package:http/http.dart' as http;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../orders/data/models/order_model.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../widgets/available_order_card.dart';
-
-class AvailableOrder {
-  final String id;
-  final String storeId;
-  final String storeName;
-  final String? storeAddress;
-  final List<AvailableOrderItem> items;
-  final double totalAmount;
-  final double deliveryFee;
-  final String deliveryAddress;
-  final String paymentMethod;
-  final double? storeLat;
-  final double? storeLng;
-  final double? deliveryLat;
-  final double? deliveryLng;
-  final DateTime createdAt;
-  final String? receiverName;
-  final String? receiverPhone;
-  final String? note;
-
-  AvailableOrder({
-    required this.id,
-    required this.storeId,
-    required this.storeName,
-    this.storeAddress,
-    required this.items,
-    required this.totalAmount,
-    required this.deliveryFee,
-    required this.deliveryAddress,
-    required this.paymentMethod,
-    this.storeLat,
-    this.storeLng,
-    this.deliveryLat,
-    this.deliveryLng,
-    required this.createdAt,
-    this.receiverName,
-    this.receiverPhone,
-    this.note,
-  });
-
-  factory AvailableOrder.fromJson(Map<String, dynamic> json) {
-    return AvailableOrder(
-      id: json['id']?.toString() ?? '',
-      storeId: json['storeId']?.toString() ?? '',
-      storeName: json['storeName']?.toString() ?? '',
-      storeAddress: json['storeAddress']?.toString(),
-      items: (json['items'] as List<dynamic>?)
-              ?.map((e) => AvailableOrderItem.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      totalAmount: (json['totalAmount'] ?? 0.0).toDouble(),
-      deliveryFee: (json['deliveryFee'] ?? 0.0).toDouble(),
-      deliveryAddress: json['deliveryAddress']?.toString() ?? '',
-      paymentMethod: json['paymentMethod']?.toString() ?? 'COD',
-      storeLat: (json['storeLat'] ?? json['store_lat'])?.toDouble(),
-      storeLng: (json['storeLng'] ?? json['store_lng'])?.toDouble(),
-      deliveryLat: (json['deliveryLat'] ?? json['delivery_lat'])?.toDouble(),
-      deliveryLng: (json['deliveryLng'] ?? json['delivery_lng'])?.toDouble(),
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'].toString())
-          : DateTime.now(),
-      receiverName: json['receiverName']?.toString(),
-      receiverPhone: json['receiverPhone']?.toString(),
-      note: json['note']?.toString(),
-    );
-  }
-}
-
-class AvailableOrderItem {
-  final String foodId;
-  final String name;
-  final double price;
-  final int quantity;
-  final String? imageUrl;
-
-  AvailableOrderItem({
-    required this.foodId,
-    required this.name,
-    required this.price,
-    required this.quantity,
-    this.imageUrl,
-  });
-
-  factory AvailableOrderItem.fromJson(Map<String, dynamic> json) {
-    return AvailableOrderItem(
-      foodId: json['foodId']?.toString() ?? '',
-      name: json['name']?.toString() ?? '',
-      price: (json['price'] ?? 0.0).toDouble(),
-      quantity: (json['quantity'] ?? 1) as int,
-      imageUrl: json['imageUrl']?.toString(),
-    );
-  }
-}
 
 class AvailableOrdersScreen extends StatefulWidget {
   const AvailableOrdersScreen({super.key});
@@ -112,7 +20,7 @@ class AvailableOrdersScreen extends StatefulWidget {
 
 class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
   Timer? _pollingTimer;
-  List<AvailableOrder> _availableOrders = [];
+  List<OrderModel> _availableOrders = [];
   bool _isLoading = true;
   String? _error;
   final http.Client _client = http.Client();
@@ -160,7 +68,7 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
     }
   }
 
-  Future<List<AvailableOrder>> _fetchAvailableOrders() async {
+  Future<List<OrderModel>> _fetchAvailableOrders() async {
     try {
       final response = await _client
           .get(
@@ -186,7 +94,7 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
         }
         return data
             .map((json) =>
-                AvailableOrder.fromJson(json as Map<String, dynamic>))
+                OrderModel.fromJson(json as Map<String, dynamic>))
             .toList();
       }
       return [];
@@ -195,7 +103,7 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
     }
   }
 
-  Future<void> _acceptOrder(AvailableOrder order) async {
+  Future<void> _acceptOrder(OrderModel order) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -275,7 +183,7 @@ class _AvailableOrdersScreenState extends State<AvailableOrdersScreen> {
     }
   }
 
-  Future<void> _declineOrder(AvailableOrder order) async {
+  Future<void> _declineOrder(OrderModel order) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,

@@ -6,12 +6,12 @@ import 'package:geolocator/geolocator.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../services/location_service.dart';
-import '../../../../services/websocket_service.dart';
+import '../../../../services/driver_realtime_service.dart';
 import '../../../../features/driver/domain/repositories/driver_repository.dart';
 import '../../../../features/orders/domain/repositories/order_repository.dart';
 import '../../../../features/wallet/domain/repositories/wallet_repository.dart';
+import '../../../../models/driver_realtime_payloads.dart';
 import '../../../orders/data/models/order_request_model.dart';
-import '../../../orders/data/models/order_model.dart';
 import '../../data/repositories/home_repository_impl.dart';
 import 'home_event.dart';
 import 'home_state.dart';
@@ -22,20 +22,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final OrderRepository _orderRepository;
   final FlutterSecureStorage _secureStorage;
   final LocationService _locationService;
-  final WebSocketService _webSocketService;
+  final DriverRealtimeService _driverRealtimeService;
 
   StreamSubscription? _profileSub;
   StreamSubscription? _activeOrderSub;
   StreamSubscription? _recentOrdersSub;
   StreamSubscription? _statsSub;
   StreamSubscription? _walletSub;
-  StreamSubscription? _orderRequestsSub;
   StreamSubscription<Position>? _locationSub;
-  StreamSubscription? _wsOrderRequestSub;
-  StreamSubscription? _wsOrderStatusSub;
+  StreamSubscription<DriverRealtimeOrderRequest>? _orderRequestSub;
+  StreamSubscription<DriverRealtimeOrderStatus>? _orderStatusSub;
+  StreamSubscription<String>? _realtimeConnectionSub;
   Timer? _locationTimer;
 
   String? _currentDriverId;
+  final Set<String> _activeRequestIds = <String>{};
+  final Set<String> _dismissedRequestIds = <String>{};
+  Timer? _availableOrdersPollingTimer;
 
   HomeBloc({
     required HomeRepository homeRepository,
@@ -43,14 +46,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required OrderRepository orderRepository,
     required WalletRepository walletRepository,
     required FlutterSecureStorage secureStorage,
-    required WebSocketService webSocketService,
+    required DriverRealtimeService driverRealtimeService,
     LocationService? locationService,
   }) : _homeRepository = homeRepository,
        _driverRepository = driverRepository,
        _orderRepository = orderRepository,
        _secureStorage = secureStorage,
+       _driverRealtimeService = driverRealtimeService,
        _locationService = locationService ?? LocationService(),
-       _webSocketService = webSocketService,
        super(const HomeState()) {
     on<HomeLoadRequested>(_onHomeLoadRequested);
     on<HomeStopListening>(_onHomeStopListening);
@@ -67,12 +70,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<StatsUpdated>(_onStatsUpdated);
     on<WalletUpdated>(_onWalletUpdated);
     on<ClearErrorMessage>(_onClearErrorMessage);
+    on<ClearSuccessMessage>(_onClearSuccessMessage);
     on<ClearLocationPermissionRequest>(_onClearLocationPermissionRequest);
     on<TriggerReLogin>(_onTriggerReLogin);
-    on<OrderRequestsUpdated>(_onOrderRequestsUpdated);
+    on<ForegroundFcmOrderSignalReceived>(_onForegroundFcmOrderSignalReceived);
+    on<DismissOrderRequestPrompt>(_onDismissOrderRequestPrompt);
     on<RespondToOrderRequest>(_onRespondToOrderRequest);
-    on<WsOrderRequestReceived>(_onWsOrderRequestReceived);
-    on<WsOrderStatusReceived>(_onWsOrderStatusReceived);
+    on<RealtimeOrderStatusReceived>(_onRealtimeOrderStatusReceived);
+    on<RealtimeOrderRequestReceived>(_onRealtimeOrderRequestReceived);
   }
 
   Future<String> _getDriverId() async {
@@ -85,17 +90,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     _recentOrdersSub?.cancel();
     _statsSub?.cancel();
     _walletSub?.cancel();
-    _orderRequestsSub?.cancel();
-    _wsOrderRequestSub?.cancel();
-    _wsOrderStatusSub?.cancel();
+    _orderRequestSub?.cancel();
+    _orderStatusSub?.cancel();
+    _realtimeConnectionSub?.cancel();
+    _stopAvailableOrdersPolling();
     _profileSub = null;
     _activeOrderSub = null;
     _recentOrdersSub = null;
     _statsSub = null;
     _walletSub = null;
-    _orderRequestsSub = null;
-    _wsOrderRequestSub = null;
-    _wsOrderStatusSub = null;
+    _orderRequestSub = null;
+    _orderStatusSub = null;
+    _realtimeConnectionSub = null;
   }
 
   void _startLocationUpdates() {
@@ -190,6 +196,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     _currentDriverId = driverId;
+    _activeRequestIds.clear();
+    _dismissedRequestIds.clear();
     _cancelAllSubscriptions();
 
     _profileSub = _homeRepository.watchDriverProfile(driverId).listen((
@@ -219,7 +227,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     //   add(WalletUpdated(wallet));
     // });
 
-    await _connectWebSocket();
+    await _connectRealtime();
 
     emit(state.copyWith(status: HomeStatus.loaded));
   }
@@ -227,7 +235,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   void _onHomeStopListening(HomeStopListening event, Emitter<HomeState> emit) {
     _cancelAllSubscriptions();
     _stopLocationUpdates();
-    _disconnectWebSocket();
+    _disconnectRealtime();
+    _activeRequestIds.clear();
+    _dismissedRequestIds.clear();
     _currentDriverId = null;
   }
 
@@ -300,7 +310,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     _startLocationUpdates();
-    _connectWebSocket();
+    _connectRealtime();
     emit(
       state.copyWith(
         isTogglingStatus: false,
@@ -327,7 +337,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     try {
       _stopLocationUpdates();
-      _disconnectWebSocket();
+      _disconnectRealtime();
       await _driverRepository.updateDriverStatus(false);
       emit(
         state.copyWith(
@@ -374,6 +384,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     _startLocationUpdates();
+    await _connectRealtime();
     emit(
       state.copyWith(
         isTogglingStatus: false,
@@ -426,6 +437,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(clearErrorMessage: true));
   }
 
+  void _onClearSuccessMessage(
+    ClearSuccessMessage event,
+    Emitter<HomeState> emit,
+  ) {
+    emit(state.copyWith(clearSuccessMessage: true));
+  }
+
   void _onClearLocationPermissionRequest(
     ClearLocationPermissionRequest event,
     Emitter<HomeState> emit,
@@ -434,12 +452,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   void _onTriggerReLogin(TriggerReLogin event, Emitter<HomeState> emit) {
-    _disconnectWebSocket();
+    _disconnectRealtime();
     emit(state.copyWith(needsReLogin: true));
   }
 
   void _handleAuthFailure(Emitter<HomeState> emit) {
-    _disconnectWebSocket();
+    _disconnectRealtime();
     emit(state.copyWith(needsReLogin: true));
   }
 
@@ -552,10 +570,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   void _onProfileUpdated(ProfileUpdated event, Emitter<HomeState> emit) {
+    final isDriverOnline = event.profile?.isActive ?? false;
+
+    if (isDriverOnline) {
+      _startLocationUpdates();
+      _connectRealtime();
+    } else {
+      _stopLocationUpdates();
+      _disconnectRealtime();
+    }
+
     emit(
       state.copyWith(
         driverProfile: event.profile,
-        isOnline: (event.profile?.isActive ?? false),
+        isOnline: isDriverOnline,
       ),
     );
   }
@@ -593,211 +621,351 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(wallet: event.wallet));
   }
 
-  void _onOrderRequestsUpdated(
-    OrderRequestsUpdated event,
+  Future<void> _onForegroundFcmOrderSignalReceived(
+    ForegroundFcmOrderSignalReceived event,
+    Emitter<HomeState> emit,
+  ) async {
+    final isDismissed = _dismissedRequestIds.contains(event.orderId);
+    final isActive = _activeRequestIds.contains(event.orderId);
+    final isPending = state.pendingRequest?.orderId == event.orderId;
+    final existsInQueue = state.orderRequests.any(
+      (request) => request.orderId == event.orderId,
+    );
+
+    debugPrint(
+      '[HomeBloc] Foreground FCM signal received - orderId=${event.orderId}, requestId=${event.requestId}, dismissed=$isDismissed, active=$isActive, pending=$isPending, existsInQueue=$existsInQueue',
+    );
+
+    if (isDismissed || isActive || isPending || existsInQueue) {
+      debugPrint(
+        '[HomeBloc] Ignoring FCM signal - orderId=${event.orderId}, dismissed=$isDismissed, active=$isActive, pending=$isPending, existsInQueue=$existsInQueue',
+      );
+      return;
+    }
+
+    if (event.requestId == null || event.requestId!.isEmpty) {
+      debugPrint(
+        '[HomeBloc] Foreground FCM signal for order: ${event.orderId}. Waiting for WebSocket payload.',
+      );
+      return;
+    }
+
+    try {
+      debugPrint(
+        '[HomeBloc] Ensuring websocket connection after FCM signal - orderId=${event.orderId}, requestId=${event.requestId}',
+      );
+      await _connectRealtime();
+    } catch (e) {
+      debugPrint('[HomeBloc] Failed to ensure websocket connection after FCM signal: $e');
+    }
+  }
+
+  void _onDismissOrderRequestPrompt(
+    DismissOrderRequestPrompt event,
     Emitter<HomeState> emit,
   ) {
-    final requests = event.requests.cast<OrderRequestModel>();
-    final pending = requests.where((r) => r.isPending).toList();
+    _dismissedRequestIds.add(event.orderId);
 
-    if (pending.isNotEmpty && state.pendingRequest == null) {
-      emit(
-        state.copyWith(orderRequests: pending, pendingRequest: pending.first),
-      );
-    } else if (pending.isEmpty) {
-      emit(state.copyWith(orderRequests: const [], clearPendingRequest: true));
-    } else {
-      emit(state.copyWith(orderRequests: pending));
+    final remainingRequests = state.orderRequests
+        .where((request) => request.orderId != event.orderId)
+        .toList();
+
+    _activeRequestIds.remove(event.orderId);
+
+    emit(
+      state.copyWith(
+        orderRequests: remainingRequests,
+        pendingRequest:
+            remainingRequests.isEmpty ? null : remainingRequests.first,
+        clearPendingRequest: remainingRequests.isEmpty,
+      ),
+    );
+  }
+
+  void _onRealtimeOrderStatusReceived(
+    RealtimeOrderStatusReceived event,
+    Emitter<HomeState> emit,
+  ) {
+    final payload = event.payload;
+    final orderId = payload.orderId;
+
+    if (orderId != null && orderId.isNotEmpty) {
+      _activeRequestIds.remove(orderId);
+      _dismissedRequestIds.add(orderId);
     }
+
+    final remainingRequests = orderId == null || orderId.isEmpty
+        ? state.orderRequests
+        : state.orderRequests
+              .where((request) => request.orderId != orderId)
+              .toList();
+
+    if (payload.isAccepted) {
+      emit(
+        state.copyWith(
+          orderRequests: remainingRequests,
+          pendingRequest:
+              remainingRequests.isEmpty ? null : remainingRequests.first,
+          clearPendingRequest: remainingRequests.isEmpty,
+          clearErrorMessage: true,
+          successMessage: 'Da nhan don hang thanh cong.',
+          isAcceptingOrder: false,
+        ),
+      );
+      add(const HomeLoadRequested());
+      return;
+    }
+
+    if (payload.isDeclined) {
+      emit(
+        state.copyWith(
+          orderRequests: remainingRequests,
+          pendingRequest:
+              remainingRequests.isEmpty ? null : remainingRequests.first,
+          clearPendingRequest: remainingRequests.isEmpty,
+          clearErrorMessage: true,
+          clearSuccessMessage: true,
+          isAcceptingOrder: false,
+        ),
+      );
+      return;
+    }
+
+    if (payload.isAcceptFailed || payload.isDeclineFailed || payload.isError) {
+      emit(
+        state.copyWith(
+          orderRequests: remainingRequests,
+          pendingRequest:
+              remainingRequests.isEmpty ? null : remainingRequests.first,
+          clearPendingRequest: remainingRequests.isEmpty,
+          errorMessage: payload.message ?? 'Khong the xu ly yeu cau don hang.',
+          clearSuccessMessage: true,
+          isAcceptingOrder: false,
+        ),
+      );
+    }
+  }
+
+  void _onRealtimeOrderRequestReceived(
+    RealtimeOrderRequestReceived event,
+    Emitter<HomeState> emit,
+  ) {
+    final payload = event.payload;
+    final hasEmptyOrderId = payload.orderId.isEmpty;
+    final hasEmptyRequestId = payload.requestId.isEmpty;
+    final invalidEvent = payload.event != 'ORDER_REQUEST';
+    final hasExpired = payload.hasExpired;
+    final isDismissed = _dismissedRequestIds.contains(payload.orderId);
+    final isActive = _activeRequestIds.contains(payload.orderId);
+    final isPending = state.pendingRequest?.orderId == payload.orderId;
+    final existsInQueue = state.orderRequests.any(
+      (request) => request.orderId == payload.orderId,
+    );
+
+    debugPrint(
+      '[HomeBloc] Realtime order request received - event=${payload.event}, orderId=${payload.orderId}, requestId=${payload.requestId}, expiresAt=${payload.expiresAt}, hasExpired=$hasExpired, dismissed=$isDismissed, active=$isActive, pending=$isPending, existsInQueue=$existsInQueue',
+    );
+
+    if (hasEmptyOrderId ||
+        hasEmptyRequestId ||
+        invalidEvent ||
+        hasExpired ||
+        isDismissed ||
+        isActive ||
+        isPending ||
+        existsInQueue) {
+      debugPrint(
+        '[HomeBloc] Dropping realtime order request - orderId=${payload.orderId}, requestId=${payload.requestId}, hasEmptyOrderId=$hasEmptyOrderId, hasEmptyRequestId=$hasEmptyRequestId, invalidEvent=$invalidEvent, hasExpired=$hasExpired, dismissed=$isDismissed, active=$isActive, pending=$isPending, existsInQueue=$existsInQueue',
+      );
+      return;
+    }
+
+    final request = OrderRequestModel(
+      id: payload.requestId,
+      orderId: payload.orderId,
+      driverId: _currentDriverId ?? '',
+      status: 0,
+      createdAt: DateTime.now(),
+      orderData: payload.order,
+      source: 'websocket',
+      expiresAt: payload.expiresAt,
+    );
+
+    _activeRequestIds.add(payload.orderId);
+
+    debugPrint(
+      '[HomeBloc] Pending request set from realtime payload - orderId=${request.orderId}, requestId=${request.id}, queueSizeBefore=${state.orderRequests.length}',
+    );
+
+    emit(
+      state.copyWith(
+        orderRequests: [
+          request,
+          ...state.orderRequests.where(
+            (existing) => existing.orderId != payload.orderId,
+          ),
+        ],
+        pendingRequest: request,
+        clearErrorMessage: true,
+      ),
+    );
   }
 
   Future<void> _onRespondToOrderRequest(
     RespondToOrderRequest event,
     Emitter<HomeState> emit,
   ) async {
-    final driverId = _currentDriverId ?? await _getDriverId();
-    if (driverId.isEmpty) return;
+    debugPrint(
+      '[HomeBloc] Responding to order request - action=${event.action}, orderId=${event.orderId}, requestId=${event.requestId}, pendingRequestId=${state.pendingRequest?.id}, queuedRequestIds=${state.orderRequests.map((request) => request.id).toList()}',
+    );
 
-    emit(state.copyWith(pendingRequest: null, clearPendingRequest: true));
-
-    // Gui qua WebSocket truoc (low latency)
-    if (event.action == 'accept') {
-      _webSocketService.sendAccept(event.orderId);
-    } else if (event.action == 'decline') {
-      _webSocketService.sendDecline(event.orderId);
+    if (!event.hasValidRequestId) {
+      emit(
+        state.copyWith(
+          errorMessage:
+              'Khong the xu ly yeu cau don hang nay vi thieu requestId hop le.',
+        ),
+      );
+      return;
     }
 
+    final updatedRequests = state.orderRequests
+        .where((request) => request.orderId != event.orderId)
+        .toList();
+
+    _dismissedRequestIds.add(event.orderId);
+    _activeRequestIds.remove(event.orderId);
+
+    emit(
+      state.copyWith(
+        orderRequests: updatedRequests,
+        pendingRequest:
+            updatedRequests.isEmpty ? null : updatedRequests.first,
+        clearPendingRequest: updatedRequests.isEmpty,
+        clearErrorMessage: true,
+      ),
+    );
+
+    emit(
+      state.copyWith(
+        isAcceptingOrder: event.action == 'accept',
+        clearErrorMessage: true,
+        clearSuccessMessage: true,
+      ),
+    );
+
+    var sentViaWebsocket = false;
     try {
-      // Goi REST lam backup
-      await _orderRepository.respondOrder(event.orderId, event.action);
-      await _orderRepository.deleteOrderRequest(driverId, event.requestId);
+      sentViaWebsocket = event.action == 'accept'
+          ? await _driverRealtimeService.sendAccept(
+              orderId: event.orderId,
+              requestId: event.requestId,
+            )
+          : await _driverRealtimeService.sendDecline(
+              orderId: event.orderId,
+              requestId: event.requestId,
+            );
+      debugPrint(
+        '[HomeBloc] WebSocket response send result - action=${event.action}, orderId=${event.orderId}, requestId=${event.requestId}, sentViaWebsocket=$sentViaWebsocket',
+      );
     } catch (e) {
-      emit(state.copyWith(errorMessage: 'Khong the xu ly yeu cau: $e'));
+      debugPrint('[HomeBloc] WebSocket respond failed: $e');
+    }
+
+    if (!sentViaWebsocket) {
+      try {
+        debugPrint(
+          '[HomeBloc] Falling back to REST respondOrder - action=${event.action}, orderId=${event.orderId}, requestId=${event.requestId}',
+        );
+        await _orderRepository.respondOrder(
+          event.orderId,
+          event.action,
+          event.requestId,
+        );
+        emit(
+          state.copyWith(
+            isAcceptingOrder: false,
+            clearErrorMessage: true,
+            successMessage: event.action == 'accept'
+                ? 'Da nhan don hang thanh cong.'
+                : 'Da tu choi don hang.',
+          ),
+        );
+        if (event.action == 'accept') {
+          add(const HomeLoadRequested());
+        }
+      } catch (e) {
+        emit(
+          state.copyWith(
+            isAcceptingOrder: false,
+            clearSuccessMessage: true,
+            errorMessage: 'Khong the xu ly yeu cau: $e',
+          ),
+        );
+      }
+      return;
+    }
+
+    if (event.action != 'accept') {
+      emit(state.copyWith(isAcceptingOrder: false, clearSuccessMessage: true));
     }
   }
 
-  void _onWsOrderRequestReceived(
-    WsOrderRequestReceived event,
-    Emitter<HomeState> emit,
-  ) {
-    debugPrint('[HomeBloc] WS order request: ${event.orderId}');
-
-    final driverId = _currentDriverId ?? '';
-
-    final orderData = OrderModel(
-      id: event.orderId,
-      userId: '',
-      storeId: '',
-      storeName: event.storeName ?? '',
-      storeAddress: event.storeAddress,
-      items: const [],
-      totalAmount: event.totalAmount ?? 0,
-      deliveryFee: event.deliveryFee ?? event.estimatedEarning ?? 0,
-      estimatedEarning: event.estimatedEarning,
-      status: 0,
-      deliveryAddress: event.deliveryAddress ?? '',
-      paymentMethod: event.paymentMethod ?? 'CASH',
-      storeLat: event.storeLat,
-      storeLng: event.storeLng,
-      deliveryLat: event.deliveryLat,
-      deliveryLng: event.deliveryLng,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      receiverName: event.receiverName,
-      receiverPhone: event.receiverPhone,
-      code: event.orderCode,
-      note: event.note,
+  Future<void> _connectRealtime() async {
+    debugPrint(
+      '[HomeBloc] _connectRealtime invoked - hasOrderRequestSub=${_orderRequestSub != null}, hasOrderStatusSub=${_orderStatusSub != null}, serviceConnected=${_driverRealtimeService.isConnected}, currentDriverId=$_currentDriverId',
     );
 
-    final request = OrderRequestModel(
-      id: 'ws_${event.orderId}_${DateTime.now().millisecondsSinceEpoch}',
-      orderId: event.orderId,
-      driverId: driverId,
-      status: 0,
-      createdAt: DateTime.now(),
-      orderData: orderData,
-    );
+    if (_orderRequestSub != null && _orderStatusSub != null) {
+      if (_driverRealtimeService.isConnected) {
+        debugPrint('[HomeBloc] Realtime already connected, keeping existing subscriptions');
+        _startAvailableOrdersPolling();
+        return;
+      }
+    } else {
+      debugPrint('[HomeBloc] Creating realtime stream subscriptions');
+      _orderRequestSub = _driverRealtimeService.orderRequests.listen(
+        (payload) => add(RealtimeOrderRequestReceived(payload)),
+      );
+      _orderStatusSub = _driverRealtimeService.orderStatuses.listen(
+        (status) => add(RealtimeOrderStatusReceived(status)),
+      );
+      _realtimeConnectionSub = _driverRealtimeService.connectionStates.listen(
+        (state) => debugPrint('[HomeBloc] WebSocket state: $state'),
+      );
+    }
 
-    emit(state.copyWith(
-      orderRequests: [request],
-      pendingRequest: request,
-      clearErrorMessage: true,
-    ));
+    await _driverRealtimeService.connect();
+    debugPrint('[HomeBloc] Realtime connect() completed');
+    _startAvailableOrdersPolling();
   }
 
-  void _onWsOrderStatusReceived(
-    WsOrderStatusReceived event,
-    Emitter<HomeState> emit,
-  ) {
-    debugPrint('[HomeBloc] WS order status: ${event.type} for order ${event.orderId}');
+  void _disconnectRealtime() {
+    unawaited(_driverRealtimeService.disconnect());
+    _stopAvailableOrdersPolling();
+    debugPrint('[HomeBloc] Realtime disconnected');
+  }
 
-    switch (event.type) {
-      case 'ORDER_ACCEPTED':
-        emit(state.copyWith(
-          orderRequests: const [],
-          clearPendingRequest: true,
-          errorMessage: event.message ?? 'Ban da nhan don thanh cong.',
-        ));
-        add(const HomeLoadRequested());
-        break;
-      case 'ORDER_TAKEN_BY_OTHER':
-        emit(state.copyWith(
-          orderRequests: const [],
-          clearPendingRequest: true,
-          errorMessage: event.message ?? 'Don hang da duoc tai xe khac nhan.',
-        ));
-        break;
-      case 'ORDER_CANCELLED':
-        emit(state.copyWith(
-          orderRequests: const [],
-          clearPendingRequest: true,
-          errorMessage: event.message ?? 'Don hang da bi huy boi khach hang.',
-        ));
-        break;
-      default:
-        break;
-    }
+
+  void _startAvailableOrdersPolling() {
+    if (_availableOrdersPollingTimer != null) return;
+
+    _availableOrdersPollingTimer = Timer.periodic(
+      const Duration(seconds: 10),
+      (_) => add(const HomeLoadRequested()),
+    );
+  }
+
+  void _stopAvailableOrdersPolling() {
+    _availableOrdersPollingTimer?.cancel();
+    _availableOrdersPollingTimer = null;
   }
 
   @override
   Future<void> close() {
     _cancelAllSubscriptions();
     _stopLocationUpdates();
-    _disconnectWebSocket();
+    _disconnectRealtime();
     return super.close();
-  }
-
-  Future<void> _connectWebSocket() async {
-    try {
-      final token = await _secureStorage.read(key: AppConstants.driverTokenKey);
-      if (token == null || token.isEmpty) {
-        debugPrint('[HomeBloc] No token found for WebSocket connection');
-        return;
-      }
-
-      _wsOrderRequestSub = _webSocketService.orderRequestStream.listen((notification) {
-        if (notification.data != null) {
-          add(WsOrderRequestReceived(
-            orderId: notification.data!.orderId,
-            orderCode: notification.data!.orderCode,
-            message: notification.message ?? notification.data!.message,
-            storeName: notification.data!.storeName,
-            storeAddress: notification.data!.storeAddress,
-            storeLat: notification.data!.storeLat,
-            storeLng: notification.data!.storeLng,
-            deliveryAddress: notification.data!.deliveryAddress,
-            receiverName: notification.data!.receiverName,
-            receiverPhone: notification.data!.receiverPhone,
-            deliveryLat: notification.data!.deliveryLat,
-            deliveryLng: notification.data!.deliveryLng,
-            deliveryHeading: notification.data!.deliveryHeading,
-            deliveryFee: notification.data!.deliveryFee,
-            totalAmount: notification.data!.totalAmount,
-            finalAmount: notification.data!.finalAmount,
-            paymentMethod: notification.data!.paymentMethod,
-            note: notification.data!.note,
-            estimatedEarning: notification.data!.estimatedEarning,
-            expiresAt: notification.data!.expiresAt,
-            requestType: notification.data!.requestType,
-          ));
-        }
-      });
-
-      _wsOrderStatusSub = _webSocketService.orderStatusStream.listen((response) {
-        if (response.type.isNotEmpty) {
-          add(WsOrderStatusReceived(
-            type: response.type,
-            orderId: response.data,
-            message: response.message,
-          ));
-        }
-      });
-
-      if (!_webSocketService.isConnected && !_webSocketService.isConnecting) {
-        _webSocketService.connect(token);
-      }
-      debugPrint('[HomeBloc] WebSocket connected');
-    } catch (e) {
-      debugPrint('[HomeBloc] WebSocket connection failed: $e');
-    }
-  }
-
-  void _disconnectWebSocket() {
-    _wsOrderRequestSub?.cancel();
-    _wsOrderStatusSub?.cancel();
-    _wsOrderRequestSub = null;
-    _wsOrderStatusSub = null;
-    if (_webSocketService.isConnected || _webSocketService.isConnecting) {
-      _webSocketService.disconnect();
-    }
-    debugPrint('[HomeBloc] WebSocket disconnected');
-  }
-
-  void sendWsAccept(String orderId) {
-    _webSocketService.sendAccept(orderId);
-  }
-
-  void sendWsDecline(String orderId) {
-    _webSocketService.sendDecline(orderId);
   }
 }

@@ -31,7 +31,7 @@ import 'features/home/data/repositories/home_repository_impl.dart';
 import 'features/home/presentation/bloc/home_bloc.dart';
 import 'core/constants/app_constants.dart';
 import 'services/fcm_service.dart';
-import 'services/websocket_service.dart';
+import 'services/driver_realtime_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -60,9 +60,11 @@ Future<void> init() async {
 
   // FCM Service
   getIt.registerLazySingleton<FCMService>(() => FCMService());
-
-  // WebSocket Service
-  getIt.registerLazySingleton<WebSocketService>(() => WebSocketService());
+  getIt.registerLazySingleton<DriverRealtimeService>(
+    () => DriverRealtimeService(
+      secureStorage: getIt<FlutterSecureStorage>(),
+    ),
+  );
 
   // HTTP Client
   getIt.registerLazySingleton<http.Client>(() => http.Client());
@@ -203,7 +205,7 @@ Future<void> init() async {
       orderRepository: getIt<OrderRepository>(),
       walletRepository: getIt<WalletRepository>(),
       secureStorage: getIt<FlutterSecureStorage>(),
-      webSocketService: getIt<WebSocketService>(),
+      driverRealtimeService: getIt<DriverRealtimeService>(),
     ),
   );
 }

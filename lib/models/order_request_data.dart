@@ -1,5 +1,9 @@
 class OrderRequestData {
   final String orderId;
+  final String? requestId;
+  final String? driverId;
+  final String? event;
+  final String? status;
   final String? orderCode;
   final String? message;
   final String? storeName;
@@ -18,11 +22,15 @@ class OrderRequestData {
   final String? paymentMethod;
   final String? note;
   final double? estimatedEarning;
-  final int? expiresAt;
+  final DateTime? expiresAt;
   final int? requestType;
 
   OrderRequestData({
     required this.orderId,
+    this.requestId,
+    this.driverId,
+    this.event,
+    this.status,
     this.orderCode,
     this.message,
     this.storeName,
@@ -47,7 +55,11 @@ class OrderRequestData {
 
   factory OrderRequestData.fromJson(Map<String, dynamic> json) {
     return OrderRequestData(
-      orderId: json['orderId'] ?? '',
+      orderId: json['orderId']?.toString() ?? '',
+      requestId: json['requestId']?.toString(),
+      driverId: json['driverId']?.toString(),
+      event: json['event']?.toString(),
+      status: json['status']?.toString(),
       orderCode: json['orderCode']?.toString(),
       message: json['message']?.toString(),
       storeName: json['storeName']?.toString(),
@@ -66,8 +78,8 @@ class OrderRequestData {
       paymentMethod: json['paymentMethod']?.toString(),
       note: json['note']?.toString(),
       estimatedEarning: _toDouble(json['estimatedEarning']),
-      expiresAt: json['expiresAt'] is int ? json['expiresAt'] : int.tryParse(json['expiresAt']?.toString() ?? ''),
-      requestType: json['requestType'] is int ? json['requestType'] : int.tryParse(json['requestType']?.toString() ?? ''),
+      expiresAt: _toDateTime(json['expiresAt']),
+      requestType: _toInt(json['requestType']),
     );
   }
 
@@ -78,24 +90,70 @@ class OrderRequestData {
     if (v is String) return double.tryParse(v);
     return null;
   }
+
+  static int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static DateTime? _toDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (_) {
+        final asInt = int.tryParse(value);
+        return _toDateTime(asInt);
+      }
+    }
+    if (value is int) {
+      final milliseconds = value > 1000000000000 ? value : value * 1000;
+      return DateTime.fromMillisecondsSinceEpoch(milliseconds);
+    }
+    return null;
+  }
 }
 
 class OrderRequestNotification {
   final String type;
+  final String? event;
   final OrderRequestData? data;
   final String? message;
 
   OrderRequestNotification({
     required this.type,
+    this.event,
     this.data,
     this.message,
   });
 
   factory OrderRequestNotification.fromJson(Map<String, dynamic> json) {
+    final rawData = json['data'];
+    final dataMap = rawData is Map<String, dynamic>
+        ? rawData
+        : rawData is String && rawData.isNotEmpty
+            ? <String, dynamic>{'orderId': rawData}
+            : null;
+
+    final rootHasOrderRequestFields =
+        json['orderId'] != null || json['requestId'] != null || json['driverId'] != null;
+
+    final normalizedPayload = dataMap ??
+        (rootHasOrderRequestFields
+            ? <String, dynamic>{
+                ...json,
+                if (json['message'] != null) 'message': json['message'],
+              }
+            : null);
+
     return OrderRequestNotification(
-      type: json['type'] ?? '',
-      data: json['data'] != null
-          ? OrderRequestData.fromJson(json['data'] as Map<String, dynamic>)
+      type: json['type']?.toString() ?? json['event']?.toString() ?? '',
+      event: json['event']?.toString(),
+      data: normalizedPayload != null
+          ? OrderRequestData.fromJson(normalizedPayload)
           : null,
       message: json['message']?.toString(),
     );

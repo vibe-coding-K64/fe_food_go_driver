@@ -24,7 +24,18 @@ class HomeRemoteDataSource extends BaseRemoteDataSource {
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        return decoded as Map<String, dynamic>;
+        final data = decoded is Map<String, dynamic> ? decoded['data'] ?? decoded : decoded;
+        if (data is Map<String, dynamic>) {
+          // Map StatsDTO backend -> frontend format
+          return {
+            'totalOrders': data['totalTrips'] ?? data['total_trips'] ?? 0,
+            'totalTrips': data['totalTrips'] ?? data['total_trips'] ?? 0,
+            'ordersToday': data['todayTrips'] ?? data['today_trips'] ?? 0,
+            'earningsToday': (data['todayEarnings'] ?? data['today_earnings'] ?? 0.0).toDouble(),
+            'balance': (data['balance'] ?? 0.0).toDouble(),
+            'rating': (data['averageRating'] ?? data['average_rating'] ?? 0.0).toDouble(),
+          };
+        }
       }
       return {
         'ordersToday': 0,

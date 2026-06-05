@@ -125,6 +125,14 @@ class WalletUpdated extends HomeEvent {
   const WalletUpdated(this.wallet);
 }
 
+final class LoadWalletRequested extends HomeEvent {
+  const LoadWalletRequested();
+}
+
+final class LoadStatsRequested extends HomeEvent {
+  const LoadStatsRequested();
+}
+
 final class ForegroundFcmOrderSignalReceived extends HomeEvent {
   final String orderId;
   final String? requestId;

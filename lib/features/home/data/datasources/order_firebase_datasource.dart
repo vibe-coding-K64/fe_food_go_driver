@@ -1,12 +1,14 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../../../orders/data/models/order_model.dart';
 
 class OrderFirebaseDataSource {
-  final FirebaseFirestore _firestore;
-
   OrderFirebaseDataSource({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
+
+  final FirebaseFirestore _firestore;
 
   void _log(String message) {
     debugPrint('[OrderFirebaseDataSource] $message');
@@ -22,6 +24,9 @@ class OrderFirebaseDataSource {
         .where('deletedAt', isNull: true)
         .orderBy('createdAt', descending: true)
         .snapshots()
+        .handleError((error, stack) {
+          _log('watchAvailableOrders stream error: $error');
+        })
         .map(
           (snap) => snap.docs
               .map((doc) => OrderModel.fromJson(_fromFirestore(doc)))
@@ -38,6 +43,9 @@ class OrderFirebaseDataSource {
         .where('status', isEqualTo: 2)
         .where('deletedAt', isNull: true)
         .snapshots()
+        .handleError((error, stack) {
+          _log('watchDriverActiveOrders stream error: $error');
+        })
         .map(
           (snap) => snap.docs
               .map((doc) => OrderModel.fromJson(_fromFirestore(doc)))
@@ -48,7 +56,20 @@ class OrderFirebaseDataSource {
   Stream<OrderModel?> watchSingleActiveOrder(String driverId) {
     _log('watchSingleActiveOrder($driverId)');
 
-    return const Stream<OrderModel?>.empty();
+    return _firestore
+        .collection('orders')
+        .where('driverId', isEqualTo: driverId)
+        .where('status', whereIn: [1, 2])
+        .where('deletedAt', isNull: true)
+        .snapshots()
+        .handleError((error, stack) {
+          _log('watchSingleActiveOrder stream error: $error');
+        })
+        .map(
+          (snap) => snap.docs.isEmpty
+              ? null
+              : OrderModel.fromJson(_fromFirestore(snap.docs.first)),
+        );
   }
 
   Stream<List<OrderModel>> watchDriverRecentOrders(
@@ -57,7 +78,21 @@ class OrderFirebaseDataSource {
   }) {
     _log('watchDriverRecentOrders($driverId, limit=$limit)');
 
-    return const Stream<List<OrderModel>>.empty();
+    return _firestore
+        .collection('orders')
+        .where('driverId', isEqualTo: driverId)
+        .where('status', whereIn: [1, 2, 3, 4])
+        .orderBy('updatedAt', descending: true)
+        .limit(limit)
+        .snapshots()
+        .handleError((error, stack) {
+          _log('watchDriverRecentOrders stream error: $error');
+        })
+        .map(
+          (snap) => snap.docs
+              .map((doc) => OrderModel.fromJson(_fromFirestore(doc)))
+              .toList(),
+        );
   }
 
   Map<String, dynamic> _fromFirestore(DocumentSnapshot doc) {
@@ -76,6 +111,15 @@ class OrderFirebaseDataSource {
       'deletedAt': data['deletedAt'] is Timestamp
           ? (data['deletedAt'] as Timestamp).toDate().toIso8601String()
           : data['deletedAt'],
+      'pickedUpAt': data['pickedUpAt'] is Timestamp
+          ? (data['pickedUpAt'] as Timestamp).toDate().toIso8601String()
+          : data['pickedUpAt'],
+      'arrivedAtStoreAt': data['arrivedAtStoreAt'] is Timestamp
+          ? (data['arrivedAtStoreAt'] as Timestamp).toDate().toIso8601String()
+          : data['arrivedAtStoreAt'],
+      'deliveredAt': data['deliveredAt'] is Timestamp
+          ? (data['deliveredAt'] as Timestamp).toDate().toIso8601String()
+          : data['deliveredAt'],
     };
   }
 }

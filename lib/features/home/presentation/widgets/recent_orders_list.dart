@@ -30,6 +30,7 @@ class _RecentOrdersListState extends State<RecentOrdersList> {
     _filters.clear();
     _filters.addAll([
       l10n.allOrders,
+      l10n.pickingUp,
       l10n.delivering,
       l10n.delivered,
       l10n.cancelled,
@@ -39,11 +40,13 @@ class _RecentOrdersListState extends State<RecentOrdersList> {
   List<Order> _filteredOrders() {
     switch (_selectedFilter) {
       case 1:
-        return widget.orders.where((o) => o.statusCode == 'DELIVERING').toList();
+        return widget.orders.where((o) => o.isPickingUp).toList();
       case 2:
-        return widget.orders.where((o) => o.statusCode == 'COMPLETED').toList();
+        return widget.orders.where((o) => o.isOnTheWay).toList();
       case 3:
-        return widget.orders.where((o) => o.statusCode == 'CANCELLED').toList();
+        return widget.orders.where((o) => o.isCompleted).toList();
+      case 4:
+        return widget.orders.where((o) => o.isCancelled).toList();
       default:
         return widget.orders;
     }

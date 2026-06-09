@@ -213,8 +213,8 @@ Tất cả các package đã được khai báo trong `pubspec.yaml`:
 2. Chọn **Add user** và tạo tài khoản:
 
    ```
-   Email:    driver_test@example.com
-   Password: Test123456
+   Email:    trangkimdatst2005@gmail.com
+   Password: Kimdat@123
    ```
 
 3. Hoặc đăng ký trực tiếp trong ứng dụng.

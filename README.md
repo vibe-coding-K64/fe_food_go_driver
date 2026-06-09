@@ -1,15 +1,15 @@
 # Food Go Driver
 
-Ung dung tai xe giao hang cho he thong Food Go - giao hang thuc an truc tuyen.
+Ứng dụng tài xế giao hàng cho hệ thống Food Go - giao hàng thực phẩm trực tuyến.
 
 ---
 
-## Cong nghe su dung
+## Công nghệ sử dụng
 
-| Linh vuc | Cong nghe |
+| Lĩnh vực | Công nghệ |
 |---|---|
 | Framework | Flutter |
-| Ngon ngu | Dart |
+| Ngôn ngữ | Dart |
 | State Management | flutter_bloc |
 | Dependency Injection | get_it |
 | Real-time Communication | STOMP (WebSocket) |
@@ -22,14 +22,14 @@ Ung dung tai xe giao hang cho he thong Food Go - giao hang thuc an truc tuyen.
 
 ---
 
-## Phien ban
+## Phiên bản
 
 - **Flutter SDK:** `^3.11.1`
 - **Dart SDK:** `^3.11.1`
 - **Android Gradle Plugin:** 8.x
 - **Kotlin:** 1.9.x
 
-Kiem tra phien ban Flutter dang su dung:
+Kiểm tra phiên bản Flutter đang sử dụng:
 
 ```bash
 flutter --version
@@ -37,14 +37,14 @@ flutter --version
 
 ---
 
-## Cac buoc cai dat va chay project
+## Các bước cài đặt và chạy project
 
-### 1. Yeu cau he thong
+### 1. Yêu cầu hệ thống
 
 - Flutter SDK >= 3.11.1
 - Dart SDK >= 3.11.1
-- Android SDK (neu build Android)
-- Xcode + CocoaPods (neu build iOS, chi tren macOS)
+- Android SDK (nếu build Android)
+- Xcode + CocoaPods (nếu build iOS, chỉ trên macOS)
 - Git
 
 ### 2. Clone project
@@ -54,40 +54,40 @@ git clone <repo-url>
 cd fe_food_go_driver
 ```
 
-### 3. Cai dat dependencies
+### 3. Cài đặt dependencies
 
 ```bash
 flutter pub get
 ```
 
-### 4. Cau hinh Firebase
+### 4. Cấu hình Firebase
 
-Ung dung su dung Firebase, can thuc hien cac buoc sau:
+Ứng dụng sử dụng Firebase, cần thực hiện các bước sau:
 
-1. Tao project Firebase tai [Firebase Console](https://console.firebase.google.com/)
-2. Dang ky ung dung Android:
-   - Lay `google-services.json` tu Firebase Console -> Project Settings -> Your apps
-   - Dat file `google-services.json` vao `android/app/google-services.json`
-3. Dang ky ung dung iOS:
-   - Lay `GoogleService-Info.plist` tu Firebase Console
-   - Dat file vao `ios/Runner/GoogleService-Info.plist`
-4. Bat Firebase Authentication:
-   - Vao Firebase Console -> Authentication -> Sign-in method
-   - Bat **Email/Password**
-5. Tao Firestore Database:
-   - Vao Firebase Console -> Firestore Database -> Create database
-   - Dat rules cho phep doc/ghi hoac thiet lap rules phu hop
-6. Tao Realtime Database:
-   - Vao Firebase Console -> Realtime Database -> Create Database
-7. Cau hinh Cloud Messaging (FCM):
-   - Vao Firebase Console -> Project Settings -> Cloud Messaging
-   - Lay **Server key** de cau hinh phia server gui notification
+1. Tạo project Firebase tại [Firebase Console](https://console.firebase.google.com/)
+2. Đăng ký ứng dụng Android:
+   - Lấy `google-services.json` từ Firebase Console -> Project Settings -> Your apps
+   - Đặt file `google-services.json` vào `android/app/google-services.json`
+3. Đăng ký ứng dụng iOS:
+   - Lấy `GoogleService-Info.plist` từ Firebase Console
+   - Đặt file vào `ios/Runner/GoogleService-Info.plist`
+4. Bật Firebase Authentication:
+   - Vào Firebase Console -> Authentication -> Sign-in method
+   - Bật **Email/Password**
+5. Tạo Firestore Database:
+   - Vào Firebase Console -> Firestore Database -> Create database
+   - Đặt rules cho phép đọc/ghi hoặc thiết lập rules phù hợp
+6. Tạo Realtime Database:
+   - Vào Firebase Console -> Realtime Database -> Create Database
+7. Cấu hình Cloud Messaging (FCM):
+   - Vào Firebase Console -> Project Settings -> Cloud Messaging
+   - Lấy **Server key** để cấu hình phía server gửi notification
 
-### 5. Cau hinh Android
+### 5. Cấu hình Android
 
-#### Them quyen trong `android/app/src/main/AndroidManifest.xml`
+#### Thêm quyền trong `android/app/src/main/AndroidManifest.xml`
 
-File da co san cac quyen can thiet:
+File đã có sẵn các quyền cần thiết:
 
 ```xml
 <uses-permission android:name="android.permission.INTERNET" />
@@ -100,9 +100,9 @@ File da co san cac quyen can thiet:
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 ```
 
-#### Cau hinh minSdkVersion
+#### Cấu hình minSdkVersion
 
-Trong `android/app/build.gradle`, dam bao `minSdkVersion` >= 21:
+Trong `android/app/build.gradle`, đảm bảo `minSdkVersion` >= 21:
 
 ```groovy
 defaultConfig {
@@ -111,7 +111,7 @@ defaultConfig {
 }
 ```
 
-#### Them Google Services plugin
+#### Thêm Google Services plugin
 
 Trong `android/build.gradle` (project-level):
 
@@ -130,15 +130,15 @@ plugins {
 }
 ```
 
-### 6. Cau hinh iOS (chi macOS)
+### 6. Cấu hình iOS (chỉ macOS)
 
-#### Them quyen trong `ios/Runner/Info.plist`
+#### Thêm quyền trong `ios/Runner/Info.plist`
 
 ```xml
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>App can xac dinh vi tri cua ban de nhan don giao hang</string>
+<string>App có thể xác định vị trí của bạn để nhận đơn giao hàng</string>
 <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>App can xac dinh vi tri khi chay nen de cap nhat vi tri lien tuc</string>
+<string>App có thể xác định vị trí khi chạy nền để cập nhật vị trí liên tục</string>
 <key>UIBackgroundModes</key>
 <array>
     <string>location</string>
@@ -146,7 +146,7 @@ plugins {
 </array>
 ```
 
-#### Chay pod install
+#### Chạy pod install
 
 ```bash
 cd ios
@@ -154,10 +154,10 @@ pod install
 cd ..
 ```
 
-### 7. Chay ung dung
+### 7. Chạy ứng dụng
 
 ```bash
-# Chay che do debug
+# Chạy chế độ debug
 flutter run
 
 # Build APK debug
@@ -169,110 +169,110 @@ flutter build apk --release
 
 ---
 
-## Cac package/dependency can cai
+## Các package/dependency cần cài
 
-Tat ca cac package da duoc khai bao trong `pubspec.yaml`:
+Tất cả các package đã được khai báo trong `pubspec.yaml`:
 
-| Package | Phien ban | Muc dich |
+| Package | Phiên bản | Mục đích |
 |---|---|---|
-| flutter_bloc | ^8.1.6 | Quan ly trang thai |
-| equatable | ^2.0.5 | So sanh doi tuong |
+| flutter_bloc | ^8.1.6 | Quản lý trạng thái |
+| equatable | ^2.0.5 | So sánh đối tượng |
 | dartz | ^0.10.1 | Functional programming |
 | rxdart | ^0.28.0 | Reactive extensions |
 | get_it | ^8.0.3 | Dependency injection |
-| shared_preferences | ^2.3.5 | Luu tru cuc bo |
-| flutter_secure_storage | ^9.2.4 | Luu tru an toan |
-| intl | ^0.20.2 | Đinh dang ngon ngu |
-| http | ^1.2.0 | Goi API |
+| shared_preferences | ^2.3.5 | Lưu trữ cục bộ |
+| flutter_secure_storage | ^9.2.4 | Lưu trữ an toàn |
+| intl | ^0.20.2 | Định dạng ngôn ngữ |
+| http | ^1.2.0 | Gọi API |
 | stomp_dart_client | ^3.0.1 | WebSocket STOMP |
-| geolocator | ^13.0.2 | Lay vi tri |
-| permission_handler | ^11.3.1 | Xu ly quyen |
+| geolocator | ^13.0.2 | Lấy vị trí |
+| permission_handler | ^11.3.1 | Xử lý quyền |
 | flutter_tts | ^4.2.0 | Text-to-speech |
-| flutter_map | ^7.0.2 | Ban do |
-| latlong2 | ^0.9.1 | Toa do dia ly |
-| google_fonts | ^6.2.1 | Phong chu |
-| shimmer | ^3.0.0 | Hieu ung loading |
-| pinput | ^5.0.0 | Nhap OTP |
-| url_launcher | ^6.3.1 | Mo URL |
+| flutter_map | ^7.0.2 | Bản đồ |
+| latlong2 | ^0.9.1 | Tọa độ địa lý |
+| google_fonts | ^6.2.1 | Phông chữ |
+| shimmer | ^3.0.0 | Hiệu ứng loading |
+| pinput | ^5.0.0 | Nhập OTP |
+| url_launcher | ^6.3.1 | Mở URL |
 | firebase_core | ^3.12.1 | Firebase core |
 | cloud_firestore | ^5.6.6 | Cloud Firestore |
 | firebase_database | ^11.3.5 | Realtime Database |
-| firebase_auth | ^5.5.3 | Xac thuc |
+| firebase_auth | ^5.5.3 | Xác thực |
 | firebase_messaging | ^15.2.4 | Push notification |
-| flutter_local_notifications | ^21.0.0 | Thong bao cuc bo |
+| flutter_local_notifications | ^21.0.0 | Thông báo cục bộ |
 
 ---
 
-## Tai khoan test
+## Tài khoản test
 
-Ung dung su dung Firebase Authentication (Email/Password).
+Ứng dụng sử dụng Firebase Authentication (Email/Password).
 
-### Tao tai khoan test
+### Tạo tài khoản test
 
-1. Vao Firebase Console -> Authentication -> Users
-2. Chon **Add user** va tao tai khoan:
+1. Vào Firebase Console -> Authentication -> Users
+2. Chọn **Add user** và tạo tài khoản:
 
    ```
    Email:    driver_test@example.com
    Password: Test123456
    ```
 
-3. Hoac dang ky truc tiep trong ung dung.
+3. Hoặc đăng ký trực tiếp trong ứng dụng.
 
-### Phan quyen driver
+### Phân quyền driver
 
-Tai khoan driver can duoc tao/phan quyen tu phia backend API. Khi driver dang nhap, backend se kiem tra thong tin va tra ve token.
+Tài khoản driver cần được tạo/phân quyền từ phía backend API. Khi driver đăng nhập, backend sẽ kiểm tra thông tin và trả về token.
 
 ---
 
-## Cac loi can luu y de project hoat dong
+## Các lỗi cần lưu ý để project hoạt động
 
-### 1. Quyen location
+### 1. Quyền location
 
-Ung dung yeu cau **quyen vi tri** de:
-- Hien thi vi tri tai xe tren ban do
-- Cap nhat vi tri len server (real-time tracking)
-- Nhan don giao hang gan vi tri
+Ứng dụng yêu cầu **quyền vị trí** để:
+- Hiển thị vị trí tài xế trên bản đồ
+- Cập nhật vị trí lên server (real-time tracking)
+- Nhận đơn giao hàng gần vị trí
 
-Neu khong cap quyen vi tri, mot so chuc nang se khong hoat dong.
+Nếu không cấp quyền vị trí, một số chức năng sẽ không hoạt động.
 
 ### 2. Firebase Configuration
 
-- File `google-services.json` (Android) va `GoogleService-Info.plist` (iOS) **bat buoc** phai co. Neu khong co, ung dung se loi khi khoi dong.
-- Dam bao Firebase project da bat cac dich vu: **Authentication**, **Firestore**, **Realtime Database**, **Cloud Messaging**.
+- File `google-services.json` (Android) và `GoogleService-Info.plist` (iOS) **bắt buộc** phải có. Nếu không có, ứng dụng sẽ lỗi khi khởi động.
+- Đảm bảo Firebase project đã bật các dịch vụ: **Authentication**, **Firestore**, **Realtime Database**, **Cloud Messaging**.
 
 ### 3. WebSocket / STOMP
 
-Ung dung ket noi den server qua **STOMP over WebSocket** de nhan don giao hang real-time. Dam bao:
-- Server backend da cau hinh WebSocket endpoint
-- Dia chi server (URL) da duoc cau hinh dung trong `lib/core/api/api_constants.dart` hoac `lib/injection_container.dart`
-- Device co internet de ket noi
+Ứng dụng kết nối đến server qua **STOMP over WebSocket** để nhận đơn giao hàng real-time. Đảm bảo:
+- Server backend đã cấu hình WebSocket endpoint
+- Địa chỉ server (URL) đã được cấu hình đúng trong `lib/core/api/api_constants.dart` hoặc `lib/injection_container.dart`
+- Thiết bị có internet để kết nối
 
 ### 4. API Backend
 
-Ung dung goi API den backend (REST) cho cac tac vu nhu:
-- Dang nhap / xac thuc
-- Lay danh sach don hang
-- Cap nhat trang thai don hang
-- Lay thong tin nguoi dung
+Ứng dụng gọi API đến backend (REST) cho các tác vụ như:
+- Đăng nhập / xác thực
+- Lấy danh sách đơn hàng
+- Cập nhật trạng thái đơn hàng
+- Lấy thông tin người dùng
 
-Dam bao backend API da chay va dia chi da duoc cau hinh dung.
+Đảm bảo backend API đã chạy và địa chỉ đã được cấu hình đúng.
 
-### 5. Notification khi app o nen
+### 5. Notification khi app ở nền
 
-Khi app o che do nen (background/terminated), push notification duoc gui qua **FCM**. Can:
-- Cai dat `firebase_messaging`
-- Cau hinh FCM server key phia backend de gui notification
+Khi app ở chế độ nền (background/terminated), push notification được gửi qua **FCM**. Cần:
+- Cài đặt `firebase_messaging`
+- Cấu hình FCM server key phía backend để gửi notification
 
 ### 6. Foreground Service (Android)
 
-Ung dung su dung **Foreground Service** de cap nhat vi tri khi app o nen. Dam bao:
-- Quyen `FOREGROUND_SERVICE` va `FOREGROUND_SERVICE_LOCATION` da duoc khai bao
-- Khong tat ung dung khi dang giao hang
+Ứng dụng sử dụng **Foreground Service** để cập nhật vị trí khi app ở nền. Đảm bảo:
+- Quyền `FOREGROUND_SERVICE` và `FOREGROUND_SERVICE_LOCATION` đã được khai báo
+- Không tắt ứng dụng khi đang giao hàng
 
-### 7. Thu muc assets
+### 7. Thư mục assets
 
-Dam bao thu muc assets ton tai:
+Đảm bảo thư mục assets tồn tại:
 
 ```
 assets/
@@ -280,41 +280,41 @@ assets/
   img/
 ```
 
-Neu khong co, chay:
+Nếu không có, chạy:
 
 ```bash
 mkdir -p assets/lang assets/img
 ```
 
-### 8. Build loi thuong gap
+### 8. Build lỗi thường gặp
 
-- **Loi `minSdkVersion`:** Tang minSdkVersion trong `build.gradle` len 21+
-- **Loi `google-services.json`:** Kiem tra file co dung project Firebase
-- **Loi `pod install` (iOS):** Chay `cd ios && pod install --repo-update`
-- **Loi Flutter: `Unable to find git`:** Cai dat git va them vao PATH
+- **Lỗi `minSdkVersion`:** Tăng minSdkVersion trong `build.gradle` lên 21+
+- **Lỗi `google-services.json`:** Kiểm tra file có đúng project Firebase
+- **Lỗi `pod install` (iOS):** Chạy `cd ios && pod install --repo-update`
+- **Lỗi Flutter: `Unable to find git`:** Cài đặt git và thêm vào PATH
 
 ---
 
-## Cau truc project
+## Cấu trúc project
 
 ```
 lib/
-  core/           # Cau hinh chung, API, constants, theme
-  features/       # Cac chuc nang theo feature
-    auth/         # Dang nhap, xac thuc
-    home/         # Man hinh chinh, nhan don hang
-    orders/       # Quan ly don hang
-    profile/      # Thong tin tai xe
-  injection_container.dart  # Cau hinh DI (get_it)
+  core/           # Cấu hình chung, API, constants, theme
+  features/       # Các chức năng theo feature
+    auth/         # Đăng nhập, xác thực
+    home/         # Màn hình chính, nhận đơn hàng
+    orders/       # Quản lý đơn hàng
+    profile/      # Thông tin tài xế
+  injection_container.dart  # Cấu hình DI (get_it)
   main.dart      # Entry point
 ```
 
 ---
 
-## Lien he / Ho tro
+## Liên hệ / Hỗ trợ
 
-Neu gap van de khi cai dat hoac chay du an, vui long kiem tra:
-1. Cac buoc cau hinh Firebase o tren
-2. Phien ban Flutter/Dart
-3. Quyen truy cap (location, internet)
-4. Backend API va WebSocket server da chay
+Nếu gặp vấn đề khi cài đặt hoặc chạy dự án, vui lòng kiểm tra:
+1. Các bước cấu hình Firebase ở trên
+2. Phiên bản Flutter/Dart
+3. Quyền truy cập (location, internet)
+4. Backend API và WebSocket server đã chạy

@@ -64,7 +64,7 @@ Luồng này chỉ áp dụng cho **order request realtime**. Với màn hình d
 
 ### Khi app background hoặc mất socket
 
-Nên dùng thêm FCM hoặc cơ chế refresh dữ liệu để đồng bộ lại danh sách đơn.
+Nên dùng thêm polling dữ liệu để đồng bộ lại danh sách đơn.
 
 ---
 

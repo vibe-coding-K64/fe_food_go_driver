@@ -325,7 +325,7 @@ Khi lỗi:
 
 ---
 
-## Real-time Data (Firestore)
+## Real-time Data
 
 ### Collections & Queries
 
@@ -363,7 +363,7 @@ Khi lỗi:
 3. GET /api/drivers/orders/current                <- Lay don vua nhan
    |
    v
-4. Firestore watch cap nhat UI                   <- Real-time
+4. WebSocket subscription cap nhat UI            <- Real-time
 ```
 
 ## Thu tu goi khi hoan thanh don

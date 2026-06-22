@@ -7,7 +7,7 @@
 3. [Luồng 2 — Nhận đơn hàng (tự chọn)](#3-luồng-2--nhận-đơn-hàng-tự-chọn)
 4. [Luồng 3 — Hệ thống gán đơn tự động](#4-luồng-3--hệ-thống-gán-đơn-tự-động)
 5. [Luồng 4 — Giao đơn hàng (trạng thái)](#5-luồng-4--giao-đơn-hàng-trạng-thái)
-6. [Luồng 5 — Thông báo Push (FCM)](#6-luồng-5--thông-báo-push-fcm)
+6. [Luồng 5 — Thông báo Push (WebSocket)](#6-luồng-5--thông-báo-push-websocket)
 7. [Luồng 6 — Ví & Rút tiền](#7-luồng-6--ví--rút-tiền)
 8. [Luồng 7 — Từ chối đơn hàng](#8-luồng-7--từ-chối-đơn-hàng)
 9. [Luồng 8 — GPS Realtime](#9-luồng-8--gps-realtime)
@@ -34,8 +34,8 @@ Khách đặt món
          │ OrderAssignmentService tìm tài xế trong bán kính 5km
          ▼
 ┌─────────────────────────────────────────────┐
-│  Gửi FCM Push Notification (type=11)        │
-│  Tạo order_requests trong Firestore         │
+│  Gửi WebSocket Push Notification (type=11) │
+│  Tạo order_requests trong database          │
 └────────┬────────────────────────────────────┘
          │
          ▼
@@ -69,7 +69,7 @@ Khách đặt món
          ▼
 ┌─────────────────────────────┐
 │ Order status = 3            │  COMPLETED — hoàn thành
-│ Tạo Transaction (type=1)    │  Wallet.balance += deliveryFee
+│ Tạo Transaction (type=1)   │  Wallet.balance += deliveryFee
 │ Wallet.totalEarned += fee   │
 └─────────────────────────────┘
 ```
@@ -78,11 +78,11 @@ Khách đặt món
 
 | Thành phần | Vai trò |
 |---|---|
-| **Firestore `orders/{id}`** | Lưu trữ đơn hàng chính |
+| **Database `orders/{id}`** | Lưu trữ đơn hàng chính |
 | **Realtime Database `/active_drivers/{id}`** | Vị trí GPS tài xế đang online |
 | **Realtime Database `/orders/{id}/status`** | Sync trạng thái để listener theo dõi |
-| **Firestore `order_requests/{id}`** | Yêu cầu nhận đơn — danh sách tài xế được gán |
-| **Firestore `driver_profiles/{id}/notifications`** | Thông báo của tài xế |
+| **Database `order_requests/{id}`** | Yêu cầu nhận đơn — danh sách tài xế được gán |
+| **Database `driver_profiles/{id}/notifications`** | Thông báo của tài xế |
 | **OrderAssignmentService** | Tự động tìm tài xế khi có đơn mới |
 | **DriverLocationMonitorService** | Tự động offline tài xế nếu không cập nhật GPS > 60s |
 
@@ -227,7 +227,7 @@ Tài xế nhấn "Nhận đơn" trên card X
 ③ POST /api/drivers/orders/{id}/accept
     │
     ├─► 200 SUCCESS
-    │   Backend thực hiện (Firestore Transaction):
+    │   Backend thực hiện (Database Transaction):
     │     - order.driverId = currentDriver
     │     - order.driverName = driver.fullName
     │     - order.driverPhone = driver.phoneNumber
@@ -313,7 +313,7 @@ OrderAssignmentService phát hiện order mới trên RTDB
    - Chênh lệch heading ≤ 45 độ
         │
         ▼
-② Tạo document Firestore: order_requests/{orderId}
+② Tạo document: order_requests/{orderId}
    {
      targetDriverIds: [driver1, driver2, ...],
      acceptedDriverId: null,
@@ -322,7 +322,7 @@ OrderAssignmentService phát hiện order mới trên RTDB
    }
         │
         ▼
-③ Gửi FCM Push Notification đến tất cả target drivers
+③ Gửi WebSocket Push Notification đến tất cả target drivers
    Notification type=11
    Title: "Bạn có đơn hàng mới!"
    Body: "{storeName} - Phí: {deliveryFee}đ"
@@ -339,10 +339,10 @@ OrderAssignmentService phát hiện order mới trên RTDB
        → Lặp lại bước ②-④
 ```
 
-### 4.2. Sơ đồ phía app — khi nhận FCM
+### 4.2. Sơ đồ phía app — khi nhận WebSocket
 
 ```
-FCM nhận Push Notification (type=11)
+WebSocket nhận Push Notification (type=11)
          │
          ├─► APP ĐANG FOREGROUND (đang mở)
          │   │
@@ -388,7 +388,7 @@ FCM nhận Push Notification (type=11)
          │
          └─► APP ĐANG BACKGROUND hoặc ĐÓNG
              │
-             ① FCM hiện SYSTEM NOTIFICATION (native OS)
+             ① WebSocket hiện SYSTEM NOTIFICATION (native OS)
              │   Title: "🛵 Đơn hàng mới cần giao!"
              │   Body: "{storeName} - Phí: {deliveryFee}đ"
              │
@@ -402,7 +402,7 @@ FCM nhận Push Notification (type=11)
              │     └─► "Từ chối" → POST /respond action=decline
              │
              └─► User SWIPE DISMISS (xóa notification)
-                 Notification vẫn lưu trong Firestore
+                 Notification vẫn lưu trong database
                  → Đọc sau ở màn Notifications
 ```
 
@@ -414,7 +414,7 @@ Tình huống: 2 tài xế cùng nhấn "Nhận đơn" gần như đồng thời
 Tài xế A ──► POST /respond action=accept ──► Backend kiểm tra
 Tài xế B ──► POST /respond action=accept ──► Backend kiểm tra
 
-Backend dùng Firestore Transaction:
+Backend dùng Database Transaction:
 ① Read order_requests/{id}
 ② Kiểm tra status == "PENDING" && acceptedDriverId == null
 ③ Nếu TRUE → gán acceptedDriverId = this_driver, status = "ACCEPTED"
@@ -631,7 +631,7 @@ PUT /api/drivers/orders/{id}/status
 
 ---
 
-## 6. Luồng 5 — Thông báo Push (FCM)
+## 6. Luồng 5 — Thông báo Push (WebSocket)
 
 ### 6.1. Các loại thông báo tài xế nhận được
 
@@ -641,10 +641,10 @@ PUT /api/drivers/orders/{id}/status
 | 12 | Thông báo giao hàng | Cập nhật trạng thái đơn | Refresh OrderDetail nếu đang mở |
 | 13 | Đơn bị tài xế khác nhận | 409 conflict | Đơn biến mất khỏi danh sách |
 
-### 6.2. Sơ đồ xử lý FCM chi tiết
+### 6.2. Sơ đồ xử lý WebSocket chi tiết
 
 ```
-Firebase Cloud Messaging nhận message
+WebSocket nhận message
          │
          ▼
 Kiểm tra: message.data["type"] hoặc notification type
@@ -691,7 +691,7 @@ Kiểm tra: app.state
     │     APP BACKGROUND              │
     │ (app đang chạy nhưng không mở)  │
     ├─────────────────────────────────┤
-    │ ① FCM hiện native notification │
+    │ ① WebSocket hiện native notification │
     │    (system tray banner)          │
     │    Title: "🛵 Đơn hàng mới!"   │
     │    Body: "{storeName}"           │
@@ -704,11 +704,11 @@ Kiểm tra: app.state
     │                                 │
     │ ③ User swipe dismiss            │
     │    → notification vào system tray│
-    │    → lưu Firestore notification │
+    │    → lưu notification          │
     ├─────────────────────────────────┤
     │     APP CLOSED (đã kill)        │
     ├─────────────────────────────────┤
-    │ ① FCM hiện native notification │
+    │ ① WebSocket hiện native notification │
     │ ② User tap → app opens         │
     │    → điều hướng OrderDetail     │
     │    → hiện dialog               │
@@ -726,14 +726,14 @@ type = 13
     ├─► Foreground: Dialog "Đơn đã được tài xế khác nhận."
     │       Đơn tự động biến mất khỏi danh sách
     │
-    └─► Background: FCM notification đẩy
+    └─► Background: WebSocket notification đẩy
             "Đơn #{mã} đã được tài xế khác nhận."
 ```
 
-### 6.3. Lưu trữ notification trong Firestore
+### 6.3. Lưu trữ notification trong database
 
 ```
-Firestore: driver_profiles/{driverId}/notifications/{notifId}
+Database: driver_profiles/{driverId}/notifications/{notifId}
 
 {
   "id": "notif_xxx",
@@ -976,7 +976,7 @@ Bắt đầu GPS Service (foreground/background)
 │     /active_drivers/{driverId}                       │
 │     {                                                │
 │       lat: 10.85,                                    │
-│       lng: 106.79,                                   │
+│       lng: 106.79,                                    │
 │       heading: 90,                                    │
 │       lastUpdate: System.currentTimeMillis()         │
 │     }                                                │

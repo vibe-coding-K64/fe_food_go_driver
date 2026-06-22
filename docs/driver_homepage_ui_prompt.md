@@ -25,7 +25,7 @@ Giao diện sử dụng dữ liệu từ các API endpoint của backend Spring 
 
 ---
 
-## 3. Thông tin chi tiết các collections Firestore
+## 3. Thông tin chi tiết các collections Database
 
 ### 3.1. DriverProfile
 | Field | Kiểu | Mô tả |
@@ -244,7 +244,7 @@ lib/
 
 - **Security**: Không hardcode token. Luôn lấy token từ SharedPreferences sau khi đăng nhập.
 - **Realtime GPS**: Khi tài xế Online, cần chạy service GPS ở background (dùng flutter_background_service hoặc workmanager) và cập nhật lên Realtime Database mỗi 5-10 giây.
-- **Push Notifications**: Cần tích hợp Firebase Cloud Messaging (FCM) để nhận thông báo đơn hàng mới khi app ở background.
+- **Push Notifications**: Cần tích hợp WebSocket STOMP để nhận thông báo đơn hàng mới khi app ở background.
 - **Mã đơn hàng**: Hiển thị mã ngắn (6 ký tự) để tài xế dễ đọc, dễ xác nhận với cửa hàng và khách hàng.
 - **Phone number**: Dùng url_launcher để gọi điện trực tiếp từ app (`tel:` scheme).
 - **Maps**: Khi tap vào địa chỉ giao hàng hoặc nút "Chỉ đường", mở Google Maps với địa chỉ hoặc tọa độ GPS.

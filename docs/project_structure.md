@@ -1,6 +1,6 @@
-# Cấu trúc thư mục dự án - Be FoodGo
+# Cấu trúc thư mục dự án - Food Go Driver
 
-Dự án backend Spring Boot kết nối Firebase Firestore làm cơ sở dữ liệu.
+Dự án frontend Flutter cho ứng dụng tài xế giao hàng.
 
 ---
 
@@ -12,8 +12,7 @@ be-foodgo/
 ├── .mvn/                              # Maven wrapper
 ├── .vscode/                           # Cấu hình VS Code
 ├── docs/                              # Tài liệu dự án
-│   ├── firebase_collections.md        # Cấu trúc Firestore
-│   └── project_structure.md           # Tài liệu này
+│   ├── project_structure.md           # Tài liệu này
 ├── src/                               # Source code
 │   ├── main/
 │   │   ├── java/
@@ -24,13 +23,12 @@ be-foodgo/
 │   │   │       ├── controller/               # REST API
 │   │   │       ├── dto/                     # Data Transfer Object
 │   │   │       ├── exception/               # Xử lý lỗi tập trung
-│   │   │       ├── model/                   # Firestore document
-│   │   │       ├── repository/              # Giao tiếp Firestore
+│   │   │       ├── model/                   # Entity model
+│   │   │       ├── repository/              # Data access layer
 │   │   │       ├── seeder/                  # Khởi tạo dữ liệu mẫu
 │   │   │       └── service/                 # Logic nghiệp vụ
 │   │   └── resources/
 │   │       ├── application.properties        # Cấu hình Spring
-│   │       ├── firebase-service-account.json # Firebase credentials
 │   │       ├── static/                      # Static files
 │   │       └── templates/                   # Template files
 │   └── test/                               # Unit tests
@@ -56,50 +54,46 @@ Service
 Repository
     │ gọi
     ▼
-Firebase Firestore
+REST API (Backend)
 ```
 
 ### Chi tiết từng lớp
 
-| Package         | Chức năng                                                                                              |
-| --------------- | ------------------------------------------------------------------------------------------------------ |
-| `config`        | Cấu hình hệ thống: Firebase SDK, Security, Swagger, CORS...                                            |
-| `constant`      | Enum (trạng thái, role...) và hằng số dùng chung toàn hệ thống                                          |
-| `controller`    | REST API endpoints. Nhận request từ client, trả response. Không chứa logic nghiệp vụ.                    |
-| `dto`           | Data Transfer Object. Đóng gói dữ liệu gửi/nhận qua API (request/response).                              |
-| `exception`     | Global Exception Handler. Xử lý lỗi tập trung, trả về message thống nhất cho client.                    |
-| `model`         | Entity/document mapping. Các class đóng như Firestore document (annotation @DocumentReference...).          |
-| `repository`    | Truy vấn Firestore. Dùng Firebase Admin SDK (Firestore, CollectionReference...) để đọc/ghi dữ liệu.     |
-| `seeder`        | Khởi tạo dữ liệu mẫu. Chạy 1 lần khi ứng dụng lên, seed dữ liệu test vào Firestore nếu chưa có.           |
-| `service`       | Logic nghiệp vụ. Xử lý các tác vụ nghiệp vụ phức tạp, gọi repository để truy vấn dữ liệu.                |
+| Package         | Chức năng                                                                          |
+| --------------- | ---------------------------------------------------------------------------------- |
+| `config`        | Cấu hình hệ thống: API, Security, CORS...                                          |
+| `constant`      | Enum (trạng thái, role...) và hằng số dùng chung toàn hệ thống                    |
+| `controller`    | REST API endpoints. Nhận request từ client, trả response. Không chứa logic nghiệp vụ.    |
+| `dto`           | Data Transfer Object. Đóng gói dữ liệu gửi/nhận qua API (request/response).             |
+| `exception`     | Global Exception Handler. Xử lý lỗi tập trung, trả về message thống nhất cho client.      |
+| `bloc`          | Business Logic Component. Quản lý trạng thái UI và xử lý sự kiện.                      |
+| `repository`    | Định nghĩa interface cho tầng data. Triển khai gọi API, WebSocket.                      |
+| `datasource`    | Nguồn dữ liệu: REST API, WebSocket STOMP.                                             |
+| `model`         | Data model/entity mapping.                                                          |
+| `service`       | Logic nghiệp vụ. Xử lý các tác vụ nghiệp vụ phức tạp, gọi repository để truy vấn dữ liệu. |
 
 ### Mối quan hệ giữa các lớp
 
 ```
-Client (HTTP Request)
+Client (HTTP Request / WebSocket)
        │
        ▼
 ┌─────────────────┐
-│   Controller     │  Nhận request, gọi service tương ứng
+│   BLoC           │  Quản lý trạng thái UI, xử lý sự kiện
 └────────┬────────┘
          │ call
          ▼
 ┌─────────────────┐
-│    Service      │  Logic nghiệp vụ, gọi repository
+│    Repository    │  Interface cho data access
 └────────┬────────┘
          │ call
          ▼
 ┌─────────────────┐
-│  Repository     │  Truy vấn Firestore
-└────────┬────────┘
-         │ CRUD
-         ▼
-┌─────────────────┐
-│    Model        │  Object mapping Firestore document
+│   DataSource     │  REST API, WebSocket STOMP
 └────────┬────────┘
          │
          ▼
-  Firebase Firestore
+  Backend API
 ```
 
 ---
@@ -115,7 +109,7 @@ Client (HTTP Request)
 | Package           | lowercase              | `controller`, `dto`            |
 | Enum              | PascalCase             | `OrderStatus.java`              |
 | Enum constant     | SCREAMING_SNAKE_CASE   | `PENDING`, `COMPLETED`          |
-| Firestore field   | camelCase              | `createdAt`, `userId`           |
+| Database field  | camelCase              | `createdAt`, `userId`           |
 
 ---
 
@@ -201,5 +195,3 @@ Ví dụ:
 ## Chú thích
 
 - File `.gitkeep` trong mỗi package đảm bảo Git tracking cả khi package chưa có file nào.
-- File `firebase-service-account.json` chứa credentials Firebase, **không** được push lên Git (đã có trong `.gitignore`).
-- Khi tạo class trong `model`, sử dụng `@DocumentReference` hoặc tương tự để map với Firestore document.

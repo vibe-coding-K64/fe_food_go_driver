@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../../domain/entities/driver_profile.dart';
 import '../../domain/repositories/driver_repository.dart';
 import '../datasources/driver_remote_datasource.dart';
@@ -19,8 +21,12 @@ class DriverRepositoryImpl implements DriverRepository {
   @override
   Stream<DriverProfile?> watchDriverProfile(String driverId) async* {
     while (true) {
-      final profile = await getDriverProfile(driverId);
-      yield profile;
+      try {
+        final profile = await _remoteDataSource.getDriverProfileApi(driverId);
+        yield profile;
+      } catch (_) {
+        yield null;
+      }
       await Future.delayed(const Duration(seconds: 30));
     }
   }
@@ -46,5 +52,29 @@ class DriverRepositoryImpl implements DriverRepository {
         'balance': 0.0,
       };
     }
+  }
+
+  @override
+  Future<DriverProfile?> updateDriverProfile({
+    String? fullName,
+    String? phoneNumber,
+    String? vehiclePlate,
+    String? vehicleType,
+    String? driverLicense,
+    String? photoUrl,
+  }) async {
+    return await _remoteDataSource.updateDriverProfileApi(
+      fullName: fullName,
+      phoneNumber: phoneNumber,
+      vehiclePlate: vehiclePlate,
+      vehicleType: vehicleType,
+      driverLicense: driverLicense,
+      photoUrl: photoUrl,
+    );
+  }
+
+  @override
+  Future<String> uploadDriverAvatar(String filePath) async {
+    return await _remoteDataSource.uploadDriverAvatarApi(File(filePath));
   }
 }

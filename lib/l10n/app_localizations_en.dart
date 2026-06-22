@@ -376,6 +376,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotPasswordCountdown => 'Code expires in';
 
   @override
+  String get expired => 'Expired';
+
+  @override
   String get forgotPasswordVerifyOtp => 'Verify';
 
   @override
@@ -646,6 +649,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get waitingForOrder => 'Waiting for order';
 
   @override
+  String get waitingToAccept => 'Waiting to accept';
+
+  @override
   String get deliveringNow => 'Delivering';
 
   @override
@@ -795,4 +801,393 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dismiss => 'Dismiss';
+
+  @override
+  String get errorTitle => 'Error';
+
+  @override
+  String get successTitle => 'Success';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get callPhone => 'Call';
+
+  @override
+  String phoneNumber(String phone) {
+    return 'Phone number: $phone';
+  }
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String copiedToClipboard(String text) {
+    return 'Copied: $text';
+  }
+
+  @override
+  String get takePhoto => 'Take Photo';
+
+  @override
+  String get takePhotoDescription => 'Use camera to take delivery photo';
+
+  @override
+  String get selectFromGallery => 'Select from Gallery';
+
+  @override
+  String get selectFromGalleryDescription =>
+      'Select existing photo from gallery';
+
+  @override
+  String imagePickerError(String error) {
+    return 'Image selection error: $error';
+  }
+
+  @override
+  String get unableToLoadImage => 'Unable to load image';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get tapToViewFullImage => 'Tap to view full image';
+
+  @override
+  String get deliveryConfirmationPhoto => 'Delivery Confirmation Photo';
+
+  @override
+  String get takeDeliveryPhotoToComplete =>
+      'Take a delivery confirmation photo to complete the order.';
+
+  @override
+  String get paymentMethodEWallet => 'E-Wallet';
+
+  @override
+  String get paymentMethodMomo => 'MoMo';
+
+  @override
+  String get paymentMethodCash => 'Cash (COD)';
+
+  @override
+  String get paymentMethodZaloPay => 'ZaloPay';
+
+  @override
+  String get paymentMethodBankCard => 'Bank Card';
+
+  @override
+  String get paymentMethodUnknown => 'Unknown';
+
+  @override
+  String get paidStatus => 'Paid';
+
+  @override
+  String get unpaidStatus => 'Unpaid';
+
+  @override
+  String get deliverySuccess => 'Delivery successful';
+
+  @override
+  String get orderCompleteSuccess => 'Order completed successfully!';
+
+  @override
+  String get vietnameseLanguage => 'Tiếng Việt';
+
+  @override
+  String get englishLanguage => 'English';
+
+  @override
+  String get confirmLogout => 'Are you sure you want to log out?';
+
+  @override
+  String get insufficientBalance => 'Insufficient balance';
+
+  @override
+  String get processingNote =>
+      'Request will be processed within 1-3 business days.';
+
+  @override
+  String get confirmReceiveOrder => 'Confirm Accept Order';
+
+  @override
+  String get doYouWantToAcceptOrder =>
+      'Do you want to accept the order from the store:';
+
+  @override
+  String deliveryFeeAmount(String amount) {
+    return 'Delivery fee: $amount VND';
+  }
+
+  @override
+  String get confirmDeclineOrder => 'Decline Order';
+
+  @override
+  String get areYouSureDeclineOrder =>
+      'Are you sure you want to decline this order?';
+
+  @override
+  String get processing => 'Processing...';
+
+  @override
+  String get store => 'Store';
+
+  @override
+  String get estimatedEarning => 'Estimated Earning';
+
+  @override
+  String get payment => 'Payment';
+
+  @override
+  String get receiver => 'Receiver';
+
+  @override
+  String get note => 'Note';
+
+  @override
+  String get orderExpired => 'Request expired';
+
+  @override
+  String autoDeclineAfter(int seconds) {
+    return 'Auto decline after ${seconds}s';
+  }
+
+  @override
+  String get justNow => 'Just now';
+
+  @override
+  String minutesAgo(int minutes) {
+    return '$minutes minutes ago';
+  }
+
+  @override
+  String hoursAgo(int hours) {
+    return '$hours hours ago';
+  }
+
+  @override
+  String daysAgo(int days) {
+    return '$days days ago';
+  }
+
+  @override
+  String get earningDelivery => 'Delivery Earning';
+
+  @override
+  String get withdrawal => 'Withdrawal';
+
+  @override
+  String get refund => 'Refund';
+
+  @override
+  String get codCollection => 'COD Collection';
+
+  @override
+  String get transaction => 'Transaction';
+
+  @override
+  String get pending => 'Pending';
+
+  @override
+  String get completedStatus => 'Completed';
+
+  @override
+  String get failed => 'Failed';
+
+  @override
+  String get languageCodeVi => 'vi';
+
+  @override
+  String get currentLocation => 'Current Location';
+
+  @override
+  String get startNavigation => 'Starting navigation.';
+
+  @override
+  String get routeToStore => '-> Store';
+
+  @override
+  String get routeToDelivery => '-> Delivery';
+
+  @override
+  String get enableSound => 'Enable sound';
+
+  @override
+  String get disableSound => 'Disable sound';
+
+  @override
+  String get calculatingRoute => 'Calculating route...';
+
+  @override
+  String get navigatingToStore => 'Navigating to store.';
+
+  @override
+  String get navigatingToDelivery => 'Navigating to delivery address.';
+
+  @override
+  String get youHaveArrived => 'You have arrived.';
+
+  @override
+  String get navigateToStore => 'Store';
+
+  @override
+  String get navigateToDelivery => 'Delivery';
+
+  @override
+  String get startNavigationButton => 'Start Navigation';
+
+  @override
+  String get arrived => 'Arrived';
+
+  @override
+  String get onTheWay => 'On the way...';
+
+  @override
+  String get navigatingToStoreDirection => 'Going to store';
+
+  @override
+  String get navigatingToDeliveryDirection => 'Going to delivery address';
+
+  @override
+  String get remaining => 'Remaining';
+
+  @override
+  String get duration => 'Duration';
+
+  @override
+  String get hasArrived => 'Arrived';
+
+  @override
+  String get isOnTheWay => 'On the way';
+
+  @override
+  String get openMap => 'Open Map';
+
+  @override
+  String get stop => 'Stop';
+
+  @override
+  String minutesShort(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String secondsShort(int seconds) {
+    return '$seconds sec';
+  }
+
+  @override
+  String estimatedMinutes(int minutes) {
+    return 'Estimated: $minutes min';
+  }
+
+  @override
+  String m(String value) {
+    return '$value m';
+  }
+
+  @override
+  String get chatEmpty => 'No messages yet';
+
+  @override
+  String get chatEmptyHint =>
+      'Start a conversation with the customer about this order';
+
+  @override
+  String get chatHint => 'Type a message...';
+
+  @override
+  String get loadingChat => 'Loading chat...';
+
+  @override
+  String get chatError => 'Failed to load chat';
+
+  @override
+  String orderChatHeader(String code) {
+    return 'Order $code';
+  }
+
+  @override
+  String get phoneNumberLabel => 'Phone Number';
+
+  @override
+  String get storeName => 'Store';
+
+  @override
+  String get recipientName => 'Recipient';
+
+  @override
+  String get chatWithCustomer => 'Chat with Customer';
+
+  @override
+  String distanceKm(String value) {
+    return '$value km';
+  }
+
+  @override
+  String get reportSubmitSuccess => 'Report submitted successfully';
+
+  @override
+  String get reportSubmitFailed => 'Failed to submit report. Please try again.';
+
+  @override
+  String get additionalNote => 'Additional notes';
+
+  @override
+  String get orderTimeline => 'Delivery Timeline';
+
+  @override
+  String get refreshing => 'Refreshing...';
+
+  @override
+  String get noLocationData => 'No location data available';
+
+  @override
+  String get editProfile => 'Edit Profile';
+
+  @override
+  String get editProfileTitle => 'Edit Profile';
+
+  @override
+  String get fullNameLabel => 'Full Name';
+
+  @override
+  String get vehiclePlateLabel => 'Vehicle Plate';
+
+  @override
+  String get vehicleTypeLabel => 'Vehicle Type';
+
+  @override
+  String get driverLicenseLabel => 'Driver License';
+
+  @override
+  String get changeAvatar => 'Change Avatar';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get profileUpdatedSuccess => 'Profile updated successfully';
+
+  @override
+  String get profileUpdateFailed =>
+      'Failed to update profile. Please try again.';
+
+  @override
+  String get motorcycle => 'Motorcycle';
+
+  @override
+  String get car => 'Car';
+
+  @override
+  String get requiredField => 'Required field';
+
+  @override
+  String get invalidPhoneNumber => 'Invalid phone number';
+
+  @override
+  String get invalidVehiclePlate => 'Invalid vehicle plate';
 }

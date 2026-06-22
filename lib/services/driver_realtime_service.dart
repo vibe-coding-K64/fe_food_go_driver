@@ -17,8 +17,10 @@ class DriverRealtimeService {
   StompClient? _client;
   StompUnsubscribe? _orderRequestSubscription;
   StompUnsubscribe? _orderStatusSubscription;
+  StompUnsubscribe? _chatSubscription;
   StreamController<DriverRealtimeOrderRequest>? _orderRequestController;
   StreamController<DriverRealtimeOrderStatus>? _orderStatusController;
+  StreamController<DriverRealtimeChatMessage>? _chatController;
   StreamController<String>? _connectionStateController;
   int _connectAttempt = 0;
   DateTime? _lastConnectStartedAt;
@@ -35,6 +37,12 @@ class DriverRealtimeService {
     _orderStatusController ??=
         StreamController<DriverRealtimeOrderStatus>.broadcast();
     return _orderStatusController!.stream;
+  }
+
+  Stream<DriverRealtimeChatMessage> get chatMessages {
+    _chatController ??=
+        StreamController<DriverRealtimeChatMessage>.broadcast();
+    return _chatController!.stream;
   }
 
   Stream<String> get connectionStates {
@@ -114,8 +122,10 @@ class DriverRealtimeService {
   Future<void> disconnect() async {
     _orderRequestSubscription?.call();
     _orderStatusSubscription?.call();
+    _chatSubscription?.call();
     _orderRequestSubscription = null;
     _orderStatusSubscription = null;
+    _chatSubscription = null;
 
     final client = _client;
     _client = null;
@@ -180,6 +190,7 @@ class DriverRealtimeService {
     await disconnect();
     await _orderRequestController?.close();
     await _orderStatusController?.close();
+    await _chatController?.close();
     await _connectionStateController?.close();
   }
 
@@ -265,6 +276,36 @@ class DriverRealtimeService {
       );
       debugPrint(
         '[DriverRealtimeService] Subscription active for /user/queue/order-status',
+      );
+    }
+
+    if (_chatSubscription == null) {
+      debugPrint('[DriverRealtimeService] Subscribing to /user/queue/chat');
+      _chatSubscription = client.subscribe(
+        destination: '/user/queue/chat',
+        callback: (frame) {
+          final body = frame.body;
+          debugPrint(
+            '[DriverRealtimeService] Received /user/queue/chat headers=${frame.headers}',
+          );
+          if (body == null || body.isEmpty) {
+            debugPrint('[DriverRealtimeService] Empty chat frame body');
+            return;
+          }
+          debugPrint('[DriverRealtimeService] Raw chat body: $body');
+          try {
+            final payload = DriverRealtimeChatMessage.fromRaw(body);
+            debugPrint(
+              '[DriverRealtimeService] Parsed chat message event=${payload.event}, conversationId=${payload.conversationId}, senderId=${payload.senderId}',
+            );
+            _chatController?.add(payload);
+          } catch (e) {
+            debugPrint('[DriverRealtimeService] Failed parsing chat message: $e');
+          }
+        },
+      );
+      debugPrint(
+        '[DriverRealtimeService] Subscription active for /user/queue/chat',
       );
     }
   }

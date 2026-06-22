@@ -1,45 +1,5 @@
 import 'package:equatable/equatable.dart';
-
-class DriverNotification extends Equatable {
-  final String id;
-  final int type;
-  final String title;
-  final String body;
-  final String? orderId;
-  final String? referenceId;
-  final bool isRead;
-  final String? imageUrl;
-  final DateTime createdAt;
-
-  const DriverNotification({
-    required this.id,
-    required this.type,
-    required this.title,
-    required this.body,
-    this.orderId,
-    this.referenceId,
-    this.isRead = false,
-    this.imageUrl,
-    required this.createdAt,
-  });
-
-  DriverNotification copyWith({bool? isRead}) {
-    return DriverNotification(
-      id: id,
-      type: type,
-      title: title,
-      body: body,
-      orderId: orderId,
-      referenceId: referenceId,
-      isRead: isRead ?? this.isRead,
-      imageUrl: imageUrl,
-      createdAt: createdAt,
-    );
-  }
-
-  @override
-  List<Object?> get props => [id, type, title, body, orderId, referenceId, isRead, imageUrl, createdAt];
-}
+import '../../domain/entities/driver_notification.dart';
 
 enum NotificationLoadStatus { initial, loading, loaded, error }
 

@@ -213,8 +213,8 @@ class _OrderRequestModalState extends State<OrderRequestModal>
                   const SizedBox(height: 8),
                   Text(
                     _isExpired
-                        ? 'Yeu cau da het han'
-                        : 'Tu dong tu choi sau ${_remainingSeconds}s',
+                        ? l10n.orderExpired
+                        : l10n.autoDeclineAfter(_remainingSeconds),
                     style: TextStyle(
                       fontSize: 13,
                       color: _remainingSeconds <= 3
@@ -234,40 +234,40 @@ class _OrderRequestModalState extends State<OrderRequestModal>
                 if (order != null) ...[
                   _buildInfoRow(
                     Icons.store,
-                    'Cua hang',
+                    l10n.store,
                     order.storeName,
                     isDark,
                   ),
                   _buildInfoRow(
                     Icons.location_on,
-                    'Dia chi giao',
+                    l10n.deliveryAddress,
                     order.deliveryAddress,
                     isDark,
                   ),
                   _buildInfoRow(
                     Icons.delivery_dining,
-                    'Thu nhap uoc tinh',
+                    l10n.estimatedEarning,
                     '${(order.estimatedEarning ?? 0).toStringAsFixed(0)} VND',
                     isDark,
                   ),
                   _buildInfoRow(
                     Icons.payments,
-                    'Thanh toan',
-                    _paymentMethodLabel(order.paymentMethod),
+                    l10n.payment,
+                    _paymentMethodLabel(order.paymentMethod, l10n),
                     isDark,
                   ),
                   if (order.displayRecipientPhone != null ||
                       order.displayRecipientName != 'N/A')
                     _buildInfoRow(
                       Icons.person,
-                      'Nguoi nhan',
+                      l10n.receiver,
                       '${order.displayRecipientName}${order.displayRecipientPhone != null ? ' - ${order.displayRecipientPhone}' : ''}',
                       isDark,
                     ),
                   if (order.note != null && order.note!.isNotEmpty)
                     _buildInfoRow(
                       Icons.note,
-                      'Ghi chu',
+                      l10n.note,
                       order.note!,
                       isDark,
                     ),
@@ -275,7 +275,7 @@ class _OrderRequestModalState extends State<OrderRequestModal>
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Text(
-                      'Don hang #${widget.request.orderId.substring(0, widget.request.orderId.length.clamp(0, 8))}...',
+                      'Đơn hàng #${widget.request.orderId.substring(0, widget.request.orderId.length.clamp(0, 8))}...',
                       style: TextStyle(
                         fontSize: 16,
                         color: isDark ? Colors.white : Colors.black,
@@ -332,18 +332,16 @@ class _OrderRequestModalState extends State<OrderRequestModal>
     );
   }
 
-  String _paymentMethodLabel(int paymentMethod) {
+  String _paymentMethodLabel(int paymentMethod, AppLocalizations l10n) {
     switch (paymentMethod) {
       case 1:
-        return 'MoMo';
+        return l10n.paymentMethodCash;
       case 2:
-        return 'Tiền mặt';
+        return l10n.paymentMethodEWallet;
       case 3:
-        return 'ZaloPay';
-      case 4:
-        return 'Thẻ ngân hàng';
+        return l10n.paymentMethodBankCard;
       default:
-        return 'Không xác định';
+        return l10n.paymentMethodUnknown;
     }
   }
 

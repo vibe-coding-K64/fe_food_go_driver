@@ -15,11 +15,12 @@ class OrderCard extends StatelessWidget {
   });
 
   Color _statusColor(bool isDark) {
+    if (order.status == 1) {
+      return order.driverId != null ? AppColors.busy : AppColors.warning;
+    }
     switch (order.statusCode) {
       case 'PENDING_STORE_CONFIRMATION':
         return Colors.orange;
-      case 'WAITING_DRIVER':
-        return AppColors.warning;
       case 'DELIVERING':
         return AppColors.busy;
       case 'COMPLETED':
@@ -32,11 +33,12 @@ class OrderCard extends StatelessWidget {
   }
 
   String _statusText(AppLocalizations l10n) {
+    if (order.status == 1) {
+      return order.driverId != null ? l10n.pickingUp : l10n.waitingToAccept;
+    }
     switch (order.statusCode) {
       case 'PENDING_STORE_CONFIRMATION':
         return l10n.waitingForOrder;
-      case 'WAITING_DRIVER':
-        return l10n.pickingUp;
       case 'DELIVERING':
         return l10n.delivering;
       case 'COMPLETED':
@@ -58,11 +60,11 @@ class OrderCard extends StatelessWidget {
     final diff = now.difference(dateTime);
 
     if (diff.inMinutes < 1) {
-      return 'Vua xong';
+      return 'Vừa xong';
     } else if (diff.inMinutes < 60) {
-      return '${diff.inMinutes} phut truoc';
+      return '${diff.inMinutes} phút trước';
     } else if (diff.inHours < 24) {
-      return '${diff.inHours} gio truoc';
+      return '${diff.inHours} giờ trước';
     } else {
       return DateFormat('dd/MM HH:mm').format(dateTime);
     }

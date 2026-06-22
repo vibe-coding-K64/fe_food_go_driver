@@ -25,18 +25,23 @@ class _OrdersScreenState extends State<OrdersScreen> {
     super.dispose();
   }
 
-  List<dynamic> _filteredOrders(List<dynamic> orders) {
+  List<dynamic> _filteredOrders(List<dynamic> activeOrders, List<dynamic> recentOrders) {
+    final seen = <String>{};
+    final allOrders = [
+      ...activeOrders,
+      ...recentOrders,
+    ].where((o) => seen.add(o.id as String)).toList();
     switch (_selectedFilter) {
       case 1:
-        return orders.where((o) => o.isPickingUp).toList();
+        return allOrders.where((o) => o.isPickingUp).toList();
       case 2:
-        return orders.where((o) => o.isOnTheWay).toList();
+        return allOrders.where((o) => o.isOnTheWay).toList();
       case 3:
-        return orders.where((o) => o.isCompleted).toList();
+        return allOrders.where((o) => o.isCompleted).toList();
       case 4:
-        return orders.where((o) => o.isCancelled).toList();
+        return allOrders.where((o) => o.isCancelled).toList();
       default:
-        return orders;
+        return allOrders;
     }
   }
 
@@ -53,7 +58,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
-        final filtered = _filteredOrders(state.recentOrders);
+        final filtered = _filteredOrders(state.activeOrders, state.recentOrders);
         final stats = state.todayStats;
 
         return Scaffold(

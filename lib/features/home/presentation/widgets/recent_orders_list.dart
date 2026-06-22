@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../orders/domain/entities/order.dart';
+import '../bloc/home_bloc.dart';
+import '../pages/order_detail_screen.dart';
 import 'order_card.dart';
 
 class RecentOrdersList extends StatefulWidget {
@@ -130,9 +133,22 @@ class _RecentOrdersListState extends State<RecentOrdersList> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: filtered.length,
                   itemBuilder: (context, index) {
-                    return OrderCard(
-                      order: filtered[index],
-                      onTap: () {},
+                    final order = filtered[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: OrderCard(
+                        order: order,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => BlocProvider.value(
+                                value: context.read<HomeBloc>(),
+                                child: OrderDetailScreen(order: order),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     );
                   },
                 ),

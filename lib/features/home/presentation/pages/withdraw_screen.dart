@@ -52,7 +52,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     final l10n = AppLocalizations.of(context)!;
     final amount = _parseDigits(value ?? '');
     if (amount < 50000) return l10n.minWithdraw;
-    if (amount > widget.balance) return 'Số dư không đủ';
+    if (amount > widget.balance) return l10n.insufficientBalance;
     return null;
   }
 
@@ -112,10 +112,27 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
         }
         if (state.withdrawStatus == WithdrawStatus.error &&
             state.withdrawErrorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.error_outline, color: AppColors.errorLight, size: 24),
+                  SizedBox(width: 8),
+                  Text(l10n.errorTitle),
+                ],
+              ),
               content: Text(state.withdrawErrorMessage!),
-              backgroundColor: AppColors.errorLight,
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.errorLight,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text(l10n.close),
+                ),
+              ],
             ),
           );
         }
@@ -438,7 +455,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Yêu cầu sẽ được xử lý trong 1-3 ngày làm việc.',
+              l10n.processingNote,
               style: TextStyle(
                 fontSize: 12,
                 color: isDark

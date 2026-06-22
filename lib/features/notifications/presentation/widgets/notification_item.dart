@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../bloc/notification_state.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../domain/entities/driver_notification.dart';
 
 class NotificationItem extends StatelessWidget {
   final DriverNotification notification;
@@ -40,20 +41,21 @@ class NotificationItem extends StatelessWidget {
     }
   }
 
-  String _formatTime(DateTime dt) {
+  String _formatTime(DateTime dt, AppLocalizations l10n) {
     final now = DateTime.now();
     final diff = now.difference(dt);
 
-    if (diff.inMinutes < 1) return 'Vừa xong';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} phút trước';
-    if (diff.inHours < 24) return '${diff.inHours} giờ trước';
-    if (diff.inDays < 7) return '${diff.inDays} ngày trước';
+    if (diff.inMinutes < 1) return l10n.justNow;
+    if (diff.inMinutes < 60) return l10n.minutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.hoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l10n.daysAgo(diff.inDays);
 
     return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = _colorForType(notification.type);
 
@@ -142,7 +144,7 @@ class NotificationItem extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _formatTime(notification.createdAt),
+                        _formatTime(notification.createdAt, l10n),
                         style: TextStyle(
                           fontSize: 11,
                           color: isDark

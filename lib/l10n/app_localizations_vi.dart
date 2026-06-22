@@ -178,7 +178,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get pickupAddress => 'Địa chỉ lấy hàng';
 
   @override
-  String get deliveryAddress => 'Địa chỉ giao hàng';
+  String get deliveryAddress => 'Địa chỉ giao';
 
   @override
   String get distance => 'Khoảng cách';
@@ -371,6 +371,9 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get forgotPasswordCountdown => 'Mã có hiệu lực trong';
+
+  @override
+  String get expired => 'Hết hạn';
 
   @override
   String get forgotPasswordVerifyOtp => 'Xác nhận';
@@ -642,6 +645,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get waitingForOrder => 'Chờ đơn';
 
   @override
+  String get waitingToAccept => 'Chờ nhận';
+
+  @override
   String get deliveringNow => 'Đang giao';
 
   @override
@@ -791,4 +797,390 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get dismiss => 'Đóng';
+
+  @override
+  String get errorTitle => 'Thông báo lỗi';
+
+  @override
+  String get successTitle => 'Thành công';
+
+  @override
+  String get close => 'Đóng';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get callPhone => 'Gọi điện';
+
+  @override
+  String phoneNumber(String phone) {
+    return 'Số điện thoại: $phone';
+  }
+
+  @override
+  String get copy => 'Sao chép';
+
+  @override
+  String copiedToClipboard(String text) {
+    return 'Đã sao chép: $text';
+  }
+
+  @override
+  String get takePhoto => 'Chụp ảnh';
+
+  @override
+  String get takePhotoDescription => 'Sử dụng camera để chụp ảnh giao hàng';
+
+  @override
+  String get selectFromGallery => 'Chọn từ thư viện';
+
+  @override
+  String get selectFromGalleryDescription => 'Chọn ảnh đã có từ thư viện';
+
+  @override
+  String imagePickerError(String error) {
+    return 'Lỗi chọn ảnh: $error';
+  }
+
+  @override
+  String get unableToLoadImage => 'Không tải được ảnh';
+
+  @override
+  String get retry => 'Thử lại';
+
+  @override
+  String get tapToViewFullImage => 'Chạm vào ảnh để xem đầy đủ';
+
+  @override
+  String get deliveryConfirmationPhoto => 'Ảnh xác nhận giao hàng';
+
+  @override
+  String get takeDeliveryPhotoToComplete =>
+      'Chụp ảnh xác nhận giao hàng để hoàn thành đơn.';
+
+  @override
+  String get paymentMethodEWallet => 'Ví điện tử';
+
+  @override
+  String get paymentMethodMomo => 'MoMo';
+
+  @override
+  String get paymentMethodCash => 'Tiền mặt (COD)';
+
+  @override
+  String get paymentMethodZaloPay => 'ZaloPay';
+
+  @override
+  String get paymentMethodBankCard => 'Thẻ ngân hàng';
+
+  @override
+  String get paymentMethodUnknown => 'Không xác định';
+
+  @override
+  String get paidStatus => 'Đã thanh toán';
+
+  @override
+  String get unpaidStatus => 'Chưa thanh toán';
+
+  @override
+  String get deliverySuccess => 'Giao hàng thành công';
+
+  @override
+  String get orderCompleteSuccess => 'Hoàn thành đơn hàng thành công!';
+
+  @override
+  String get vietnameseLanguage => 'Tiếng Việt';
+
+  @override
+  String get englishLanguage => 'English';
+
+  @override
+  String get confirmLogout => 'Bạn có chắc muốn đăng xuất?';
+
+  @override
+  String get insufficientBalance => 'Số dư không đủ';
+
+  @override
+  String get processingNote => 'Yêu cầu sẽ được xử lý trong 1-3 ngày làm việc.';
+
+  @override
+  String get confirmReceiveOrder => 'Xác nhận nhận đơn';
+
+  @override
+  String get doYouWantToAcceptOrder => 'Bạn có muốn nhận đơn hàng từ cửa hàng:';
+
+  @override
+  String deliveryFeeAmount(String amount) {
+    return 'Phí giao hàng: $amount VND';
+  }
+
+  @override
+  String get confirmDeclineOrder => 'Từ chối đơn hàng';
+
+  @override
+  String get areYouSureDeclineOrder =>
+      'Bạn có chắc chắn muốn từ chối đơn hàng này?';
+
+  @override
+  String get processing => 'Đang xử lý...';
+
+  @override
+  String get store => 'Cửa hàng';
+
+  @override
+  String get estimatedEarning => 'Thu nhập ước tính';
+
+  @override
+  String get payment => 'Thanh toán';
+
+  @override
+  String get receiver => 'Người nhận';
+
+  @override
+  String get note => 'Ghi chú';
+
+  @override
+  String get orderExpired => 'Yêu cầu đã hết hạn';
+
+  @override
+  String autoDeclineAfter(int seconds) {
+    return 'Tự động từ chối sau ${seconds}s';
+  }
+
+  @override
+  String get justNow => 'Vừa xong';
+
+  @override
+  String minutesAgo(int minutes) {
+    return '$minutes phút trước';
+  }
+
+  @override
+  String hoursAgo(int hours) {
+    return '$hours giờ trước';
+  }
+
+  @override
+  String daysAgo(int days) {
+    return '$days ngày trước';
+  }
+
+  @override
+  String get earningDelivery => 'Thu nhập giao hàng';
+
+  @override
+  String get withdrawal => 'Rút tiền';
+
+  @override
+  String get refund => 'Hoàn tiền';
+
+  @override
+  String get codCollection => 'Thu COD';
+
+  @override
+  String get transaction => 'Giao dịch';
+
+  @override
+  String get pending => 'Đang chờ';
+
+  @override
+  String get completedStatus => 'Completed';
+
+  @override
+  String get failed => 'Thất bại';
+
+  @override
+  String get languageCodeVi => 'vi';
+
+  @override
+  String get currentLocation => 'Vị trí hiện tại';
+
+  @override
+  String get startNavigation => 'Bắt đầu chỉ đường.';
+
+  @override
+  String get routeToStore => '-> Cửa hàng';
+
+  @override
+  String get routeToDelivery => '-> Giao hàng';
+
+  @override
+  String get enableSound => 'Bật tiếng';
+
+  @override
+  String get disableSound => 'Tắt tiếng';
+
+  @override
+  String get calculatingRoute => 'Đang tính tuyến đường...';
+
+  @override
+  String get navigatingToStore => 'Hướng tới cửa hàng.';
+
+  @override
+  String get navigatingToDelivery => 'Hướng tới địa chỉ giao hàng.';
+
+  @override
+  String get youHaveArrived => 'Bạn đã đến nơi.';
+
+  @override
+  String get navigateToStore => 'Cửa hàng';
+
+  @override
+  String get navigateToDelivery => 'Giao hàng';
+
+  @override
+  String get startNavigationButton => 'Bắt đầu chỉ đường';
+
+  @override
+  String get arrived => 'Đã đến';
+
+  @override
+  String get onTheWay => 'Đang di chuyển...';
+
+  @override
+  String get navigatingToStoreDirection => 'Hướng tới cửa hàng';
+
+  @override
+  String get navigatingToDeliveryDirection => 'Hướng tới địa chỉ giao hàng';
+
+  @override
+  String get remaining => 'Còn lại';
+
+  @override
+  String get duration => 'Thời gian';
+
+  @override
+  String get hasArrived => 'Đã đến';
+
+  @override
+  String get isOnTheWay => 'Đang đi';
+
+  @override
+  String get openMap => 'Mở bản đồ';
+
+  @override
+  String get stop => 'Dừng';
+
+  @override
+  String minutesShort(int minutes) {
+    return '$minutes phút';
+  }
+
+  @override
+  String secondsShort(int seconds) {
+    return '$seconds giây';
+  }
+
+  @override
+  String estimatedMinutes(int minutes) {
+    return 'Dự kiến: $minutes phút';
+  }
+
+  @override
+  String m(String value) {
+    return '$value m';
+  }
+
+  @override
+  String get chatEmpty => 'Chua co tin nhan';
+
+  @override
+  String get chatEmptyHint =>
+      'Bat dau tro chuyen voi khach hang ve don hang nay';
+
+  @override
+  String get chatHint => 'Nhap tin nhan...';
+
+  @override
+  String get loadingChat => 'Dang tai chat...';
+
+  @override
+  String get chatError => 'Khong the tai chat';
+
+  @override
+  String orderChatHeader(String code) {
+    return 'Don hang $code';
+  }
+
+  @override
+  String get phoneNumberLabel => 'Số điện thoại';
+
+  @override
+  String get storeName => 'Cua hang';
+
+  @override
+  String get recipientName => 'Nguoi nhan';
+
+  @override
+  String get chatWithCustomer => 'Chat voi khach hang';
+
+  @override
+  String distanceKm(String value) {
+    return '$value km';
+  }
+
+  @override
+  String get reportSubmitSuccess => 'Đã gửi báo cáo thành công';
+
+  @override
+  String get reportSubmitFailed => 'Không thể gửi báo cáo. Vui lòng thử lại.';
+
+  @override
+  String get additionalNote => 'Ghi chú thêm';
+
+  @override
+  String get orderTimeline => 'Lộ trình giao hàng';
+
+  @override
+  String get refreshing => 'Đang làm mới...';
+
+  @override
+  String get noLocationData => 'Không có dữ liệu vị trí';
+
+  @override
+  String get editProfile => 'Chỉnh sửa hồ sơ';
+
+  @override
+  String get editProfileTitle => 'Chỉnh sửa hồ sơ';
+
+  @override
+  String get fullNameLabel => 'Họ và tên';
+
+  @override
+  String get vehiclePlateLabel => 'Biển số xe';
+
+  @override
+  String get vehicleTypeLabel => 'Loại xe';
+
+  @override
+  String get driverLicenseLabel => 'Giấy phép lái xe';
+
+  @override
+  String get changeAvatar => 'Đổi ảnh đại diện';
+
+  @override
+  String get save => 'Lưu';
+
+  @override
+  String get profileUpdatedSuccess => 'Cập nhật hồ sơ thành công';
+
+  @override
+  String get profileUpdateFailed =>
+      'Cập nhật hồ sơ thất bại. Vui lòng thử lại.';
+
+  @override
+  String get motorcycle => 'Xe máy';
+
+  @override
+  String get car => 'Ô tô';
+
+  @override
+  String get requiredField => 'Trường bắt buộc';
+
+  @override
+  String get invalidPhoneNumber => 'Số điện thoại không hợp lệ';
+
+  @override
+  String get invalidVehiclePlate => 'Biển số xe không hợp lệ';
 }

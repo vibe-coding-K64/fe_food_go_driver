@@ -10,4 +10,15 @@ abstract class DriverRepository {
   Future<void> updateDriverLocation(double lat, double lng, {double? heading, double? speed});
 
   Future<Map<String, dynamic>> getDriverStats(String driverId);
+
+  Future<DriverProfile?> updateDriverProfile({
+    String? fullName,
+    String? phoneNumber,
+    String? vehiclePlate,
+    String? vehicleType,
+    String? driverLicense,
+    String? photoUrl,
+  });
+
+  Future<String> uploadDriverAvatar(String filePath);
 }

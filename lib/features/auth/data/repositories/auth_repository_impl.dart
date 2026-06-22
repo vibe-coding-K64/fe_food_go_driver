@@ -122,22 +122,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> registerFcmToken(String token, String fcmToken) async {
-    debugPrint('[AuthRepositoryImpl] registerFcmToken - sending FCM token to backend');
-    try {
-      await _remoteDataSource.registerFcmToken(token, fcmToken);
-      debugPrint('[AuthRepositoryImpl] registerFcmToken - success');
-      return const Right(null);
-    } on Failure catch (e) {
-      debugPrint('[AuthRepositoryImpl] registerFcmToken - failure: ${e.message}');
-      return Left(e);
-    } catch (_) {
-      debugPrint('[AuthRepositoryImpl] registerFcmToken - unexpected exception');
-      return const Left(ServerFailure('Failed to register FCM token'));
-    }
-  }
-
-  @override
   Future<Either<Failure, OtpSendResponse>> sendRegisterOtp({
     required String email,
     required String phoneNumber,

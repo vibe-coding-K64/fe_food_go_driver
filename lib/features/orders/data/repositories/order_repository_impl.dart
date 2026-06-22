@@ -1,3 +1,4 @@
+import 'dart:io';
 import '../../domain/entities/order.dart';
 import '../../domain/repositories/order_repository.dart';
 import '../datasources/order_remote_datasource.dart';
@@ -77,5 +78,15 @@ class OrderRepositoryImpl implements OrderRepository {
     String requestId,
   ) async {
     return _remoteDataSource.respondOrderApi(orderId, action, requestId);
+  }
+
+  @override
+  Future<Order?> confirmDeliveryWithPhoto(String orderId, File photo) async {
+    return _remoteDataSource.confirmDeliveryWithPhoto(orderId, photo);
+  }
+
+  @override
+  Future<bool> reportOrderIssue(String orderId, String reason, String? additionalNote) async {
+    return _remoteDataSource.reportOrderIssue(orderId, reason, additionalNote);
   }
 }

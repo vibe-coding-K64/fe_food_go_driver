@@ -109,16 +109,33 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       body: BlocConsumer<ForgotPasswordBloc, ForgotPasswordState>(
         listener: (ctx, state) {
           if (state is ForgotPasswordError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor:
-                    isDark ? AppColors.errorDark : AppColors.errorLight,
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.all(16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: isDark ? AppColors.errorDark : AppColors.errorLight,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(l10n.errorTitle),
+                  ],
                 ),
+                content: Text(state.message),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark
+                          ? AppColors.errorDark
+                          : AppColors.errorLight,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text(l10n.close),
+                  ),
+                ],
               ),
             );
           }

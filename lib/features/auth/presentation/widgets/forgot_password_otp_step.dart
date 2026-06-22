@@ -228,7 +228,7 @@ class _ForgotPasswordOtpStepState extends State<ForgotPasswordOtpStep> {
         : primaryColor;
     final countdownValue = _formatCountdown(_localSeconds);
     final countdownText = isExpired
-        ? 'Hết hạn'
+        ? AppLocalizations.of(context)!.expired
         : '${AppLocalizations.of(context)!.forgotPasswordCountdown} $countdownValue';
     return Center(
       child: Text.rich(

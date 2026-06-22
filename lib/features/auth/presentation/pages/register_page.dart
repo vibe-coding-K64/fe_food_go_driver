@@ -124,19 +124,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 if (state is RegisterSuccess) {
                   Navigator.of(ctx).pop();
                 } else if (state is OtpFailure) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor:
-                          Theme.of(ctx).brightness == Brightness.dark
-                              ? AppColors.errorDark
-                              : AppColors.errorLight,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                  _showDialog(
+                    ctx,
+                    AppLocalizations.of(ctx)!.errorTitle,
+                    state.message,
+                    AppColors.errorLight,
+                    Icons.error_outline,
+                    AppLocalizations.of(ctx)!,
                   );
                 }
               },
@@ -214,16 +208,13 @@ class _RegisterPageState extends State<RegisterPage> {
           } else if (state is RegisterSuccess &&
               (state.user.id?.isNotEmpty ?? false)) {
             SchedulerBinding.instance.addPostFrameCallback((_) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Dang ky thanh cong!'),
-                  backgroundColor: AppColors.success,
-                  behavior: SnackBarBehavior.floating,
-                  margin: const EdgeInsets.all(16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+              _showDialog(
+                context,
+                l10n.successTitle,
+                l10n.registerSuccess,
+                AppColors.success,
+                Icons.check_circle,
+                l10n,
               );
               Future.delayed(const Duration(milliseconds: 1500), () {
                 if (context.mounted) {
@@ -232,18 +223,13 @@ class _RegisterPageState extends State<RegisterPage> {
               });
             });
           } else if (state is RegisterFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: isDark
-                    ? AppColors.errorDark
-                    : AppColors.errorLight,
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.all(16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+            _showDialog(
+              context,
+              l10n.errorTitle,
+              state.message,
+              isDark ? AppColors.errorDark : AppColors.errorLight,
+              Icons.error_outline,
+              l10n,
             );
             context.read<RegisterBloc>().add(const RegisterReset());
           }
@@ -690,6 +676,39 @@ class _RegisterPageState extends State<RegisterPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showDialog(
+    BuildContext ctx,
+    String title,
+    String message,
+    Color color,
+    IconData icon,
+    AppLocalizations l10n,
+  ) {
+    showDialog(
+      context: ctx,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(width: 8),
+            Expanded(child: Text(title)),
+          ],
+        ),
+        content: Text(message),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: color,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(l10n.close),
+          ),
+        ],
       ),
     );
   }

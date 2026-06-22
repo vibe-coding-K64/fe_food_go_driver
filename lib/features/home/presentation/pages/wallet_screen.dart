@@ -71,10 +71,27 @@ class _WalletScreenContentState extends State<_WalletScreenContent>
           _showSuccessDialog(context, l10n, state.wallet?.balance ?? 0);
         }
         if (state.withdrawErrorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.error_outline, color: AppColors.errorLight, size: 24),
+                  SizedBox(width: 8),
+                  Text(l10n.notifications),
+                ],
+              ),
               content: Text(state.withdrawErrorMessage!),
-              backgroundColor: AppColors.errorLight,
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.errorLight,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text(l10n.close),
+                ),
+              ],
             ),
           );
         }
@@ -501,7 +518,7 @@ class _WalletScreenContentState extends State<_WalletScreenContent>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
+            child: Text(l10n.ok),
           ),
         ],
       ),

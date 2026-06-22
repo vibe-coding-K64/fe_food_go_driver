@@ -81,6 +81,19 @@ final class CompleteOrderPressed extends HomeEvent {
   List<Object?> get props => [orderId];
 }
 
+final class CompleteOrderWithPhotoPressed extends HomeEvent {
+  final String orderId;
+  final String photoPath;
+
+  const CompleteOrderWithPhotoPressed({
+    required this.orderId,
+    required this.photoPath,
+  });
+
+  @override
+  List<Object?> get props => [orderId, photoPath];
+}
+
 final class ConfirmPickupPressed extends HomeEvent {
   final String orderId;
 
@@ -99,15 +112,15 @@ final class CancelOrderPressed extends HomeEvent {
   List<Object?> get props => [orderId];
 }
 
-// Internal events for Firebase stream updates - must be in same file as sealed class
+// Internal events for REST polling updates - must be in same file as sealed class
 class ProfileUpdated extends HomeEvent {
   final dynamic profile;
   const ProfileUpdated(this.profile);
 }
 
-class ActiveOrderUpdated extends HomeEvent {
-  final dynamic order;
-  const ActiveOrderUpdated(this.order);
+class ActiveOrdersUpdated extends HomeEvent {
+  final List<dynamic> orders;
+  const ActiveOrdersUpdated(this.orders);
 }
 
 class RecentOrdersUpdated extends HomeEvent {
@@ -131,6 +144,10 @@ final class LoadWalletRequested extends HomeEvent {
 
 final class LoadStatsRequested extends HomeEvent {
   const LoadStatsRequested();
+}
+
+final class RefreshAllDataRequested extends HomeEvent {
+  const RefreshAllDataRequested();
 }
 
 final class ForegroundFcmOrderSignalReceived extends HomeEvent {
@@ -169,6 +186,46 @@ final class RespondToOrderRequest extends HomeEvent {
   List<Object?> get props => [requestId, orderId, action];
 }
 
+final class AvailableOrdersUpdated extends HomeEvent {
+  final List<dynamic> orders;
+  const AvailableOrdersUpdated(this.orders);
+}
+
+final class RefreshAvailableOrdersRequested extends HomeEvent {
+  const RefreshAvailableOrdersRequested();
+}
+
+final class AcceptAvailableOrder extends HomeEvent {
+  final String orderId;
+  const AcceptAvailableOrder(this.orderId);
+
+  @override
+  List<Object?> get props => [orderId];
+}
+
+final class DeclineAvailableOrder extends HomeEvent {
+  final String orderId;
+  const DeclineAvailableOrder(this.orderId);
+
+  @override
+  List<Object?> get props => [orderId];
+}
+
+final class ReportOrderIssue extends HomeEvent {
+  final String orderId;
+  final String reason;
+  final String? additionalNote;
+
+  const ReportOrderIssue({
+    required this.orderId,
+    required this.reason,
+    this.additionalNote,
+  });
+
+  @override
+  List<Object?> get props => [orderId, reason, additionalNote];
+}
+
 final class RealtimeOrderStatusReceived extends HomeEvent {
   final DriverRealtimeOrderStatus payload;
 
@@ -185,5 +242,23 @@ final class RealtimeOrderRequestReceived extends HomeEvent {
 
   @override
   List<Object?> get props => [payload];
+}
+
+final class RealtimeChatMessageReceived extends HomeEvent {
+  final DriverRealtimeChatMessage payload;
+
+  const RealtimeChatMessageReceived(this.payload);
+
+  @override
+  List<Object?> get props => [payload];
+}
+
+final class ClearUnreadChatMessage extends HomeEvent {
+  const ClearUnreadChatMessage();
+}
+
+final class SetCurrentChatOrder extends HomeEvent {
+  final String? orderId;
+  const SetCurrentChatOrder(this.orderId);
 }
 

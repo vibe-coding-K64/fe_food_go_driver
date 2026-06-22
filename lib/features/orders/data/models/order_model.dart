@@ -52,6 +52,7 @@ class OrderModel extends Order {
     super.estimatedEarning,
     super.expiresAt,
     super.expiresInSeconds,
+    super.deliveryPhotoUrl,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -113,6 +114,7 @@ class OrderModel extends Order {
       estimatedEarning: _nullableDouble(json['estimatedEarning']),
       expiresAt: _toDateTime(json['expiresAt']),
       expiresInSeconds: _nullableInt(json['expiresInSeconds']),
+      deliveryPhotoUrl: json['deliveryPhotoUrl']?.toString() ?? json['delivery_photo_url']?.toString(),
     );
   }
 
@@ -168,6 +170,7 @@ class OrderModel extends Order {
       'estimatedEarning': estimatedEarning,
       'expiresAt': expiresAt?.toIso8601String(),
       'expiresInSeconds': expiresInSeconds,
+      'deliveryPhotoUrl': deliveryPhotoUrl,
     };
   }
 

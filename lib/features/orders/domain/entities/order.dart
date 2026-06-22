@@ -51,6 +51,7 @@ class Order extends Equatable {
   final double? estimatedEarning;
   final DateTime? expiresAt;
   final int? expiresInSeconds;
+  final String? deliveryPhotoUrl;
 
   const Order({
     required this.id,
@@ -103,6 +104,7 @@ class Order extends Equatable {
     this.estimatedEarning,
     this.expiresAt,
     this.expiresInSeconds,
+    this.deliveryPhotoUrl,
   });
 
   bool get isPendingStoreConfirmation => statusCode == 'PENDING_STORE_CONFIRMATION';
@@ -180,6 +182,7 @@ class Order extends Equatable {
     estimatedEarning,
     expiresAt,
     expiresInSeconds,
+    deliveryPhotoUrl,
   ];
 }
 

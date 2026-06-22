@@ -1,3 +1,4 @@
+import 'dart:io';
 import '../entities/order.dart';
 
 abstract class OrderRepository {
@@ -16,4 +17,8 @@ abstract class OrderRepository {
   Future<List<Order>> getRecentOrders(String driverId, {int limit = 10});
 
   Future<dynamic> respondOrder(String orderId, String action, String requestId);
+
+  Future<Order?> confirmDeliveryWithPhoto(String orderId, File photo);
+
+  Future<bool> reportOrderIssue(String orderId, String reason, String? additionalNote);
 }

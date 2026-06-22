@@ -11,17 +11,23 @@ import '../pages/order_map_screen.dart';
 class ActiveOrderPanel extends StatelessWidget {
   final Order order;
   final bool isUpdatingStatus;
+  final bool isUploadingPhoto;
   final VoidCallback onPickedUp;
   final VoidCallback onDelivered;
   final VoidCallback onCancelled;
+  final VoidCallback onTakePhoto;
+  final VoidCallback? onTap;
 
   const ActiveOrderPanel({
     super.key,
     required this.order,
     required this.isUpdatingStatus,
+    required this.isUploadingPhoto,
     required this.onPickedUp,
     required this.onDelivered,
     required this.onCancelled,
+    required this.onTakePhoto,
+    this.onTap,
   });
 
   bool get _isWaitingDriver => order.statusCode == 'WAITING_DRIVER';
@@ -72,29 +78,41 @@ class ActiveOrderPanel extends StatelessWidget {
       );
     } catch (_) {}
 
-    final destLat = destination.latitude.toStringAsFixed(6);
-    final destLng = destination.longitude.toStringAsFixed(6);
     const defaultLat = 10.7769;
     const defaultLng = 106.7009;
 
-    final oriLat = position != null ? position.latitude.toStringAsFixed(6) : defaultLat.toString();
-    final oriLng = position != null ? position.longitude.toStringAsFixed(6) : defaultLng.toString();
+    final oriLat = position != null ? position.latitude.toString() : defaultLat.toString();
+    final oriLng = position != null ? position.longitude.toString() : defaultLng.toString();
 
     final uri = Uri.parse(
       'https://www.google.com/maps/dir/?api=1'
-      '&origin=${oriLat},${oriLng}'
-      '&destination=${destLat},${destLng}'
+      '&origin=${Uri.encodeComponent(oriLat)},${Uri.encodeComponent(oriLng)}'
+      '&destination=${Uri.encodeComponent(destination.latitude.toString())},${Uri.encodeComponent(destination.longitude.toString())}'
       '&travelmode=driving',
     );
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _openMaps() async {
-    final hasCoords = order.deliveryLat != null && order.deliveryLng != null;
-    if (hasCoords) {
-      await _openNavigation(LatLng(order.deliveryLat!, order.deliveryLng!));
+    LatLng? destination;
+    String? fallbackAddress;
+
+    if (_isWaitingDriver) {
+      if (order.storeLat != null && order.storeLng != null) {
+        destination = LatLng(order.storeLat!, order.storeLng!);
+      }
+      fallbackAddress = order.storeAddress;
     } else {
-      final encoded = Uri.encodeComponent(order.deliveryAddress);
+      if (order.deliveryLat != null && order.deliveryLng != null) {
+        destination = LatLng(order.deliveryLat!, order.deliveryLng!);
+      }
+      fallbackAddress = order.deliveryAddress;
+    }
+
+    if (destination != null) {
+      await _openNavigation(destination);
+    } else if (fallbackAddress != null && fallbackAddress.isNotEmpty) {
+      final encoded = Uri.encodeComponent(fallbackAddress);
       final uri = Uri.parse(
         'https://www.google.com/maps/search/?api=1&query=$encoded',
       );
@@ -178,7 +196,10 @@ class ActiveOrderPanel extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1),
@@ -374,7 +395,7 @@ class ActiveOrderPanel extends StatelessWidget {
                         Icon(Icons.timer_outlined, size: 16, color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight),
                         const SizedBox(width: 8),
                         Text(
-                          'Du kien: ${order.estimatedDurationMinutes} phut',
+                          l10n.estimatedMinutes(order.estimatedDurationMinutes!),
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight,
@@ -482,7 +503,7 @@ class ActiveOrderPanel extends StatelessWidget {
                       children: [
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: isUpdatingStatus ? null : onDelivered,
+                            onPressed: (isUpdatingStatus || isUploadingPhoto) ? null : onTakePhoto,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.success,
                               foregroundColor: Colors.white,
@@ -490,13 +511,20 @@ class ActiveOrderPanel extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: isUpdatingStatus
+                            child: isUploadingPhoto
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
                                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                   )
-                                : Text(l10n.complete),
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.camera_alt, size: 18),
+                                      const SizedBox(width: 6),
+                                      Text(l10n.complete),
+                                    ],
+                                  ),
                           ),
                         ),
                       ],
@@ -508,6 +536,7 @@ class ActiveOrderPanel extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }

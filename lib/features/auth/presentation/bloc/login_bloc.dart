@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../services/fcm_service.dart';
 import '../../domain/entities/auth_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/login_usecase.dart';
@@ -9,15 +8,12 @@ import 'login_state.dart';
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final AuthRepository _authRepository;
   final LoginUseCase _loginUseCase;
-  final FCMService _fcmService;
 
   LoginBloc({
     required AuthRepository authRepository,
     required LoginUseCase loginUseCase,
-    required FCMService fcmService,
   })  : _authRepository = authRepository,
         _loginUseCase = loginUseCase,
-        _fcmService = fcmService,
         super(const LoginInitial()) {
     on<LoginRequested>(_onLoginRequested);
     on<LoginReset>(_onLoginReset);
@@ -40,7 +36,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
 
     if (session.refreshToken.isEmpty) {
-      emit(const SessionInvalid('Phien het han. Vui long dang nhap lai.'));
+      emit(const SessionInvalid('Phiên hết hạn. Vui lòng đăng nhập lại.'));
       return;
     }
 
@@ -52,7 +48,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       (authResponse) async {
         final newToken = authResponse.token;
         if (newToken == null || newToken.isEmpty) {
-          emit(const SessionInvalid('Token khong hop le. Vui long dang nhap lai.'));
+          emit(const SessionInvalid('Token không hợp lệ. Vui lòng đăng nhập lại.'));
           return;
         }
 
@@ -87,23 +83,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         }
 
         emit(LoginSuccess(user));
-        await _registerFcmToken(authResponse.token ?? '');
       },
     );
-  }
-
-  Future<void> _registerFcmToken(String token) async {
-    try {
-      await _fcmService.requestPermission();
-      final fcmToken = await _fcmService.getToken();
-      if (fcmToken == null || fcmToken.isEmpty) {
-        return;
-      }
-      await _authRepository.registerFcmToken(token, fcmToken);
-      _fcmService.onTokenRefresh((newToken) {
-        _authRepository.registerFcmToken(token, newToken);
-      });
-    } catch (_) {}
   }
 
   void _onLoginReset(LoginReset event, Emitter<LoginState> emit) {

@@ -296,6 +296,7 @@
   "@forgotPasswordCountdown": {
     "description": "Countdown label"
   },
+  "expired": "Hết hạn",
   "forgotPasswordVerifyOtp": "Xác nhận",
   "@forgotPasswordVerifyOtp": {
     "description": "Button text to verify OTP"
@@ -451,6 +452,8 @@
   "cancelled": "Đã hủy",
   "delivering": "Đang giao",
   "waitingForOrder": "Chờ đơn",
+  "waitingToAccept": "Chờ nhận",
+  "pickingUp": "Đang lấy",
   "deliveringNow": "Đang giao",
   "pickedUp": "Đã lấy hàng",
   "cancelOrder": "Hủy đơn",
@@ -502,5 +505,225 @@
   "cannotConnectServer": "Không thể kết nối server. Kiểm tra kết nối mạng.",
   "paid": "Đã thanh toán",
   "unpaid": "Chưa thanh toán",
-  "dismiss": "Đóng"
+  "dismiss": "Đóng",
+  "errorTitle": "Thông báo lỗi",
+  "successTitle": "Thành công",
+  "close": "Đóng",
+  "ok": "OK",
+  "callPhone": "Gọi điện",
+  "phoneNumber": "Số điện thoại: {phone}",
+  "@phoneNumber": {
+    "placeholders": {
+      "phone": {"type": "String"}
+    }
+  },
+  "copy": "Sao chép",
+  "copiedToClipboard": "Đã sao chép: {text}",
+  "@copiedToClipboard": {
+    "placeholders": {
+      "text": {"type": "String"}
+    }
+  },
+  "takePhoto": "Chụp ảnh",
+  "takePhotoDescription": "Sử dụng camera để chụp ảnh giao hàng",
+  "selectFromGallery": "Chọn từ thư viện",
+  "selectFromGalleryDescription": "Chọn ảnh đã có từ thư viện",
+  "imagePickerError": "Lỗi chọn ảnh: {error}",
+  "@imagePickerError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "unableToLoadImage": "Không tải được ảnh",
+  "retry": "Thử lại",
+  "tapToViewFullImage": "Chạm vào ảnh để xem đầy đủ",
+  "deliveryConfirmationPhoto": "Ảnh xác nhận giao hàng",
+  "takeDeliveryPhotoToComplete": "Chụp ảnh xác nhận giao hàng để hoàn thành đơn.",
+  "paymentMethodEWallet": "Ví điện tử",
+  "paymentMethodMomo": "MoMo",
+  "paymentMethodCash": "Tiền mặt (COD)",
+  "paymentMethodZaloPay": "ZaloPay",
+  "paymentMethodBankCard": "Thẻ ngân hàng",
+  "paymentMethodUnknown": "Không xác định",
+  "paidStatus": "Đã thanh toán",
+  "unpaidStatus": "Chưa thanh toán",
+  "deliverySuccess": "Giao hàng thành công",
+  "orderCompleteSuccess": "Hoàn thành đơn hàng thành công!",
+  "vietnameseLanguage": "Tiếng Việt",
+  "englishLanguage": "English",
+  "confirmLogout": "Bạn có chắc muốn đăng xuất?",
+  "insufficientBalance": "Số dư không đủ",
+  "processingNote": "Yêu cầu sẽ được xử lý trong 1-3 ngày làm việc.",
+  "confirmReceiveOrder": "Xác nhận nhận đơn",
+  "doYouWantToAcceptOrder": "Bạn có muốn nhận đơn hàng từ cửa hàng:",
+  "deliveryFeeAmount": "Phí giao hàng: {amount} VND",
+  "@deliveryFeeAmount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "confirmDeclineOrder": "Từ chối đơn hàng",
+  "areYouSureDeclineOrder": "Bạn có chắc chắn muốn từ chối đơn hàng này?",
+  "processing": "Đang xử lý...",
+  "store": "Cửa hàng",
+  "deliveryAddress": "Địa chỉ giao",
+  "estimatedEarning": "Thu nhập ước tính",
+  "payment": "Thanh toán",
+  "receiver": "Người nhận",
+  "note": "Ghi chú",
+  "orderExpired": "Yêu cầu đã hết hạn",
+  "autoDeclineAfter": "Tự động từ chối sau {seconds}s",
+  "@autoDeclineAfter": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "justNow": "Vừa xong",
+  "minutesAgo": "{minutes} phút trước",
+  "@minutesAgo": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "hoursAgo": "{hours} giờ trước",
+  "@hoursAgo": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+  "daysAgo": "{days} ngày trước",
+  "@daysAgo": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "earningDelivery": "Thu nhập giao hàng",
+  "withdrawal": "Rút tiền",
+  "refund": "Hoàn tiền",
+  "codCollection": "Thu COD",
+  "transaction": "Giao dịch",
+  "pending": "Đang chờ",
+  "completed": "Hoàn thành",
+  "failed": "Thất bại",
+  "languageCodeVi": "vi",
+  "currentLocation": "Vị trí hiện tại",
+  "startNavigation": "Bắt đầu chỉ đường.",
+  "routeToStore": "-> Cửa hàng",
+  "routeToDelivery": "-> Giao hàng",
+  "enableSound": "Bật tiếng",
+  "disableSound": "Tắt tiếng",
+  "calculatingRoute": "Đang tính tuyến đường...",
+  "navigatingToStore": "Hướng tới cửa hàng.",
+  "navigatingToDelivery": "Hướng tới địa chỉ giao hàng.",
+  "youHaveArrived": "Bạn đã đến nơi.",
+  "navigateToStore": "Cửa hàng",
+  "navigateToDelivery": "Giao hàng",
+  "startNavigationButton": "Bắt đầu chỉ đường",
+  "arrived": "Đã đến",
+  "onTheWay": "Đang di chuyển...",
+  "navigatingToStoreDirection": "Hướng tới cửa hàng",
+  "navigatingToDeliveryDirection": "Hướng tới địa chỉ giao hàng",
+  "remaining": "Còn lại",
+  "duration": "Thời gian",
+  "hasArrived": "Đã đến",
+  "isOnTheWay": "Đang đi",
+  "status": "Trạng thái",
+  "openMap": "Mở bản đồ",
+  "stop": "Dừng",
+  "minutesShort": "{minutes} phút",
+  "@minutesShort": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "secondsShort": "{seconds} giây",
+  "@secondsShort": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "estimatedMinutes": "Dự kiến: {minutes} phút",
+  "@estimatedMinutes": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "m": "{value} m",
+  "@m": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "chatEmpty": "Chua co tin nhan",
+  "@chatEmpty": {
+    "description": "Empty chat state message"
+  },
+  "chatEmptyHint": "Bat dau tro chuyen voi khach hang ve don hang nay",
+  "@chatEmptyHint": {
+    "description": "Hint for empty chat"
+  },
+  "chatHint": "Nhap tin nhan...",
+  "@chatHint": {
+    "description": "Chat input hint"
+  },
+  "loadingChat": "Dang tai chat...",
+  "@loadingChat": {
+    "description": "Loading chat state"
+  },
+  "chatError": "Khong the tai chat",
+  "@chatError": {
+    "description": "Chat error message"
+  },
+  "orderChatHeader": "Don hang {code}",
+  "@orderChatHeader": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
+  "phoneNumberLabel": "Dien thoai",
+  "@phoneNumberLabel": {
+    "description": "Phone number label"
+  },
+  "storeName": "Cua hang",
+  "@storeName": {
+    "description": "Store name label"
+  },
+  "recipientName": "Nguoi nhan",
+  "@recipientName": {
+    "description": "Recipient name label"
+  },
+  "chatWithCustomer": "Chat voi khach hang",
+  "@chatWithCustomer": {
+    "description": "Chat button label"
+  },
+  "distanceKm": "{value} km",
+  "@distanceKm": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "reportSubmitSuccess": "Đã gửi báo cáo thành công",
+  "reportSubmitFailed": "Không thể gửi báo cáo. Vui lòng thử lại.",
+  "additionalNote": "Ghi chú thêm",
+  "orderTimeline": "Lộ trình giao hàng",
+  "refreshing": "Đang làm mới...",
+  "noLocationData": "Không có dữ liệu vị trí",
+  "editProfile": "Chỉnh sửa hồ sơ",
+  "editProfileTitle": "Chỉnh sửa hồ sơ",
+  "fullNameLabel": "Họ và tên",
+  "phoneNumberLabel": "Số điện thoại",
+  "vehiclePlateLabel": "Biển số xe",
+  "vehicleTypeLabel": "Loại xe",
+  "driverLicenseLabel": "Giấy phép lái xe",
+  "changeAvatar": "Đổi ảnh đại diện",
+  "takePhoto": "Chụp ảnh",
+  "selectFromGallery": "Chọn từ thư viện",
+  "save": "Lưu",
+  "profileUpdatedSuccess": "Cập nhật hồ sơ thành công",
+  "profileUpdateFailed": "Cập nhật hồ sơ thất bại. Vui lòng thử lại.",
+  "motorcycle": "Xe máy",
+  "car": "Ô tô",
+  "requiredField": "Trường bắt buộc",
+  "invalidPhoneNumber": "Số điện thoại không hợp lệ",
+  "invalidVehiclePlate": "Biển số xe không hợp lệ"
 }

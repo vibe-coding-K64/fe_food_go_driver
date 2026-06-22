@@ -296,30 +296,4 @@ class AuthRemoteDataSource {
       throw _mapException(e, url);
     }
   }
-
-  Future<void> registerFcmToken(String token, String fcmToken) async {
-    final url = '$_baseApiUrl/auth/fcm-token';
-    final body = {'fcmToken': fcmToken};
-    _log('POST $url - Body: {fcmToken: ****}');
-
-    try {
-      final response = await _httpClient.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(body),
-      );
-
-      _log('Response $url - Status: ${response.statusCode} - Body: ${response.body}');
-
-      if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
-        throw _mapHttpResponse(response, url);
-      }
-    } catch (e) {
-      if (e is Failure) rethrow;
-      throw _mapException(e, url);
-    }
-  }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -102,7 +103,7 @@ abstract class BaseRemoteDataSource {
 
   Future<void> clearTokens() async {
     log('clearTokens - Clearing all tokens');
-    await Future.wait([
+    await Future.wait<void>([
       _secureStorage.delete(key: AppConstants.driverTokenKey),
       _secureStorage.delete(key: AppConstants.driverRefreshTokenKey),
       _secureStorage.delete(key: AppConstants.driverIdKey),
@@ -284,5 +285,125 @@ abstract class BaseRemoteDataSource {
       }
     }
     throw const ServerFailure('Unknown network error');
+  }
+
+  Future<Map<String, dynamic>> uploadFile(
+    String endpoint,
+    File file, {
+    String fieldName = 'file',
+    Map<String, String>? extraFields,
+    int retryCount = 0,
+    int maxRetries = 2,
+  }) async {
+    for (int attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        final request = http.MultipartRequest(
+          'POST',
+          Uri.parse('$_baseApiUrl$endpoint'),
+        );
+
+        request.headers.addAll(await authHeaders());
+        request.files.add(await http.MultipartFile.fromPath(fieldName, file.path));
+
+        if (extraFields != null) {
+          request.fields.addAll(extraFields);
+        }
+
+        final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
+        final response = await http.Response.fromStream(streamedResponse);
+
+        if (response.statusCode == 401 && retryCount == 0) {
+          log('uploadFile $endpoint - Got 401, attempting token refresh');
+          final result = await refreshToken();
+          if (result['success'] == true) {
+            log('uploadFile $endpoint - Refresh success, retrying upload');
+            return uploadFile(endpoint, file, fieldName: fieldName, extraFields: extraFields, retryCount: retryCount + 1);
+          }
+        }
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final decoded = jsonDecode(response.body);
+          return decoded is Map<String, dynamic> ? decoded : {'data': decoded};
+        }
+        throw mapFailure(response, endpoint);
+      } on TimeoutException {
+        log('uploadFile $endpoint - Timeout (attempt ${attempt + 1}/$maxRetries)');
+        if (attempt == maxRetries) {
+          throw ServerFailure('Upload timed out after $maxRetries retries');
+        }
+      } on ServerFailure {
+        rethrow;
+      } on AuthFailure {
+        rethrow;
+      } catch (e) {
+        if (e is ServerFailure || e is AuthFailure) rethrow;
+        log('uploadFile $endpoint - Unexpected exception (attempt ${attempt + 1}): $e');
+        if (attempt == maxRetries) rethrow;
+      }
+    }
+    throw const ServerFailure('Unknown upload error');
+  }
+
+  Future<Map<String, dynamic>> requestPutMultipart(
+    String endpoint, {
+    required File file,
+    required String fieldName,
+    Map<String, String>? extraFields,
+    int retryCount = 0,
+    int maxRetries = 2,
+  }) async {
+    for (int attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        final request = http.MultipartRequest(
+          'PUT',
+          Uri.parse('$_baseApiUrl$endpoint'),
+        );
+
+        request.headers.addAll(await authHeaders());
+        request.files.add(await http.MultipartFile.fromPath(fieldName, file.path));
+
+        if (extraFields != null) {
+          request.fields.addAll(extraFields);
+        }
+
+        final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
+        final response = await http.Response.fromStream(streamedResponse);
+
+        if (response.statusCode == 401 && retryCount == 0) {
+          log('requestPutMultipart $endpoint - Got 401, attempting token refresh');
+          final result = await refreshToken();
+          if (result['success'] == true) {
+            log('requestPutMultipart $endpoint - Refresh success, retrying upload');
+            return requestPutMultipart(
+              endpoint,
+              file: file,
+              fieldName: fieldName,
+              extraFields: extraFields,
+              retryCount: retryCount + 1,
+            );
+          }
+        }
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final decoded = jsonDecode(response.body);
+          return decoded is Map<String, dynamic> ? decoded : {'data': decoded};
+        }
+        throw mapFailure(response, endpoint);
+      } on TimeoutException {
+        log('requestPutMultipart $endpoint - Timeout (attempt ${attempt + 1}/$maxRetries)');
+        if (attempt == maxRetries) {
+          throw ServerFailure('Upload timed out after $maxRetries retries');
+        }
+      } on ServerFailure {
+        rethrow;
+      } on AuthFailure {
+        rethrow;
+      } catch (e) {
+        if (e is ServerFailure || e is AuthFailure) rethrow;
+        log('requestPutMultipart $endpoint - Unexpected exception (attempt ${attempt + 1}): $e');
+        if (attempt == maxRetries) rethrow;
+      }
+    }
+    throw const ServerFailure('Unknown upload error');
   }
 }

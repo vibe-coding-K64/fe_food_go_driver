@@ -16,7 +16,7 @@ class TransactionModel extends Transaction {
 
   static String _mapType(dynamic type) {
     if (type == null) return 'DELIVERY_INCOME';
-    // Backend trả về Integer từ Firestore: 2=delivery_income, 3=withdrawal, 4=refund, 5=COD_DEBIT
+    // Backend trả về Integer: 2=delivery_income, 3=withdrawal, 4=refund, 5=COD_DEBIT
     final String strVal = type.toString().trim();
     final int? intVal = int.tryParse(strVal);
     final int t = intVal ?? 1;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../wallet/domain/entities/transaction.dart';
 
 class TransactionItem extends StatelessWidget {
@@ -42,29 +43,29 @@ class TransactionItem extends StatelessWidget {
     }
   }
 
-  String _labelForType(String type) {
+  String _labelForType(String type, AppLocalizations l10n) {
     switch (type) {
       case 'DELIVERY_INCOME':
-        return 'Thu nhập giao hàng';
+        return l10n.earningDelivery;
       case 'WITHDRAWAL':
-        return 'Rút tiền';
+        return l10n.withdrawal;
       case 'REFUND':
-        return 'Hoàn tiền';
+        return l10n.refund;
       case 'COD_DEBIT':
-        return 'Thu COD';
+        return l10n.codCollection;
       default:
-        return 'Giao dịch';
+        return l10n.transaction;
     }
   }
 
-  String _statusLabel(String status) {
+  String _statusLabel(String status, AppLocalizations l10n) {
     switch (status) {
       case 'PENDING':
-        return 'Đang chờ';
+        return l10n.pending;
       case 'COMPLETED':
-        return 'Hoàn thành';
+        return l10n.completed;
       case 'FAILED':
-        return 'Thất bại';
+        return l10n.failed;
       default:
         return status;
     }
@@ -85,6 +86,7 @@ class TransactionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = _colorForType(transaction.type);
 
@@ -115,7 +117,7 @@ class TransactionItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      transaction.description ?? _labelForType(transaction.type),
+                      transaction.description ?? _labelForType(transaction.type, l10n),
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
@@ -128,7 +130,7 @@ class TransactionItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _formatDate(transaction.createdAt),
+                      _formatDate(transaction.createdAt, l10n),
                       style: TextStyle(
                         fontSize: 11,
                         color: isDark
@@ -158,7 +160,7 @@ class TransactionItem extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      _statusLabel(transaction.status),
+                      _statusLabel(transaction.status, l10n),
                       style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
@@ -182,14 +184,14 @@ class TransactionItem extends StatelessWidget {
             RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.');
   }
 
-  String _formatDate(DateTime dt) {
+  String _formatDate(DateTime dt, AppLocalizations l10n) {
     final now = DateTime.now();
     final diff = now.difference(dt);
 
-    if (diff.inMinutes < 1) return 'Vừa xong';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} phút trước';
-    if (diff.inHours < 24) return '${diff.inHours} giờ trước';
-    if (diff.inDays < 7) return '${diff.inDays} ngày trước';
+    if (diff.inMinutes < 1) return l10n.justNow;
+    if (diff.inMinutes < 60) return l10n.minutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.hoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l10n.daysAgo(diff.inDays);
 
     return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
   }

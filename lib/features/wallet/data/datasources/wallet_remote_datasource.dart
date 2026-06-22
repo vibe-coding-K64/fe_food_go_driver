@@ -19,6 +19,27 @@ class WalletRemoteDataSource extends BaseRemoteDataSource {
           secureStorage: secureStorage,
         );
 
+  Future<WalletModel?> getWallet(String driverId) async {
+    log('GET /drivers/wallet');
+    try {
+      final response = await requestGet('/drivers/wallet');
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic>) {
+          final data = decoded['data'] ?? decoded;
+          return WalletModel.fromJson(data as Map<String, dynamic>);
+        }
+        throw const ServerFailure('Invalid wallet response format');
+      }
+      throw mapFailure(response, '/drivers/wallet');
+    } catch (e) {
+      if (e is Failure) rethrow;
+      log('Exception: $e');
+      throw const ServerFailure('Failed to fetch wallet');
+    }
+  }
+
   Future<WalletModel> getWalletApi(String driverId) async {
     log('GET /drivers/wallet');
     try {

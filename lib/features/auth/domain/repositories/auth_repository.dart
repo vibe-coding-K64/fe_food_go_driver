@@ -19,7 +19,6 @@ abstract class AuthRepository {
 
   Future<Either<Failure, AuthUser>> getCurrentUser(String token);
 
-  Future<Either<Failure, void>> registerFcmToken(String token, String fcmToken);
 
   Future<Either<Failure, OtpSendResponse>> sendRegisterOtp({
     required String email,

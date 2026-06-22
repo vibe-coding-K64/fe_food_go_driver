@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import '../../../../core/errors/failures.dart';
@@ -199,6 +200,67 @@ class OrderRemoteDataSource extends BaseRemoteDataSource {
       if (e is Failure) rethrow;
       log('Exception: $e');
       throw const ServerFailure('Failed to respond to order');
+    }
+  }
+
+  Future<String?> uploadDeliveryPhoto(String orderId, File photo) async {
+    log('POST /drivers/orders/$orderId/photo');
+    try {
+      final result = await uploadFile(
+        '/drivers/orders/$orderId/photo',
+        photo,
+        fieldName: 'photo',
+      );
+      final url = result['url'] ?? result['data']?['url'];
+      return url?.toString();
+    } catch (e) {
+      log('Exception uploadDeliveryPhoto: $e');
+      return null;
+    }
+  }
+
+  Future<bool> reportOrderIssue(String orderId, String reason, String? additionalNote) async {
+    log('POST /drivers/orders/$orderId/report-issue');
+    try {
+      final response = await requestPost(
+        '/drivers/orders/$orderId/report-issue',
+        body: {
+          'reason': reason,
+          if (additionalNote != null && additionalNote.isNotEmpty)
+            'additionalNote': additionalNote,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      }
+      log('reportOrderIssue failed: ${response.statusCode}');
+      return false;
+    } catch (e) {
+      log('Exception reportOrderIssue: $e');
+      return false;
+    }
+  }
+
+  Future<OrderModel?> confirmDeliveryWithPhoto(
+    String orderId,
+    File photo,
+  ) async {
+    log('POST /drivers/orders/$orderId/deliver-with-photo');
+    try {
+      final result = await uploadFile(
+        '/drivers/orders/$orderId/deliver-with-photo',
+        photo,
+        fieldName: 'photo',
+      );
+
+      if (result['data'] != null) {
+        return OrderModel.fromJson(result['data'] as Map<String, dynamic>);
+      }
+      return null;
+    } catch (e) {
+      log('Exception confirmDeliveryWithPhoto: $e');
+      return null;
     }
   }
 }

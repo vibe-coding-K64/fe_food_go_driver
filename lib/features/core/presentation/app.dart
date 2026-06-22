@@ -38,9 +38,7 @@ class App extends StatelessWidget {
         BlocProvider<LocaleBloc>(
           create: (_) => getIt<LocaleBloc>()..add(const LoadLocale()),
         ),
-        BlocProvider<HomeBloc>(
-          create: (_) => getIt<HomeBloc>(),
-        ),
+        BlocProvider<HomeBloc>(create: (_) => getIt<HomeBloc>()),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
@@ -123,18 +121,11 @@ class _MainShellState extends State<_MainShell> {
   int _currentIndex = 0;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<HomeBloc>().add(const HomeLoadRequested());
-      }
-    });
-  }
-
-  @override
   void dispose() {
-    context.read<HomeBloc>().add(const HomeStopListening());
+    debugPrint('[App] _MainShell disposing — setting driver offline');
+    final homeBloc = context.read<HomeBloc>();
+    homeBloc.add(const SetDriverOfflineRequested());
+    homeBloc.add(const HomeStopListening());
     super.dispose();
   }
 
@@ -194,7 +185,7 @@ class _SessionValidatingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Dang xac minh phien dang nhap...',
+              'Đang xác minh phiên đăng nhập...',
               style: TextStyle(
                 fontSize: 16,
                 color: isDark ? Colors.white70 : Colors.black54,

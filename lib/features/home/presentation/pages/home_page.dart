@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../injection_container.dart';
 import '../../../../services/background_location_service_manager.dart';
-import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../../driver/domain/repositories/driver_repository.dart';
 import '../../../auth/presentation/bloc/login_bloc.dart';
 import '../../../auth/presentation/pages/login_page.dart';
-import '../../../../services/fcm_service.dart';
 import '../bloc/home_bloc.dart';
 import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
 import '../widgets/driver_info_card.dart';
 import '../widgets/active_order_panel.dart';
 import '../widgets/today_stats_card.dart';
-import '../widgets/wallet_summary_card.dart';
-import '../widgets/recent_orders_list.dart';
 import '../widgets/order_request_modal.dart';
+import '../widgets/available_orders_section.dart';
+import 'available_orders_screen.dart';
+import 'order_detail_screen.dart';
 
 class HomePage extends StatefulWidget {
   final VoidCallback? onNotificationTap;
@@ -40,7 +38,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     context.read<HomeBloc>().add(const HomeLoadRequested());
-    _ensureFcmTokenRegistered();
     _initBackgroundService();
   }
 
@@ -51,7 +48,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final homeState = context.read<HomeBloc>().state;
-    final hasActiveOrder = homeState.activeOrder != null;
+    final hasActiveOrder = homeState.activeOrders.isNotEmpty;
     final isOnline = homeState.isOnline;
 
     if (state == AppLifecycleState.paused ||
@@ -96,43 +93,104 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _ensureFcmTokenRegistered() async {
-    try {
-      final fcmService = getIt<FCMService>();
-      final authRepo = getIt<AuthRepository>();
-      final secureStorage = getIt<FlutterSecureStorage>();
-
-      await fcmService.requestPermission();
-      final fcmToken = await fcmService.getToken();
-      if (fcmToken == null || fcmToken.isEmpty) return;
-
-      final token = await secureStorage.read(key: AppConstants.driverTokenKey);
-      if (token == null || token.isEmpty) return;
-
-      await authRepo.registerFcmToken(token, fcmToken);
-      debugPrint('[HomePage] FCM token re-registered on app start');
-    } catch (e) {
-      debugPrint('[HomePage] FCM token registration failed: $e');
-    }
+  Future<void> _onRefresh() async {
+    context.read<HomeBloc>().add(const RefreshAllDataRequested());
   }
 
-  Future<void> _onRefresh() async {
-    context.read<HomeBloc>().add(const HomeLoadRequested());
-    context.read<HomeBloc>().add(const LoadWalletRequested());
-    context.read<HomeBloc>().add(const LoadStatsRequested());
+  Future<void> _handleTakePhoto(BuildContext context, HomeState state, String orderId) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.complete,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.takeDeliveryPhotoToComplete,
+                style: TextStyle(color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.camera_alt, color: AppColors.primaryLight),
+                title: Text(l10n.takePhoto),
+                subtitle: Text(l10n.takePhotoDescription),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await _pickAndUploadPhoto(context, orderId, ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: AppColors.primaryLight),
+                title: Text(l10n.selectFromGallery),
+                subtitle: Text(l10n.selectFromGalleryDescription),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await _pickAndUploadPhoto(context, orderId, ImageSource.gallery);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAndUploadPhoto(
+    BuildContext context,
+    String orderId,
+    ImageSource source,
+  ) async {
+
+    try {
+      final picker = ImagePicker();
+      final XFile? photo = await picker.pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+
+      if (photo == null) return;
+
+      context.read<HomeBloc>().add(
+        CompleteOrderWithPhotoPressed(
+          orderId: orderId,
+          photoPath: photo.path,
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.imagePickerError(e.toString()))),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? AppColors.primaryDark : AppColors.primaryLight;
+    final primaryColor = isDark
+        ? AppColors.primaryDark
+        : AppColors.primaryLight;
 
     return BlocListener<HomeBloc, HomeState>(
       listenWhen: (previous, current) =>
-          previous.activeOrder != current.activeOrder,
+          previous.activeOrders.length != current.activeOrders.length ||
+          previous.isOnline != current.isOnline,
       listener: (context, state) {
-        if (state.activeOrder != null && state.isOnline) {
+        if (state.activeOrders.isNotEmpty && state.isOnline) {
           // Order started - if app is already in background, start service immediately
           final lifecycleState = WidgetsBinding.instance.lifecycleState;
           if (lifecycleState == AppLifecycleState.paused ||
@@ -141,7 +199,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             _startBackgroundLocation();
           }
         } else {
-          // Order completed/cancelled
+          // No active orders - stop background location
           _stopBackgroundLocation();
         }
       },
@@ -150,139 +208,140 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             previous.pendingRequest != current.pendingRequest ||
             previous.successMessage != current.successMessage ||
             previous.errorMessage != current.errorMessage ||
-            previous.needsReLogin != current.needsReLogin,
+            previous.needsReLogin != current.needsReLogin ||
+            previous.unreadChatMessage != current.unreadChatMessage,
         listener: (context, state) {
-        if (state.needsReLogin) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => BlocProvider<LoginBloc>(
-                create: (_) => getIt<LoginBloc>(),
-                child: const LoginPage(),
+          if (state.needsReLogin) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => BlocProvider<LoginBloc>(
+                  create: (_) => getIt<LoginBloc>(),
+                  child: const LoginPage(),
+                ),
               ),
-            ),
-            (route) => false,
-          );
-          return;
-        }
+              (route) => false,
+            );
+            return;
+          }
 
-        if (state.pendingRequest != null) {
-          _showOrderRequestModal(context, state);
-        }
+          if (state.pendingRequest != null) {
+            _showOrderRequestModal(context, state);
+          }
 
-        if (state.successMessage != null && state.successMessage!.isNotEmpty) {
-          final messenger = ScaffoldMessenger.of(context);
-          messenger.hideCurrentSnackBar();
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(state.successMessage!),
-              backgroundColor: AppColors.success,
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              action: SnackBarAction(
-                label: l10n.dismiss,
-                textColor: Colors.white,
-                onPressed: () {
-                  messenger.hideCurrentSnackBar();
-                  context.read<HomeBloc>().add(const ClearSuccessMessage());
-                },
-              ),
-            ),
-          );
-          context.read<HomeBloc>().add(const ClearSuccessMessage());
-        }
+          if (state.successMessage != null &&
+              state.successMessage!.isNotEmpty) {
+            _showInfoDialog(
+              context,
+              l10n.notifications,
+              state.successMessage!,
+              AppColors.success,
+              Icons.check_circle,
+              l10n,
+            );
+            context.read<HomeBloc>().add(const ClearSuccessMessage());
+          }
 
-        if (state.errorMessage != null &&
-            state.errorMessage!.isNotEmpty &&
-            !state.needsLocationPermission) {
-          final messenger = ScaffoldMessenger.of(context);
-          messenger.hideCurrentSnackBar();
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage!),
-              backgroundColor:
-                  isDark ? AppColors.errorDark : AppColors.errorLight,
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              action: SnackBarAction(
-                label: l10n.dismiss,
-                textColor: Colors.white,
-                onPressed: () {
-                  messenger.hideCurrentSnackBar();
-                  context.read<HomeBloc>().add(const ClearErrorMessage());
-                },
-              ),
-            ),
-          );
-          context.read<HomeBloc>().add(const ClearErrorMessage());
-        }
-      },
-      builder: (context, state) {
-        if (state.status == HomeStatus.loading || state.driverProfile == null) {
-          return Center(
-            child: CircularProgressIndicator(color: primaryColor),
-          );
-        }
+          if (state.errorMessage != null &&
+              state.errorMessage!.isNotEmpty &&
+              !state.needsLocationPermission) {
+            _showInfoDialog(
+              context,
+              l10n.notifications,
+              state.errorMessage!,
+              isDark ? AppColors.errorDark : AppColors.errorLight,
+              Icons.error_outline,
+              l10n,
+            );
+            context.read<HomeBloc>().add(const ClearErrorMessage());
+          }
 
-        return RefreshIndicator(
-          onRefresh: () async => _onRefresh(),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DriverInfoCard(profile: state.driverProfile),
-                const SizedBox(height: 16),
-                if (state.activeOrder != null) ...[
-                  ActiveOrderPanel(
-                    order: state.activeOrder!,
-                    isUpdatingStatus: state.isUpdatingStatus,
-                    onPickedUp: () {
-                      if (state.activeOrder != null) {
-                        context.read<HomeBloc>().add(
-                              ConfirmPickupPressed(state.activeOrder!.id),
-                            );
-                      }
-                    },
-                    onDelivered: () {
-                      if (state.activeOrder != null) {
-                        context.read<HomeBloc>().add(
-                              CompleteOrderPressed(state.activeOrder!.id),
-                            );
-                      }
-                    },
-                    onCancelled: () {
-                      _showCancelConfirmation(context, l10n);
-                    },
-                  ),
+          if (state.unreadChatMessage != null &&
+              state.unreadChatMessage!.isNotEmpty) {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.unreadChatMessage!),
+                backgroundColor: primaryColor,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+            context.read<HomeBloc>().add(const ClearUnreadChatMessage());
+          }
+        },
+        builder: (context, state) {
+          if (state.status == HomeStatus.loading ||
+              state.driverProfile == null) {
+            return Center(
+              child: CircularProgressIndicator(color: primaryColor),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async => _onRefresh(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DriverInfoCard(profile: state.driverProfile),
                   const SizedBox(height: 16),
+                  if (state.activeOrders.isNotEmpty) ...[
+                    ...state.activeOrders.map((order) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: ActiveOrderPanel(
+                        order: order,
+                        isUpdatingStatus: state.isUpdatingStatus,
+                        isUploadingPhoto: state.isUploadingPhoto,
+                        onPickedUp: () {
+                          context.read<HomeBloc>().add(
+                            ConfirmPickupPressed(order.id),
+                          );
+                        },
+                        onDelivered: () {},
+                        onCancelled: () {
+                          _showCancelConfirmation(context, l10n, order.id);
+                        },
+                        onTakePhoto: () => _handleTakePhoto(context, state, order.id),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => BlocProvider.value(
+                                value: context.read<HomeBloc>(),
+                                child: OrderDetailScreen(order: order),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )),
+                  ],
+                  if (state.isOnline && state.availableOrders.isNotEmpty) ...[
+                    AvailableOrdersSection(
+                      availableOrders: state.availableOrders,
+                      onRefresh: _onRefresh,
+                      onViewAll: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => BlocProvider.value(
+                              value: context.read<HomeBloc>(),
+                              child: const AvailableOrdersScreen(),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  if (!state.isOnline && state.activeOrders.isEmpty)
+                    _buildOfflinePrompt(context, l10n, isDark, primaryColor),
+                  TodayStatsCard(stats: state.todayStats),
+                  const SizedBox(height: 80),
                 ],
-                if (!state.isOnline && state.activeOrder == null)
-                  _buildOfflinePrompt(context, l10n, isDark, primaryColor),
-                TodayStatsCard(stats: state.todayStats),
-                const SizedBox(height: 16),
-                WalletSummaryCard(
-                  wallet: state.wallet,
-                  onWithdraw: widget.onNotificationTap ?? () {},
-                  onTransactionHistory: widget.onNotificationTap ?? () {},
-                ),
-                const SizedBox(height: 16),
-                RecentOrdersList(
-                  orders: state.recentOrders,
-                  onRefresh: _onRefresh,
-                ),
-                const SizedBox(height: 80),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
       ),
     );
   }
@@ -344,11 +403,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-  void _showCancelConfirmation(BuildContext context, AppLocalizations l10n) {
-    final state = context.read<HomeBloc>().state;
-    final orderId = state.activeOrder?.id;
-    if (orderId == null) return;
-
+  void _showCancelConfirmation(BuildContext context, AppLocalizations l10n, String orderId) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -379,7 +434,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void _showOrderRequestModal(BuildContext context, HomeState state) {
     final request = state.pendingRequest;
     if (request == null) {
-      debugPrint('[HomePage] Skipping order request modal because pendingRequest is null');
+      debugPrint(
+        '[HomePage] Skipping order request modal because pendingRequest is null',
+      );
       return;
     }
     if (_isModalShowing) {
@@ -391,13 +448,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     final homeBloc = context.read<HomeBloc>();
     debugPrint(
-      '[HomePage] Scheduling order request modal - orderId=${request.orderId}, requestId=${request.id}, source=${request.source}, expiresAt=${request.expiresAt}',
+      '[HomePage] Scheduling order request modal - orderId=${request.orderId}, requestId=${request.id}, expiresAt=${request.expiresAt}',
     );
     setState(() => _isModalShowing = true);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) {
-        debugPrint('[HomePage] Context unmounted before showing order request modal');
+        debugPrint(
+          '[HomePage] Context unmounted before showing order request modal',
+        );
         if (mounted) setState(() => _isModalShowing = false);
         return;
       }
@@ -421,5 +480,38 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         if (mounted) setState(() => _isModalShowing = false);
       });
     });
+  }
+
+  void _showInfoDialog(
+    BuildContext context,
+    String title,
+    String message,
+    Color color,
+    IconData icon,
+    AppLocalizations l10n,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(width: 8),
+            Expanded(child: Text(title)),
+          ],
+        ),
+        content: Text(message),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: color,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(l10n.close),
+          ),
+        ],
+      ),
+    );
   }
 }

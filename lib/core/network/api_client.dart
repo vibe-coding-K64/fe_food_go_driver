@@ -38,9 +38,9 @@ class ApiClient {
       case 409:
         return AuthFailure(msg);
       case 502:
-        return const ServerFailure('Server dang bao tri. Vui long thu lai sau.');
+        return const ServerFailure('Server đang bảo trì. Vui lòng thử lại sau.');
       case 503:
-        return const ServerFailure('Dich vu tam thoi khong kha dung. Vui long thu lai sau.');
+        return const ServerFailure('Dịch vụ tạm thời không khả dụng. Vui lòng thử lại sau.');
       default:
         return ServerFailure(msg);
     }
@@ -186,7 +186,7 @@ class ApiClient {
           _log('Token refresh failed, user must login again');
           return ApiResponse(
             success: false,
-            failure: const AuthFailure('Phien dang nhap het han. Vui long dang nhap lai.'),
+            failure: const AuthFailure('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'),
             statusCode: 401,
           );
         }

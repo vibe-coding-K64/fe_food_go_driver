@@ -14,7 +14,9 @@ import '../../../core/presentation/bloc/locale/locale_bloc.dart';
 import '../../../core/presentation/bloc/locale/locale_state.dart';
 import '../../../core/presentation/bloc/locale/locale_event.dart';
 import '../bloc/home_bloc.dart';
+import '../bloc/home_event.dart';
 import '../bloc/home_state.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -99,6 +101,23 @@ class ProfileScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             color: isDark ? AppColors.onBackgroundDark : AppColors.onBackgroundLight,
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: 200,
+          child: OutlinedButton.icon(
+            onPressed: () => _openEditProfile(context, l10n),
+            icon: const Icon(Icons.edit, size: 18),
+            label: Text(l10n.editProfile),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: primaryColor,
+              side: BorderSide(color: primaryColor),
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
           ),
         ),
       ],
@@ -213,7 +232,7 @@ class ProfileScreen extends StatelessWidget {
               return _buildSettingsTile(
                 Icons.language,
                 l10n.language,
-                localeState.locale?.languageCode == 'vi' ? 'Tiếng Việt' : 'English',
+                localeState.locale?.languageCode == 'vi' ? l10n.vietnameseLanguage : l10n.englishLanguage,
                 () => _showLanguageSheet(context, l10n),
                 isDark,
                 primaryColor,
@@ -335,7 +354,7 @@ class ProfileScreen extends StatelessWidget {
                 return Column(
                   children: [
                     ListTile(
-                      title: const Text('Tiếng Việt'),
+                      title: Text(l10n.vietnameseLanguage),
                       trailing: state.locale?.languageCode == 'vi'
                           ? const Icon(Icons.check, color: AppColors.primaryLight)
                           : null,
@@ -347,7 +366,7 @@ class ProfileScreen extends StatelessWidget {
                       },
                     ),
                     ListTile(
-                      title: const Text('English'),
+                      title: Text(l10n.englishLanguage),
                       trailing: state.locale?.languageCode == 'en'
                           ? const Icon(Icons.check, color: AppColors.primaryLight)
                           : null,
@@ -373,7 +392,7 @@ class ProfileScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.logout),
-        content: Text('${l10n.logout}?'),
+        content: Text(l10n.confirmLogout),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -382,6 +401,11 @@ class ProfileScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.of(ctx).pop();
+              final homeBloc = context.read<HomeBloc>();
+              // Set driver offline before logout (fire-and-forget)
+              homeBloc.add(const SetDriverOfflineRequested());
+              // Stop listeners after offline API is sent
+              homeBloc.add(const HomeStopListening());
               final newLoginBloc = getIt<LoginBloc>();
               newLoginBloc.add(const LogoutRequested());
               Navigator.of(context).pushAndRemoveUntil(
@@ -410,5 +434,16 @@ class ProfileScreen extends StatelessWidget {
         .toStringAsFixed(0)
         .replaceAllMapped(
             RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.');
+  }
+
+  void _openEditProfile(BuildContext context, AppLocalizations l10n) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => BlocProvider.value(
+          value: context.read<HomeBloc>(),
+          child: const EditProfileScreen(),
+        ),
+      ),
+    );
   }
 }

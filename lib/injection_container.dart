@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'features/core/presentation/bloc/theme/theme_bloc.dart';
 import 'features/core/presentation/bloc/locale/locale_bloc.dart';
 import 'features/auth/data/datasources/auth_remote_datasource.dart';
@@ -24,14 +23,14 @@ import 'features/wallet/data/datasources/wallet_remote_datasource.dart';
 import 'features/wallet/data/repositories/wallet_repository_impl.dart';
 import 'features/wallet/domain/repositories/wallet_repository.dart';
 import 'features/home/data/datasources/home_remote_datasource.dart';
-import 'features/home/data/datasources/driver_firebase_datasource.dart';
-import 'features/home/data/datasources/order_firebase_datasource.dart';
-import 'features/home/data/datasources/wallet_firebase_datasource.dart';
 import 'features/home/data/repositories/home_repository_impl.dart';
 import 'features/home/presentation/bloc/home_bloc.dart';
+import 'features/chat/data/datasources/chat_remote_datasource.dart';
+import 'features/chat/data/repositories/chat_repository.dart';
+import 'features/chat/presentation/bloc/chat_bloc.dart';
 import 'core/constants/app_constants.dart';
-import 'services/fcm_service.dart';
 import 'services/driver_realtime_service.dart';
+import 'services/chat_realtime_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -55,19 +54,42 @@ Future<void> init() async {
   );
   getIt.registerSingleton<FlutterSecureStorage>(secureStorage);
 
-  // Firebase Auth
-  getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
-
-  // FCM Service
-  getIt.registerLazySingleton<FCMService>(() => FCMService());
+  // Driver Realtime Service (WebSocket)
   getIt.registerLazySingleton<DriverRealtimeService>(
-    () => DriverRealtimeService(
-      secureStorage: getIt<FlutterSecureStorage>(),
-    ),
+    () => DriverRealtimeService(secureStorage: getIt<FlutterSecureStorage>()),
   );
 
   // HTTP Client
   getIt.registerLazySingleton<http.Client>(() => http.Client());
+
+  // Chat Realtime Service (WebSocket)
+  getIt.registerLazySingleton<ChatRealtimeService>(
+    () => ChatRealtimeService(secureStorage: getIt<FlutterSecureStorage>()),
+  );
+
+  // Chat data source (HTTP)
+  getIt.registerLazySingleton<ChatRemoteDataSource>(
+    () => ChatRemoteDataSource(
+      httpClient: getIt<http.Client>(),
+      baseApiUrl: AppConstants.baseApiUrl,
+      getToken: _getTokenFromStorage,
+      secureStorage: getIt<FlutterSecureStorage>(),
+    ),
+  );
+
+  // Chat repository
+  getIt.registerLazySingleton<ChatRepository>(
+    () => ChatRepository(getIt<ChatRemoteDataSource>()),
+  );
+
+  // Chat BLoC singleton
+  getIt.registerLazySingleton<ChatBloc>(
+    () => ChatBloc(
+      chatRepository: getIt<ChatRepository>(),
+      realtimeService: getIt<DriverRealtimeService>(),
+      secureStorage: getIt<FlutterSecureStorage>(),
+    ),
+  );
 
   // Auth data source
   getIt.registerLazySingleton<AuthRemoteDataSource>(
@@ -84,7 +106,7 @@ Future<void> init() async {
   );
   getIt.registerSingleton<AuthRepository>(authRepository);
 
-  // Driver data source (HTTP - for Command operations)
+  // Driver data source (HTTP)
   getIt.registerLazySingleton<DriverRemoteDataSource>(
     () => DriverRemoteDataSource(
       httpClient: getIt<http.Client>(),
@@ -99,7 +121,7 @@ Future<void> init() async {
     () => DriverRepositoryImpl(getIt<DriverRemoteDataSource>()),
   );
 
-  // Order data source (HTTP - for Command operations)
+  // Order data source (HTTP)
   getIt.registerLazySingleton<OrderRemoteDataSource>(
     () => OrderRemoteDataSource(
       httpClient: getIt<http.Client>(),
@@ -114,7 +136,7 @@ Future<void> init() async {
     () => OrderRepositoryImpl(getIt<OrderRemoteDataSource>()),
   );
 
-  // Wallet data source (HTTP - for Command operations)
+  // Wallet data source (HTTP)
   getIt.registerLazySingleton<WalletRemoteDataSource>(
     () => WalletRemoteDataSource(
       httpClient: getIt<http.Client>(),
@@ -132,20 +154,7 @@ Future<void> init() async {
     ),
   );
 
-  // Firebase data sources (QUERY - real-time from Firestore/Realtime DB)
-  getIt.registerLazySingleton<DriverFirebaseDataSource>(
-    () => DriverFirebaseDataSource(),
-  );
-
-  getIt.registerLazySingleton<OrderFirebaseDataSource>(
-    () => OrderFirebaseDataSource(),
-  );
-
-  getIt.registerLazySingleton<WalletFirebaseDataSource>(
-    () => WalletFirebaseDataSource(),
-  );
-
-  // Home data source (HTTP - for stats and misc queries via REST)
+  // Home data source (HTTP)
   getIt.registerLazySingleton<HomeRemoteDataSource>(
     () => HomeRemoteDataSource(
       httpClient: getIt<http.Client>(),
@@ -155,20 +164,12 @@ Future<void> init() async {
     ),
   );
 
-  // Home repository - uses Firebase for real-time QUERY
-  getIt.registerLazySingleton<HomeRemoteDataSource>(
-    () => HomeRemoteDataSource(
-      getToken: () async => await getIt<FlutterSecureStorage>().read(key: AppConstants.driverTokenKey) ?? '',
-      secureStorage: getIt<FlutterSecureStorage>(),
-    ),
-  );
-
+  // Home repository
   getIt.registerLazySingleton<HomeRepository>(
     () => HomeRepository(
-      driverFirebase: getIt<DriverFirebaseDataSource>(),
-      orderFirebase: getIt<OrderFirebaseDataSource>(),
-      walletFirebase: getIt<WalletFirebaseDataSource>(),
       homeRemote: getIt<HomeRemoteDataSource>(),
+      driverRemote: getIt<DriverRemoteDataSource>(),
+      walletRemote: getIt<WalletRemoteDataSource>(),
     ),
   );
 
@@ -194,7 +195,6 @@ Future<void> init() async {
     () => LoginBloc(
       authRepository: getIt<AuthRepository>(),
       loginUseCase: getIt<LoginUseCase>(),
-      fcmService: getIt<FCMService>(),
     ),
   );
 
@@ -211,7 +211,6 @@ Future<void> init() async {
       homeRepository: getIt<HomeRepository>(),
       driverRepository: getIt<DriverRepository>(),
       orderRepository: getIt<OrderRepository>(),
-      walletRepository: getIt<WalletRepository>(),
       secureStorage: getIt<FlutterSecureStorage>(),
       driverRealtimeService: getIt<DriverRealtimeService>(),
     ),

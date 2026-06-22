@@ -13,9 +13,7 @@
 | State Management | flutter_bloc |
 | Dependency Injection | get_it |
 | Real-time Communication | STOMP (WebSocket) |
-| Database | Firebase Firestore, Firebase Realtime Database |
-| Authentication | Firebase Authentication |
-| Push Notification | Firebase Cloud Messaging (FCM) |
+| API | REST API (Backend) |
 | Maps | flutter_map (OpenStreetMap) |
 | Location | Geolocator |
 | Local Storage | shared_preferences, flutter_secure_storage |
@@ -60,28 +58,9 @@ cd fe_food_go_driver
 flutter pub get
 ```
 
-### 4. Cấu hình Firebase
+### 4. Cấu hình Backend
 
-Ứng dụng sử dụng Firebase, cần thực hiện các bước sau:
-
-1. Tạo project Firebase tại [Firebase Console](https://console.firebase.google.com/)
-2. Đăng ký ứng dụng Android:
-   - Lấy `google-services.json` từ Firebase Console -> Project Settings -> Your apps
-   - Đặt file `google-services.json` vào `android/app/google-services.json`
-3. Đăng ký ứng dụng iOS:
-   - Lấy `GoogleService-Info.plist` từ Firebase Console
-   - Đặt file vào `ios/Runner/GoogleService-Info.plist`
-4. Bật Firebase Authentication:
-   - Vào Firebase Console -> Authentication -> Sign-in method
-   - Bật **Email/Password**
-5. Tạo Firestore Database:
-   - Vào Firebase Console -> Firestore Database -> Create database
-   - Đặt rules cho phép đọc/ghi hoặc thiết lập rules phù hợp
-6. Tạo Realtime Database:
-   - Vào Firebase Console -> Realtime Database -> Create Database
-7. Cấu hình Cloud Messaging (FCM):
-   - Vào Firebase Console -> Project Settings -> Cloud Messaging
-   - Lấy **Server key** để cấu hình phía server gửi notification
+Ứng dụng sử dụng backend REST API và WebSocket (STOMP) để giao tiếp.
 
 ### 5. Cấu hình Android
 
@@ -113,22 +92,7 @@ defaultConfig {
 
 #### Thêm Google Services plugin
 
-Trong `android/build.gradle` (project-level):
-
-```groovy
-plugins {
-    id 'com.android.application' version '8.1.0' apply false
-    id 'com.google.gms.google-services' version '4.4.2' apply false
-}
-```
-
-Trong `android/app/build.gradle` (app-level):
-
-```groovy
-plugins {
-    id 'com.google.gms.google-services'
-}
-```
+> **Lưu ý:** Phần cấu hình Google Services đã được loại bỏ. Ứng dụng hiện chỉ sử dụng backend REST API và WebSocket.
 
 ### 6. Cấu hình iOS (chỉ macOS)
 
@@ -194,34 +158,17 @@ Tất cả các package đã được khai báo trong `pubspec.yaml`:
 | shimmer | ^3.0.0 | Hiệu ứng loading |
 | pinput | ^5.0.0 | Nhập OTP |
 | url_launcher | ^6.3.1 | Mở URL |
-| firebase_core | ^3.12.1 | Firebase core |
-| cloud_firestore | ^5.6.6 | Cloud Firestore |
-| firebase_database | ^11.3.5 | Realtime Database |
-| firebase_auth | ^5.5.3 | Xác thực |
-| firebase_messaging | ^15.2.4 | Push notification |
-| flutter_local_notifications | ^21.0.0 | Thông báo cục bộ |
 
 ---
 
 ## Tài khoản test
 
-Ứng dụng sử dụng Firebase Authentication (Email/Password).
+Ứng dụng sử dụng backend API để xác thực.
 
 ### Tạo tài khoản test
 
-1. Vào Firebase Console -> Authentication -> Users
-2. Chọn **Add user** và tạo tài khoản:
+1. Sử dụng tài khoản đã được tạo qua backend API:
 
-   ```
-   Email:    trangkimdatst2005@gmail.com
-   Password: Kimdat@123
-   ```
-
-3. Hoặc đăng ký trực tiếp trong ứng dụng.
-
-### Phân quyền driver
-
-Tài khoản driver cần được tạo/phân quyền từ phía backend API. Khi driver đăng nhập, backend sẽ kiểm tra thông tin và trả về token.
 
 ---
 
@@ -236,19 +183,14 @@ Tài khoản driver cần được tạo/phân quyền từ phía backend API. K
 
 Nếu không cấp quyền vị trí, một số chức năng sẽ không hoạt động.
 
-### 2. Firebase Configuration
-
-- File `google-services.json` (Android) và `GoogleService-Info.plist` (iOS) **bắt buộc** phải có. Nếu không có, ứng dụng sẽ lỗi khi khởi động.
-- Đảm bảo Firebase project đã bật các dịch vụ: **Authentication**, **Firestore**, **Realtime Database**, **Cloud Messaging**.
-
-### 3. WebSocket / STOMP
+### 2. WebSocket / STOMP
 
 Ứng dụng kết nối đến server qua **STOMP over WebSocket** để nhận đơn giao hàng real-time. Đảm bảo:
 - Server backend đã cấu hình WebSocket endpoint
 - Địa chỉ server (URL) đã được cấu hình đúng trong `lib/core/api/api_constants.dart` hoặc `lib/injection_container.dart`
 - Thiết bị có internet để kết nối
 
-### 4. API Backend
+### 3. API Backend
 
 Ứng dụng gọi API đến backend (REST) cho các tác vụ như:
 - Đăng nhập / xác thực
@@ -258,19 +200,13 @@ Nếu không cấp quyền vị trí, một số chức năng sẽ không hoạt
 
 Đảm bảo backend API đã chạy và địa chỉ đã được cấu hình đúng.
 
-### 5. Notification khi app ở nền
-
-Khi app ở chế độ nền (background/terminated), push notification được gửi qua **FCM**. Cần:
-- Cài đặt `firebase_messaging`
-- Cấu hình FCM server key phía backend để gửi notification
-
-### 6. Foreground Service (Android)
+### 5. Foreground Service (Android)
 
 Ứng dụng sử dụng **Foreground Service** để cập nhật vị trí khi app ở nền. Đảm bảo:
 - Quyền `FOREGROUND_SERVICE` và `FOREGROUND_SERVICE_LOCATION` đã được khai báo
 - Không tắt ứng dụng khi đang giao hàng
 
-### 7. Thư mục assets
+### 6. Thư mục assets
 
 Đảm bảo thư mục assets tồn tại:
 
@@ -286,10 +222,9 @@ Nếu không có, chạy:
 mkdir -p assets/lang assets/img
 ```
 
-### 8. Build lỗi thường gặp
+### 7. Build lỗi thường gặp
 
 - **Lỗi `minSdkVersion`:** Tăng minSdkVersion trong `build.gradle` lên 21+
-- **Lỗi `google-services.json`:** Kiểm tra file có đúng project Firebase
 - **Lỗi `pod install` (iOS):** Chạy `cd ios && pod install --repo-update`
 - **Lỗi Flutter: `Unable to find git`:** Cài đặt git và thêm vào PATH
 
@@ -314,7 +249,7 @@ lib/
 ## Liên hệ / Hỗ trợ
 
 Nếu gặp vấn đề khi cài đặt hoặc chạy dự án, vui lòng kiểm tra:
-1. Các bước cấu hình Firebase ở trên
+1. Cấu hình Backend API ở trên
 2. Phiên bản Flutter/Dart
 3. Quyền truy cập (location, internet)
 4. Backend API và WebSocket server đã chạy

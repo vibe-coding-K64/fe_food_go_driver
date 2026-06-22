@@ -43,6 +43,9 @@ dependencies:
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
 
+  # Mapbox Navigation
+  flutter_mapbox_navigation_plus: ^1.0.0
+
   # UI
   google_fonts: ^6.2.1
   shimmer: ^3.0.0
@@ -53,13 +56,11 @@ dependencies:
   # URL Launcher
   url_launcher: ^6.3.1
 
-  # Firebase
-  firebase_core: ^3.12.1
-  cloud_firestore: ^5.6.6
-  firebase_database: ^11.3.5
-  firebase_auth: ^5.5.3
-  firebase_messaging: ^15.2.4
-  flutter_local_notifications: ^21.0.0
+  # Camera / Image
+  image_picker: ^1.1.2
+
+  # Text-to-Speech
+  flutter_tts: ^4.2.0
 
 dev_dependencies:
   flutter_test:
